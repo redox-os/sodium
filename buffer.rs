@@ -1,4 +1,6 @@
 use std::mem::swap;
+use std::ops::{Index, IndexMut};
+
 
 /// The buffer data structure, that Sodium is using.
 ///
@@ -20,11 +22,11 @@ impl SplitBuffer {
         }
     }
 
-    pub fn get_line(&self) -> &String {
+    pub fn cur_line(&self) -> &String {
         self.before.last().expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
-    pub fn get_line_mut(&mut self) -> &mut String {
+    pub fn cur_line_mut(&mut self) -> &mut String {
         self.before.last_mut().expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
@@ -46,11 +48,11 @@ impl SplitBuffer {
         }
     }
 
-    pub fn line(&self) -> usize {
+    pub fn y(&self) -> usize {
         self.before.len()
     }
 
-    pub fn get_nth_line(&self, n: usize) -> Option<&String> {
+    pub fn get_line(&self, n: usize) -> Option<&String> {
         if n < self.before.len() {
             Some(&self.before[n])
         } else if n < self.before.len() + self.after.len() {
@@ -60,7 +62,7 @@ impl SplitBuffer {
         }
     }
 
-    pub fn get_nth_line_mut(&mut self, n: usize) -> Option<&mut String> {
+    pub fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
         if n < self.before.len() {
             Some(&mut self.before[n])
         } else if n < self.before.len() + self.after.len() {
@@ -73,9 +75,16 @@ impl SplitBuffer {
     pub fn remove_line(&mut self, n: usize) {
         if n < self.before.len() {
             self.before.remove(n);
-            Some(&mut self.before[n])
         } else if n < self.before.len() + self.after.len() {
             self.after.remove(n - self.before.len());
+        }
+    }
+
+    pub fn insert_line(&mut self, n: usize, line: String) {
+        if n < self.before.len() {
+            self.before.insert(n, line);
+        } else if n < self.before.len() + self.after.len() {
+            self.after.insert(n - self.before.len(), line);
         }
     }
 
@@ -110,7 +119,23 @@ impl SplitBuffer {
         self.before.len() + self.after.len()
     }
 
-    pub fn iter(&self) -> ::std::iter::Once<Vec<char>> {
+    pub fn lines(&self) -> ::std::iter::Once<Vec<char>> {
         self.after.iter().chain(self.before.iter().reverse())
+    }
+}
+
+
+impl Index<usize> for SplitBuffer {
+    type Output = String;
+
+    fn index<'a>(&'a self, index: usize) -> &'a Foo {
+        self.get_line(index).expect("Out of bound")
+    }
+}
+impl IndexMut<usize> for SplitBuffer {
+    type Output = String;
+
+    fn index<'a>(&'a self, index: usize) -> &'a mut Foo {
+        self.get_line(index).expect("Out of bound")
     }
 }
