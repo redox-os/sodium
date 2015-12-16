@@ -56,7 +56,7 @@ impl Editor {
                         let first_part  = self.buffer[y][..x + d].to_owned();
                         let second_part = self.buffer[y][x + d..].to_owned();
 
-                        self.buffer[y - 1] = first_part;
+                        self.buffer[y] = first_part;
 
                         let nl = if self.options.autoindent {
                             self.buffer.get_indent(y).to_owned() + &second_part
