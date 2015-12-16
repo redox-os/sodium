@@ -12,21 +12,25 @@ impl Editor {
     /// using this method.
     pub fn to_motion(&mut self, Inst(n, cmd): Inst) -> Option<(usize, usize)> {
         use key::Key::*;
+
+        let x = self.x();
+        let y = self.y();
+
         match cmd.key {
             Char('h') => Some(self.left(n.d())),
             Char('l') => Some(self.right(n.d())),
             Char('j') => Some(self.down(n.d())),
             Char('k') => Some(self.up(n.d())),
             Char('g') => Some((0, n.or(1) - 1)),
-            Char('G') => Some((0, self.text.len() - 1)),
-            Char('L') => Some(self.ln_end()),
-            Char('H') => Some((0, self.y())),
+            Char('G') => Some((0, self.buffer.len() - 1)),
+            Char('L') => Some((self.buffer[y].len() - 1, y)),
+            Char('H') => Some((0, y)),
             Char('t') => {
 
                 let ch = self.get_char();
 
                 if let Some(o) = self.next_ocur(ch, n.d()) {
-                    Some(o)
+                    Some((o, y))
                 } else {
                     None
                 }
@@ -36,7 +40,7 @@ impl Editor {
                 let ch = self.get_char();
 
                 if let Some(o) = self.previous_ocur(ch, n.d()) {
-                    Some(o)
+                    Some((o, y))
                 } else {
                     None
                 }
@@ -57,21 +61,25 @@ impl Editor {
     /// the relative movement over the movement.
     pub fn to_motion_unbounded(&mut self, Inst(n, cmd): Inst) -> Option<(isize, isize)> {
         use key::Key::*;
+
+        let x = self.x();
+        let y = self.y();
+
         match cmd.key {
             Char('h') => Some(self.left_unbounded(n.d())),
             Char('l') => Some(self.right_unbounded(n.d())),
             Char('j') => Some(self.down_unbounded(n.d())),
             Char('k') => Some(self.up_unbounded(n.d())),
             Char('g') => Some((0, n.or(1) as isize - 1)),
-            Char('G') => Some((0, self.text.len() as isize - 1)),
-            Char('L') => Some(to_signed_pos(self.ln_end())),
-            Char('H') => Some((0, self.y() as isize)),
+            Char('G') => Some((0, self.buffer.len() as isize - 1)),
+            Char('L') => Some(to_signed_pos((x, self.buffer[y].len()))),
+            Char('H') => Some((0, y as isize)),
             Char('t') => {
 
                 let ch = self.get_char();
 
                 if let Some(o) = self.next_ocur(ch, n.d()) {
-                    Some(to_signed_pos(o))
+                    Some((to_signed_pos((o, y))))
                 } else {
                     None
                 }
@@ -81,7 +89,7 @@ impl Editor {
                 let ch = self.get_char();
 
                 if let Some(o) = self.previous_ocur(ch, n.d()) {
-                    Some(to_signed_pos(o))
+                    Some((to_signed_pos((o, y))))
                 } else {
                     None
                 }

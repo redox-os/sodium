@@ -4,8 +4,9 @@ impl Editor {
     /// Goto a given position. Does not automatically bound.
     #[inline]
     pub fn goto(&mut self, (x, y): (usize, usize)) {
-        self.cursor_mut().x = x;
+        self.buffer.goto(y);
         self.cursor_mut().y = y;
+        self.cursor_mut().x = x;
     }
 
     /// Get the previous position, i.e. the position before the cursor (*not* left to the cursor)
@@ -23,22 +24,23 @@ impl Editor {
     #[inline]
     pub fn after(&self, n: usize, (x, y): (usize, usize)) -> Option<(usize, usize)> {
 
-        if x + n < self.text[y].len() {
+        // TODO: Make this more idiomatic {
+        if x + n < self.buffer[y].len() {
 
             Some((x + n, y))
         } else {
-            if y + 1 >= self.text.len() {
+            if y + 1 >= self.buffer.len() {
                 None
             } else {
-                let mut mv = n + x - self.text[y].len();
+                let mut mv = n + x - self.buffer[y].len();
                 let mut ry = y + 1;
 
                 loop {
-                    if mv < self.text[ry].len() {
+                    if mv < self.buffer[ry].len() {
                         return Some((mv, ry));
                     } else {
-                        if ry + 1 < self.text.len() {
-                            mv -= self.text[ry].len();
+                        if ry + 1 < self.buffer.len() {
+                            mv -= self.buffer[ry].len();
                             ry += 1;
                         } else {
                             return None;
@@ -48,6 +50,7 @@ impl Editor {
 
             }
         }
+        // }
     }
 
     /// Get the position before a given position, i.e. a generalisation .before()
@@ -63,11 +66,11 @@ impl Editor {
                 let mut ry = y - 1;
 
                 loop {
-                    if mv <= self.text[ry].len() {
-                        return Some((self.text[ry].len() - mv, ry));
+                    if mv <= self.buffer[ry].len() {
+                        return Some((self.buffer[ry].len() - mv, ry));
                     } else {
-                        if ry > 0 && mv >= self.text[ry].len() {
-                            mv -= self.text[ry].len();
+                        if ry > 0 && mv >= self.buffer[ry].len() {
+                            mv -= self.buffer[ry].len();
                             ry -= 1;
                         } else if ry == 0 {
                             return None;
@@ -132,65 +135,43 @@ impl Editor {
 
     }
 
-    /// Get the position of the end of the line
-    #[inline]
-    pub fn ln_end(&self) -> (usize, usize) {
-        (self.text[self.y()].len(), self.y())
-    }
-
     /// Get n'th next ocurrence of a given charecter (relatively to the cursor)
-    pub fn next_ocur(&self, c: char, n: usize) -> Option<(usize, usize)> {
+    pub fn next_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
+        let mut x  = self.x();
 
-        let mut pos = self.after(1, self.pos());
-        loop {
-
-            match pos {
-                None => return None,
-                Some(mut p) => {
-                    p = self.bound(p);
-
-                    if self.text[p.1][p.0] == c {
-                        dn += 1;
-                        if dn == n {
-                            return Some(p);
-                        }
+        for ch in self.buffer[self.y()].chars().skip(x) {
+            if dn == n {
+                if ch == c {
+                    dn += 1;
+                    if dn == n {
+                        return Some(x);
                     }
-
-                    pos = self.after(1, p);
-
                 }
             }
-
-
         }
+
+        None
     }
+
     /// Get n'th previous ocurrence of a given charecter (relatively to the cursor)
-    pub fn previous_ocur(&self, c: char, n: usize) -> Option<(usize, usize)> {
+    pub fn previous_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
+        let mut x  = self.x();
+        let y      = self.y();
 
-        let mut pos = self.before(1, self.pos());
-        loop {
-
-            match pos {
-                None => return None,
-                Some(mut p) => {
-                    p = self.bound(p);
-
-                    if self.text[p.1][p.0] == c {
-                        dn += 1;
-                        if dn == n {
-                            return Some(p);
-                        }
+        for ch in self.buffer[y].chars().rev().skip(self.buffer[y].len() - x) {
+            if dn == n {
+                if ch == c {
+                    dn += 1;
+                    if dn == n {
+                        return Some(x);
                     }
-
-                    pos = self.before(1, p);
-
                 }
             }
-
-
         }
+
+        None
     }
 
 

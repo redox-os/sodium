@@ -29,8 +29,8 @@ impl Editor {
     #[inline]
     pub fn current(&self) -> Option<char> {
         let (x, y) = self.pos();
-        match self.text[y].get(x) {
-            Some(&c) => Some(c),
+        match self.buffer[y].chars().nth(x) {
+            Some(c) => Some(c),
             None => None,
         }
     }

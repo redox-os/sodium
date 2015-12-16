@@ -1,6 +1,7 @@
 extern crate orbital;
 
 pub mod editor;
+pub mod buffer;
 pub mod parse;
 pub mod key_state;
 pub mod key;

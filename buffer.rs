@@ -3,7 +3,7 @@ use std::ops::{Index, IndexMut};
 
 
 // Wow, I would really love having unboxed trait return types...
-type BufIter<'a> = ::std::iter::Chain<::std::slice::Iter<'a, String>, ::std::iter::Rev<::std::slice::Iter<'a, String>>>;
+pub type BufIter<'a> = ::std::iter::Chain<::std::slice::Iter<'a, String>, ::std::iter::Rev<::std::slice::Iter<'a, String>>>;
 
 
 /// The buffer data structure, that Sodium is using.
@@ -26,15 +26,22 @@ impl SplitBuffer {
         }
     }
 
-    pub fn cur_line(&self) -> &String {
+    pub fn from_str(s: &str) -> Self {
+        SplitBuffer {
+            before: s.lines().map(str::to_string).collect(),
+            after: Vec::new(),
+        }
+    }
+
+    fn cur_line(&self) -> &String {
         self.before.last().expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
-    pub fn cur_line_mut(&mut self) -> &mut String {
+    fn cur_line_mut(&mut self) -> &mut String {
         self.before.last_mut().expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
-    pub fn up(&mut self) -> bool {
+    fn up(&mut self) -> bool {
         if self.before.len() == 1 {
             false
         } else {
@@ -43,7 +50,7 @@ impl SplitBuffer {
         }
     }
 
-    pub fn down(&mut self) -> bool {
+    fn down(&mut self) -> bool {
         if self.after.len() == 0 {
             false
         } else {
@@ -52,14 +59,14 @@ impl SplitBuffer {
         }
     }
 
-    pub fn y(&self) -> usize {
+    fn y(&self) -> usize {
         self.before.len()
     }
 
     pub fn get_line(&self, n: usize) -> Option<&String> {
         if n < self.before.len() {
             Some(&self.before[n])
-        } else if n < self.before.len() + self.after.len() {
+        } else if n < self.len() {
             Some(&self.after[n - self.before.len()])
         } else {
             None
@@ -69,7 +76,7 @@ impl SplitBuffer {
     pub fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
         if n < self.before.len() {
             Some(&mut self.before[n])
-        } else if n < self.before.len() + self.after.len() {
+        } else if n < self.len() {
             Some(&mut self.after[n - self.before.len()])
         } else {
             None
@@ -79,16 +86,22 @@ impl SplitBuffer {
     pub fn remove_line(&mut self, n: usize) {
         if n < self.before.len() {
             self.before.remove(n);
-        } else if n < self.before.len() + self.after.len() {
+        } else if n < self.len() {
             self.after.remove(n - self.before.len());
+        } else {
+            panic!("Out of bound");
         }
     }
 
     pub fn insert_line(&mut self, n: usize, line: String) {
         if n < self.before.len() {
+            println!("C1 n: {}", n);
             self.before.insert(n, line);
-        } else if n < self.before.len() + self.after.len() {
+        } else if n < self.len() {
+            println!("C2");
             self.after.insert(n - self.before.len(), line);
+        } else {
+            panic!("Out of bound");
         }
     }
 
@@ -115,7 +128,7 @@ impl SplitBuffer {
         }
     }
 
-    pub fn pop_line(&mut self) -> String {
+    fn pop_line(&mut self) -> String {
         self.before.pop().expect("Unexpected condition (Popped the last line)")
     }
 
@@ -127,7 +140,7 @@ impl SplitBuffer {
         self.after.iter().chain(self.before.iter().rev())
     }
 
-    /// Get the leading whitespaces of the current line. Used for autoindenting.
+    /// Get the leading whitespaces of the nth line. Used for autoindenting.
     pub fn get_indent(&self, n: usize) -> &str {
         let ln = if let Some(s) = self.get_line(n) {
             s

@@ -33,11 +33,11 @@ impl Editor {
     pub fn delta(&self) -> usize {
         let (x, y) = self.pos();
         match self.cursor().mode {
-            _ if x > self.text[y].len() => {
+            _ if x > self.buffer[y].len() => {
                 0
             }
             Mode::Primitive(PrimitiveMode::Insert(InsertOptions { mode: InsertMode::Append }))
-                if x == self.text[y].len() => 0,
+                if x == self.buffer[y].len() => 0,
 
             Mode::Primitive(PrimitiveMode::Insert(InsertOptions { mode: InsertMode::Append })) => 1,
             _ => 0,
@@ -53,32 +53,26 @@ impl Editor {
 
                 match k {
                     Key::Char('\n') => {
-                        let ln = self.text[y].clone();
-                        let (slice, _) = ln.as_slices();
+                        let first_part  = self.buffer[y][..x + d].to_owned();
+                        let second_part = self.buffer[y][x + d..].to_owned();
 
-                        let first_part = &slice[..x + d];
-                        let second_part = &slice[x + d..];
-
-                        self.text[y] = VecDeque::from_iter(first_part.iter().map(|x| *x));
+                        self.buffer[y - 1] = first_part;
 
                         let nl = if self.options.autoindent {
-                            VecDeque::from_iter(self.get_indent(y)
-                                                    .iter()
-                                                    .chain(second_part.iter())
-                                                    .map(|x| *x))
+                            self.buffer.get_indent(y).to_owned() + &second_part
                         } else {
-                            VecDeque::new()
+                            String::new()
                         };
                         let begin = nl.len();
 
-                        self.text.insert(y + 1, nl);
+                        self.buffer.insert_line(y + 1, nl);
 
                         self.redraw_task = RedrawTask::LinesAfter(y);
                         self.goto((begin, y + 1));
                     }
                     Key::Backspace => {
                         // Backspace
-                        let del = if self.text[y].len() == 0 {
+                        let del = if self.buffer[y].len() == 0 {
                             1
                         } else if d == 0 && x == 0 {
                             self.cursor_mut().mode =
@@ -99,11 +93,11 @@ impl Editor {
                         }
                     }
                     Key::Char(c) => {
-                        self.text[y].insert(x + d, c);
+                        self.buffer[y].insert(x + d, c);
 
                         // TODO: Are there a better way than switching?
                         match mode {
-                            InsertMode::Insert if x + 1 == self.text[y].len() => {
+                            InsertMode::Insert if x + 1 == self.buffer[y].len() => {
                                 self.cursor_mut().mode =
                                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                                         mode: InsertMode::Append,
@@ -121,7 +115,7 @@ impl Editor {
             }
             InsertMode::Replace => match k {
                 Key::Char(c) => {
-                    if x == self.text[y].len() {
+                    if x == self.buffer[y].len() {
                         let next = self.next(1);
                         if let Some(p) = next {
                             self.goto(p);
@@ -130,14 +124,15 @@ impl Editor {
                         }
                     }
 
-                    if self.text.len() != y {
-                        if self.text[y].len() == x {
+                    if self.buffer.len() != y {
+                        if self.buffer[y].len() == x {
                             let next = self.next(1);
                             if let Some(p) = next {
                                 self.goto(p);
                             }
                         } else {
-                            self.text[y][x] = c;
+                            self.buffer[y].remove(x);
+                            self.buffer[y].insert(x, c);
                         }
                     }
                     let next = self.next(1);

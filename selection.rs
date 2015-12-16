@@ -15,9 +15,7 @@ impl Editor {
             } else {
                 (self.x(), x)
             };
-            for _ in a..b {
-                self.text[y].remove(a);
-            }
+            for _ in self.buffer[y].drain(a..b) {}
         } else {
             let (_, y) = self.bound((x as usize, y as usize));
             // Full line mode
@@ -26,11 +24,13 @@ impl Editor {
             } else {
                 (y, self.y())
             };
+
+            // TODO: Make this more idiomatic (drain)
             for _ in a..(b + 1) {
-                if self.text.len() > 1 {
-                    self.text.remove(a);
+                if self.buffer.len() > 1 {
+                    self.buffer.remove_line(a);
                 } else {
-                    self.text[0] = VecDeque::new();
+                    self.buffer[0] = String::new();
                 }
             }
         }

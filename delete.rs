@@ -6,13 +6,13 @@ impl Editor {
     #[inline]
     pub fn delete(&mut self) {
         let (x, y) = self.pos();
-        if self.text[y].is_empty() {
-            if self.text.len() != 1 {
-                self.text.remove(y);
+        if self.buffer[y].is_empty() {
+            if self.buffer.len() != 1 {
+                self.buffer.remove_line(y);
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
             }
-        } else if x < self.text[y].len() {
-            self.text[y].remove(x);
+        } else if x < self.buffer[y].len() {
+            self.buffer[y].remove(x);
             self.redraw_task = RedrawTask::LinesAfter(y);
         }
     }

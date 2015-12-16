@@ -1,7 +1,7 @@
 use editor::Editor;
 use std::fs::File;
 use std::io::Read;
-use std::collections::VecDeque;
+use buffer::SplitBuffer;
 
 pub enum OpenStatus {
     Ok,
@@ -16,10 +16,7 @@ impl Editor {
             let mut con = String::new();
             file.read_to_string(&mut con);
 
-            self.text = con.lines()
-                           .map(|x| x.chars().collect::<VecDeque<char>>())
-                           .collect::<VecDeque<VecDeque<char>>>();
-
+            self.buffer = SplitBuffer::from_str(&con);
             OpenStatus::Ok
         } else {
             OpenStatus::NotFound

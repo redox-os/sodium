@@ -5,7 +5,6 @@ use mode::{Mode, CommandMode, PrimitiveMode};
 use insert::{InsertOptions, InsertMode};
 use redraw::RedrawTask;
 
-use std::collections::VecDeque;
 use std::iter::FromIterator;
 
 // TODO: Move the command definitions outta here
@@ -75,12 +74,12 @@ impl Editor {
                     Char('o') => {
                         let y = self.y();
                         let ind = if self.options.autoindent {
-                            VecDeque::from_iter(self.get_indent(y).iter().map(|x| *x))
+                            self.buffer.get_indent(y).to_owned()
                         } else {
-                            VecDeque::new()
+                            String::new()
                         };
                         let last = ind.len();
-                        self.text.insert(y + 1, ind);
+                        self.buffer.insert_line(y + 1, ind.into());
                         self.goto((last, y + 1));
                         self.cursor_mut().mode =
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
@@ -126,7 +125,7 @@ impl Editor {
                         self.delete();
                     }
                     Char('L') => {
-                        let ln_end = self.ln_end();
+                        let ln_end = (self.buffer[self.y()].len(), self.y());
                         self.goto(ln_end);
                         mov = true;
                     }
@@ -136,7 +135,9 @@ impl Editor {
                     }
                     Char('r') => {
                         let (x, y) = self.pos();
-                        self.text[y][x] = self.get_char();
+                        let c = self.get_char();
+                        self.buffer[y].remove(x);
+                        self.buffer[y].insert(x, c);
                     }
                     Char('R') => {
                         self.cursor_mut().mode =
@@ -151,7 +152,7 @@ impl Editor {
                         }
                     }
                     Char('G') => {
-                        let last = self.text.len() - 1;
+                        let last = self.buffer.len() - 1;
                         self.goto((0, last));
                         mov = true;
                     }
@@ -183,7 +184,8 @@ impl Editor {
 
                         let pos = self.next_ocur(ch, n);
                         if let Some(p) = pos {
-                            self.goto(p);
+                            let y = self.y();
+                            self.goto((p, y));
                             mov = true;
                         }
                     }
@@ -192,21 +194,14 @@ impl Editor {
 
                         let pos = self.previous_ocur(ch, n);
                         if let Some(p) = pos {
-                            self.goto(p);
+                            let y = self.y();
+                            self.goto((p, y));
                             mov = true;
                         }
                     }
                     Char(';') => {
                         self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt);
                     }
-                    //
-                    //                    ????
-                    //                    Char('K') => {
-                    //                        self.goto((0, 0));
-                    //                    },
-                    //                    Char('J') => {
-                    //                        self.goto((0, self.text.len() - 1));
-                    //                    },
                     Char(' ') => {
                         self.next_cursor();
                     }

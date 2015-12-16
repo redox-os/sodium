@@ -5,10 +5,10 @@ impl Editor {
         for _ in 0..n {
             let (x, y) = self.pos();
             let current = self.current();
-            if let Some(c) = self.text[y].get_mut(x) {
-                if let Some(cur) = current {
-                    *c = invert(cur);
-                }
+
+            if let Some(cur) = current {
+                self.buffer[y].remove(x);
+                self.buffer[y].insert(x, invert(cur));
             }
             if let Some(m) = self.next(1) {
                 self.goto(m);

@@ -5,6 +5,7 @@ use graphics::StatusBar;
 use options::Options;
 use key_state::KeyState;
 use redraw::RedrawTask;
+use buffer::SplitBuffer;
 
 /// The current state of the editor, including the file, the cursor, the scrolling info, etc.
 pub struct Editor {
@@ -12,8 +13,8 @@ pub struct Editor {
     pub current_cursor: u8,
     /// The cursors
     pub cursors: Vec<Cursor>,
-    /// The text (document)
-    pub text: VecDeque<VecDeque<char>>,
+    /// The buffer (document)
+    pub buffer: SplitBuffer,
     /// The x coordinate of the scroll
     pub scroll_x: usize,
     /// The y coordinate of the scroll
@@ -42,7 +43,7 @@ impl Editor {
         let mut editor = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
-            text: VecDeque::new(),
+            buffer: SplitBuffer::new(),
             scroll_x: 0,
             scroll_y: 0,
             window: *window,
@@ -52,9 +53,6 @@ impl Editor {
             key_state: KeyState::new(),
             redraw_task: RedrawTask::Null,
         };
-
-        editor.text.push_back(VecDeque::new());
-
 
         editor.redraw();
 
@@ -66,21 +64,4 @@ impl Editor {
         }
     }
 
-    /// Get a slice of the current line
-    pub fn get_ln(&self, n: usize) -> &[char] {
-        self.text[n].as_slices().0
-    }
-
-    /// Get the leading whitespaces of the current line. Used for autoindenting.
-    pub fn get_indent(&self, n: usize) -> &[char] {
-        let ln = self.get_ln(n);
-        let mut len = 0;
-        for &c in ln {
-            match c {
-                '\t' | ' ' => len += 1,
-                _ => break,
-            }
-        }
-        &ln[..len]
-    }
 }

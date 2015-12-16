@@ -30,13 +30,13 @@ impl Editor {
     pub fn bound(&self, (x, mut y): (usize, usize)) -> (usize, usize) {
 
 
-        y = if y >= self.text.len() {
-            self.text.len() - 1
+        y = if y >= self.buffer.len() {
+            self.buffer.len() - 1
         } else {
             y
         };
 
-        let ln = self.text[y].len();
+        let ln = self.buffer[y].len();
         if x >= ln {
             if ln == 0 {
                 (0, y)
@@ -61,8 +61,8 @@ impl Editor {
     pub fn bound_ver(&self, (x, mut y): (usize, usize)) -> (usize, usize) {
 
         // Is this premature optimization? Yes, yes it is!
-        y = if y > self.text.len() - 1 {
-            self.text.len() - 1
+        y = if y > self.buffer.len() - 1 {
+            self.buffer.len() - 1
         } else {
             y
         };
