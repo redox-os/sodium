@@ -2,6 +2,10 @@ use std::mem::swap;
 use std::ops::{Index, IndexMut};
 
 
+// Wow, I would really love having unboxed trait return types...
+type BufIter<'a> = ::std::iter::Chain<::std::slice::Iter<'a, String>, ::std::iter::Rev<::std::slice::Iter<'a, String>>>;
+
+
 /// The buffer data structure, that Sodium is using.
 ///
 /// This structure consists of two "subbuffers", which are just vectors over lines (defined by
@@ -34,16 +38,16 @@ impl SplitBuffer {
         if self.before.len() == 1 {
             false
         } else {
-            self.after.push(self.before.pop());
+            self.after.push(self.before.pop().unwrap());
             true
         }
     }
 
     pub fn down(&mut self) -> bool {
-        if self.after.len() == 1 {
+        if self.after.len() == 0 {
             false
         } else {
-            self.before.push(self.after.pop());
+            self.before.push(self.after.pop().unwrap());
             true
         }
     }
@@ -96,14 +100,14 @@ impl SplitBuffer {
     }
 
     pub fn goto(&mut self, y: usize) {
-        if y < self.line() {
-            for _ in 1..self.line() - y {
+        if y < self.y() {
+            for _ in 1..self.y() - y {
                 if !self.up() {
                     break;
                 }
             }
-        } else if y > self.line() {
-            for _ in 1..y - self.line() {
+        } else if y > self.y() {
+            for _ in 1..y - self.y() {
                 if !self.down() {
                     break;
                 }
@@ -112,15 +116,32 @@ impl SplitBuffer {
     }
 
     pub fn pop_line(&mut self) -> String {
-        self.before.expect("Unexpected condition (Popped the last line)")
+        self.before.pop().expect("Unexpected condition (Popped the last line)")
     }
 
     pub fn len(&self) -> usize {
         self.before.len() + self.after.len()
     }
 
-    pub fn lines(&self) -> ::std::iter::Once<Vec<char>> {
-        self.after.iter().chain(self.before.iter().reverse())
+    pub fn lines<'a>(&'a self) -> BufIter<'a> {
+        self.after.iter().chain(self.before.iter().rev())
+    }
+
+    /// Get the leading whitespaces of the current line. Used for autoindenting.
+    pub fn get_indent(&self, n: usize) -> &str {
+        let ln = if let Some(s) = self.get_line(n) {
+            s
+        } else {
+            return "";
+        };
+        let mut len = 0;
+        for c in ln.chars() {
+            match c {
+                '\t' | ' ' => len += 1,
+                _ => break,
+            }
+        }
+        &ln[..len]
     }
 }
 
@@ -128,14 +149,13 @@ impl SplitBuffer {
 impl Index<usize> for SplitBuffer {
     type Output = String;
 
-    fn index<'a>(&'a self, index: usize) -> &'a Foo {
+    fn index<'a>(&'a self, index: usize) -> &'a String {
         self.get_line(index).expect("Out of bound")
     }
 }
 impl IndexMut<usize> for SplitBuffer {
-    type Output = String;
 
-    fn index<'a>(&'a self, index: usize) -> &'a mut Foo {
-        self.get_line(index).expect("Out of bound")
+    fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut String {
+        self.get_line_mut(index).expect("Out of bound")
     }
 }
