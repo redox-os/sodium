@@ -114,13 +114,13 @@ impl SplitBuffer {
 
     pub fn goto(&mut self, y: usize) {
         if y < self.y() {
-            for _ in 1..self.y() - y {
+            for _ in 0..self.y() - y {
                 if !self.up() {
                     break;
                 }
             }
         } else if y > self.y() {
-            for _ in 1..y - self.y() {
+            for _ in 0..y - self.y() {
                 if !self.down() {
                     break;
                 }

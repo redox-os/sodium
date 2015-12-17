@@ -65,7 +65,7 @@ impl Editor {
                         };
                         let begin = nl.len();
 
-                        self.buffer.insert_line(y + 1, nl);
+                        self.buffer.insert_line(y, nl);
 
                         self.redraw_task = RedrawTask::LinesAfter(y);
                         self.goto((begin, y + 1));
