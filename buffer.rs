@@ -9,7 +9,9 @@ pub type BufIter<'a> = ::std::iter::Chain<::std::slice::Iter<'a, String>, ::std:
 /// The buffer data structure, that Sodium is using.
 ///
 /// This structure consists of two "subbuffers", which are just vectors over lines (defined by
-/// Strings). The split is where the cursor currently is.
+/// Strings). The split is called a center.
+///
+/// The nearer a given operation is to the center, the better it performs.
 ///
 /// The second buffer is in reverse order to get the particular efficiency we want.
 pub struct SplitBuffer {
@@ -18,7 +20,7 @@ pub struct SplitBuffer {
 }
 
 impl SplitBuffer {
-    /// Create a new empty buffer
+    /// Create a new empty split buffer
     pub fn new() -> Self {
         SplitBuffer {
             before: vec![String::new()],
@@ -26,6 +28,7 @@ impl SplitBuffer {
         }
     }
 
+    /// Convert a string to a split buffer
     pub fn from_str(s: &str) -> Self {
         SplitBuffer {
             before: s.lines().map(str::to_string).collect(),
@@ -63,6 +66,7 @@ impl SplitBuffer {
         self.before.len()
     }
 
+    /// Get the nth line in the buffer by option reference
     pub fn get_line(&self, n: usize) -> Option<&String> {
         if n < self.before.len() {
             Some(&self.before[n])
@@ -74,6 +78,7 @@ impl SplitBuffer {
         }
     }
 
+    /// Get the nth line in the buffer by optional mutable reference
     pub fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
         if n < self.before.len() {
             Some(&mut self.before[n])
@@ -85,17 +90,19 @@ impl SplitBuffer {
         }
     }
 
-    pub fn remove_line(&mut self, n: usize) {
+    /// Remove the nth line and return it. Panics on out of bound.
+    pub fn remove_line(&mut self, n: usize) -> String {
         if n < self.before.len() {
-            self.before.remove(n);
+            self.before.remove(n)
         } else if n < self.len() {
             let n = self.after.len() - (n - self.before.len()) - 1;
-            self.after.remove(n);
+            self.after.remove(n)
         } else {
             panic!("Out of bound");
         }
     }
 
+    /// Insert line at n. Panics on out of bound.
     pub fn insert_line(&mut self, n: usize, line: String) {
         if n < self.before.len() {
             self.before.insert(n, line);
@@ -107,6 +114,7 @@ impl SplitBuffer {
         }
     }
 
+    /// Convert a vector of lines to a split buffer
     pub fn from_lines(vec: Vec<String>) -> SplitBuffer {
         SplitBuffer {
             before: vec,
@@ -114,6 +122,9 @@ impl SplitBuffer {
         }
     }
 
+    /// Move the center (i.e. efficient point/split) of the split buffer
+    ///
+    /// Panics on out of bound.
     pub fn goto(&mut self, y: usize) {
         if y < self.y() {
             for _ in 0..self.y() - y {
@@ -127,6 +138,8 @@ impl SplitBuffer {
                     break;
                 }
             }
+        } else if y >= self.len() {
+            panic!("Out of bound");
         }
     }
 
@@ -134,10 +147,12 @@ impl SplitBuffer {
         self.before.pop().expect("Unexpected condition (Popped the last line)")
     }
 
+    /// Get the number of lines in the buffer
     pub fn len(&self) -> usize {
         self.before.len() + self.after.len()
     }
 
+    /// Get an iterator over the lines in the buffer
     pub fn lines<'a>(&'a self) -> BufIter<'a> {
         self.before.iter().chain(self.after.iter().rev())
     }
