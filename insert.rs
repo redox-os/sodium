@@ -59,13 +59,13 @@ impl Editor {
                         self.buffer[y] = first_part;
 
                         let nl = if self.options.autoindent {
-                            self.buffer.get_indent(y).to_owned() + &second_part
+                            self.buffer.get_indent(y).to_owned()
                         } else {
                             String::new()
                         };
                         let begin = nl.len();
 
-                        self.buffer.insert_line(y, nl);
+                        self.buffer.insert_line(y, nl + &second_part);
 
                         self.redraw_task = RedrawTask::LinesAfter(y);
                         self.goto((begin, y + 1));
