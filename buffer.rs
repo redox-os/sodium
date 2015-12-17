@@ -67,7 +67,8 @@ impl SplitBuffer {
         if n < self.before.len() {
             Some(&self.before[n])
         } else if n < self.len() {
-            Some(&self.after[n - self.before.len()])
+            let n = self.after.len() - (n - self.before.len()) - 1;
+            Some(&self.after[n])
         } else {
             None
         }
@@ -77,7 +78,8 @@ impl SplitBuffer {
         if n < self.before.len() {
             Some(&mut self.before[n])
         } else if n < self.len() {
-            Some(&mut self.after[n - self.before.len()])
+            let n = self.after.len() - (n - self.before.len()) - 1;
+            Some(&mut self.after[n])
         } else {
             None
         }
@@ -87,7 +89,8 @@ impl SplitBuffer {
         if n < self.before.len() {
             self.before.remove(n);
         } else if n < self.len() {
-            self.after.remove(n - self.before.len());
+            let n = self.after.len() - (n - self.before.len()) - 1;
+            self.after.remove(n);
         } else {
             panic!("Out of bound");
         }
@@ -95,11 +98,10 @@ impl SplitBuffer {
 
     pub fn insert_line(&mut self, n: usize, line: String) {
         if n < self.before.len() {
-            println!("C1 n: {}", n);
             self.before.insert(n, line);
         } else if n < self.len() {
-            println!("C2");
-            self.after.insert(n - self.before.len(), line);
+            let n = self.after.len() - (n - self.before.len()) - 1;
+            self.after.insert(n, line);
         } else {
             panic!("Out of bound");
         }
@@ -137,7 +139,7 @@ impl SplitBuffer {
     }
 
     pub fn lines<'a>(&'a self) -> BufIter<'a> {
-        self.after.iter().chain(self.before.iter().rev())
+        self.before.iter().chain(self.after.iter().rev())
     }
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
@@ -151,7 +153,7 @@ impl SplitBuffer {
         for c in ln.chars() {
             match c {
                 '\t' | ' ' => len += 1,
-                _ => break,
+                _          => break,
             }
         }
         &ln[..len]
