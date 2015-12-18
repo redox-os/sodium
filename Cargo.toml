@@ -1,0 +1,10 @@
+[package]
+name = "sodium"
+version = "0.1.0"
+authors = ["Ticki"]
+description = """
+Sodium: A modern vi-like editor
+"""
+
+[dependencies]
+orbtk = "*"

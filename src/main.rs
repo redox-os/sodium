@@ -1,5 +1,3 @@
-extern crate orbital;
-
 pub mod editor;
 pub mod buffer;
 pub mod parse;
