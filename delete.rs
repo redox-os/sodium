@@ -6,9 +6,12 @@ impl Editor {
     #[inline]
     pub fn delete(&mut self) {
         let (x, y) = self.pos();
-        if self.buffer[y].is_empty() {
-            if self.buffer.len() != 1 {
-                self.buffer.remove_line(y);
+        if x == 0 {
+            if y != 0 {
+                let s = self.buffer.remove_line(y);
+                self.buffer[y - 1].push_str(&s);
+                let len = self.buffer[y - 1].len();
+                self.goto((len, y - 1));
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
             }
         } else if x < self.buffer[y].len() {

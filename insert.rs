@@ -73,30 +73,27 @@ impl Editor {
                     Key::Backspace => {
                         // NEEDS REWRITE {
                         // Backspace
-                        if x == 0 {
-                            let line = self.buffer.remove_line(y);
-                            self.buffer[y - 1].push_str(&line);
-                        } else {
-                            let del = if self.buffer[y].len() == 0 {
-                                1
-                            } else if d == 0 && x == 0 {
-                                self.cursor_mut().mode =
-                                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                        mode: InsertMode::Append,
-                                    }));
-                                1
+                        let del = if self.buffer[y].len() == 0 {
+                            1
+                        } else if d == 0 && x == 0 {
+                            self.cursor_mut().mode =
+                                Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                                    mode: InsertMode::Append,
+                                }));
+                            1
 
-                            } else {
-                                1 - d
-                            };
-                            let prev = self.previous(del);
-                            if let Some((x, y)) = prev {
-                                // if self.x() != 0 || self.y() != 0 {
-                                self.goto((x + d, y));
-                                self.delete();
-                                // }
-                            }
+                        } else {
+                            1 - d
+                        };
+
+                        let prev = self.previous(del);
+                        if let Some((x, y)) = prev {
+                            // if self.x() != 0 || self.y() != 0 {
+                            self.goto((x + d, y));
+                            self.delete();
+                            // }
                         }
+
                         // }
 
                     }

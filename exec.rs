@@ -79,7 +79,7 @@ impl Editor {
                             String::new()
                         };
                         let last = ind.len();
-                        self.buffer.insert_line(y + 1, ind.into());
+                        self.buffer.insert_line(y, ind.into());
                         self.goto((last, y + 1));
                         self.cursor_mut().mode =
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
