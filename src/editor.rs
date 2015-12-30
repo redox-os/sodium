@@ -58,6 +58,9 @@ impl Editor {
 
         loop {
             let inp = editor.get_inst();
+            if let Inst(_, Cmd { key: Key::Quit }) = inp {
+                break;
+            }
             editor.exec(inp);
             editor.redraw();
             editor.status_bar.mode = editor.cursor().mode.to_string();
