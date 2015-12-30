@@ -1,4 +1,16 @@
-use orbital::*;
+#[cfg(feature = "orbital")]
+use orbital::{
+    KeyEvent,
+    K_LEFT_SHIFT,
+    K_RIGHT_SHIFT,
+    K_BKSP,
+    K_LEFT,
+    K_RIGHT,
+    K_UP,
+    K_DOWN,
+    K_TAB,
+    K_ESC,
+};
 
 #[derive(Copy, Clone, PartialEq)]
 /// A key
@@ -18,6 +30,7 @@ pub enum Key {
 }
 
 impl Key {
+    #[cfg(feature = "orbital")]
     pub fn from_event(k: KeyEvent) -> Key {
         match k.character {
             '\0' => match k.scancode {

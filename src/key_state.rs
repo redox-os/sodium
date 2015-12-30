@@ -1,4 +1,5 @@
 use key::Key;
+#[cfg(feature = "orbital")]
 use orbital::{
     KeyEvent,
     K_ALT,
@@ -22,6 +23,7 @@ impl KeyState {
             shift: false,
         }
     }
+
     /// Feed the keystate
     pub fn feed(&mut self, k: KeyEvent) -> Option<Key> {
 
@@ -30,8 +32,11 @@ impl KeyState {
             '\0' => {
                 // "I once lived here" - bug
                 match k.scancode {
+                    #[cfg(feature = "orbital")]
                     K_ALT => self.alt = k.pressed,
+                    #[cfg(feature = "orbital")]
                     K_CTRL => self.ctrl = k.pressed,
+                    #[cfg(feature = "orbital")]
                     K_LEFT_SHIFT | K_RIGHT_SHIFT => self.shift = k.pressed,
                     _ if k.pressed => {
                         return Some(Key::from_event(k));

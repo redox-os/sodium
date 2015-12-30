@@ -1,11 +1,13 @@
 use cursor::Cursor;
 use std::collections::VecDeque;
-use orbital::Window;
 use graphics::StatusBar;
 use options::Options;
 use key_state::KeyState;
 use redraw::RedrawTask;
 use buffer::SplitBuffer;
+
+#[cfg(feature = "orbital")]
+use orbital::Window;
 
 /// The current state of the editor, including the file, the cursor, the scrolling info, etc.
 pub struct Editor {
@@ -38,6 +40,7 @@ impl Editor {
     pub fn init() {
 
 
+        #[cfg(feature = "orbital")]
         let window = Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
 
         let mut editor = Editor {

@@ -1,8 +1,10 @@
 use key::{Cmd, Key};
 use editor::Editor;
-use orbital::{EventOption, Event};
 use redraw::RedrawTask;
 use mode::Mode;
+
+#[cfg(feature = "orbital")]
+use orbital::{EventOption, Event};
 
 #[derive(Copy, Clone)]
 /// An instruction, i.e. a command and a numeral parameter
@@ -38,6 +40,7 @@ impl Editor {
     /// Get the next character input. Useful for commands taking a character as post-parameter,
     /// such as r (replace).
     pub fn get_char(&mut self) -> char {
+        #[cfg(feature = "orbital")]
         loop {
             match self.window
                       .poll()
@@ -65,6 +68,7 @@ impl Editor {
         self.status_bar.cmd = String::new();
 
         // self.status_bar.cmd = String::new();
+        #[cfg(feature = "orbital")]
         loop {
              match self.window.poll()
                        .unwrap_or(Event::new())

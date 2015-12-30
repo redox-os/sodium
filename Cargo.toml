@@ -7,4 +7,6 @@ Sodium: A modern vi-like editor
 """
 
 [dependencies]
-orbtk = "*"
+
+[features]
+orbital = []

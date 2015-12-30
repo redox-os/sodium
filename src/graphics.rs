@@ -1,10 +1,13 @@
 use editor::Editor;
-use orbital::Color;
 use redraw::RedrawTask;
 use mode::Mode;
 use mode::PrimitiveMode;
 use mode::CommandMode;
 
+#[cfg(feature = "orbital")]
+use orbital::Color;
+
+#[cfg(feature = "orbital")]
 impl Editor {
     /// Redraw the window
     pub fn redraw(&mut self) {
@@ -133,6 +136,7 @@ impl Editor {
     }
 }
 
+#[cfg(feature = "orbital")]
 fn status_bar(editor: &mut Editor, text: String, a: usize, b: usize) {
 
     let h = editor.window.height();
@@ -163,6 +167,7 @@ fn status_bar(editor: &mut Editor, text: String, a: usize, b: usize) {
 }
 
 /// The statubar (showing various info about the current state of the editor)
+#[cfg(feature = "orbital")]
 pub struct StatusBar {
     /// The current mode
     pub mode: String,
@@ -174,6 +179,7 @@ pub struct StatusBar {
     pub msg: String,
 }
 
+#[cfg(feature = "orbital")]
 impl StatusBar {
     /// Create new status bar
     pub fn new() -> Self {
