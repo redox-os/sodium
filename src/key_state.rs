@@ -7,11 +7,6 @@ use orbital::{
     K_LEFT_SHIFT,
     K_RIGHT_SHIFT
 };
-#[cfg(feature = "orbital")]
-use rustbox::Key::{
-    Esc as K_ALT, // temporary
-    j
-};
 
 /// Key state
 pub struct KeyState {
