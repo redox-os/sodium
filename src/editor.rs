@@ -5,6 +5,7 @@ use options::Options;
 use key_state::KeyState;
 use redraw::RedrawTask;
 use buffer::SplitBuffer;
+use parse::Inst;
 
 #[cfg(feature = "orbital")]
 use orbital::Window;
