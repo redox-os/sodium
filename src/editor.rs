@@ -1,10 +1,10 @@
 use cursor::Cursor;
-use std::collections::VecDeque;
 use graphics::StatusBar;
 use options::Options;
+use key::{Key, Cmd};
 use key_state::KeyState;
 use redraw::RedrawTask;
-use buffer::SplitBuffer;
+use buffer::{Buffer, SplitBuffer};
 use parse::Inst;
 
 #[cfg(feature = "orbital")]

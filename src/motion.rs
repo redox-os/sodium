@@ -1,6 +1,7 @@
 use editor::Editor;
 use parse::Inst;
 use position::to_signed_pos;
+use buffer::Buffer;
 
 impl Editor {
     /// Convert an instruction to a motion (new coordinate). Returns None if the instructions given

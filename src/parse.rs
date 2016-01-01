@@ -87,7 +87,7 @@ impl Editor {
                                 n = match c {
                                     '0' ... '9' => {
                                         unset = false;
-                                        n * 10 + (c as u8) - b'0';
+                                        n * 10 + ((c as u8) - b'0') as usize
                                     }
                                     _ => {
 

@@ -1,7 +1,7 @@
 use editor::Editor;
 use std::fs::File;
 use std::io::Read;
-use buffer::SplitBuffer;
+use buffer::{Buffer, SplitBuffer};
 
 pub enum OpenStatus {
     Ok,

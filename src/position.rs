@@ -1,4 +1,5 @@
 use editor::Editor;
+use buffer::Buffer;
 
 /// Convert a usize tuple to isize
 pub fn to_signed_pos((x, y): (usize, usize)) -> (isize, isize) {

@@ -1,8 +1,6 @@
 #[cfg(feature = "orbital")]
 use orbital::{
     KeyEvent,
-    K_LEFT_SHIFT,
-    K_RIGHT_SHIFT,
     K_BKSP,
     K_LEFT,
     K_RIGHT,

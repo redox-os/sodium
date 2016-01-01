@@ -1,10 +1,12 @@
 use editor::Editor;
+use buffer::Buffer;
 
 impl Editor {
     /// Goto a given position. Does not automatically bound.
     #[inline]
     pub fn goto(&mut self, (x, y): (usize, usize)) {
-        self.buffer.goto(y);
+        self.buffer.focus_hint_y(y);
+        self.buffer.focus_hint_x(x);
         self.cursor_mut().y = y;
         self.cursor_mut().x = x;
     }

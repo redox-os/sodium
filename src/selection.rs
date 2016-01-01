@@ -1,4 +1,5 @@
 use editor::Editor;
+use buffer::Buffer;
 use std::collections::VecDeque;
 
 impl Editor {

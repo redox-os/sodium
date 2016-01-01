@@ -4,6 +4,7 @@ use key::Key;
 use mode::{Mode, CommandMode, PrimitiveMode};
 use insert::{InsertOptions, InsertMode};
 use redraw::RedrawTask;
+use buffer::Buffer;
 
 use std::iter::FromIterator;
 
