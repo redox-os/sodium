@@ -5,6 +5,45 @@ use std::ops::{Index, IndexMut};
 // Wow, I would really love having unboxed trait return types...
 pub type BufIter<'a> = ::std::iter::Chain<::std::slice::Iter<'a, String>, ::std::iter::Rev<::std::slice::Iter<'a, String>>>;
 
+/// A buffer structure
+pub trait Buffer {
+    /// Create a new empty split buffer
+    fn new() -> Self;
+
+    /// Convert a string to a split buffer
+    fn from_str(s: &str) -> Self;
+
+    /// Get the nth line in the buffer by option reference
+    fn get_line(&self, n: usize) -> Option<&String>;
+
+    /// Get the nth line in the buffer by optional mutable reference
+    fn get_line_mut(&mut self, n: usize) -> Option<&mut String>;
+
+    /// Remove the nth line and return it. Panics on out of bound.
+    fn remove_line(&mut self, n: usize) -> String;
+
+    /// Insert line at n. Panics on out of bound.
+    fn insert_line(&mut self, n: usize, line: String);
+
+    /// Convert a vector of lines to a split buffer
+    fn from_lines(vec: Vec<String>) -> SplitBuffer;
+
+    /// Move the focus (i.e. efficient point/split) of the split buffer
+    fn focus_hint_y(&mut self, y: usize);
+
+    /// Move the focus (i.e. efficient point/split) of the split buffer
+    fn focus_hint_x(&mut self, x: usize);
+
+    /// Get the number of lines in the buffer
+    fn len(&self) -> usize;
+
+    /// Get an iterator over the lines in the buffer
+    fn lines<'a>(&'a self) -> BufIter<'a>;
+
+    /// Get the leading whitespaces of the nth line. Used for autoindenting.
+    fn get_indent(&self, n: usize) -> &str;
+}
+
 
 /// The buffer data structure, that Sodium is using.
 ///
@@ -20,22 +59,6 @@ pub struct SplitBuffer {
 }
 
 impl SplitBuffer {
-    /// Create a new empty split buffer
-    pub fn new() -> Self {
-        SplitBuffer {
-            before: vec![String::new()],
-            after: Vec::new(),
-        }
-    }
-
-    /// Convert a string to a split buffer
-    pub fn from_str(s: &str) -> Self {
-        SplitBuffer {
-            before: s.lines().map(str::to_string).collect(),
-            after: Vec::new(),
-        }
-    }
-
     fn cur_line(&self) -> &String {
         self.before.last().expect("Unexpected condition (the first part of the split buffer is empty)")
     }
@@ -66,8 +89,31 @@ impl SplitBuffer {
         self.before.len()
     }
 
+    fn pop_line(&mut self) -> String {
+        self.before.pop().expect("Unexpected condition (Popped the last line)")
+    }
+
+}
+
+impl Buffer for SplitBuffer {
+    /// Create a new empty split buffer
+    fn new() -> Self {
+        SplitBuffer {
+            before: vec![String::new()],
+            after: Vec::new(),
+        }
+    }
+
+    /// Convert a string to a split buffer
+    fn from_str(s: &str) -> Self {
+        SplitBuffer {
+            before: s.lines().map(str::to_string).collect(),
+            after: Vec::new(),
+        }
+    }
+
     /// Get the nth line in the buffer by option reference
-    pub fn get_line(&self, n: usize) -> Option<&String> {
+    fn get_line(&self, n: usize) -> Option<&String> {
         if n < self.before.len() {
             Some(&self.before[n])
         } else if n < self.len() {
@@ -79,7 +125,7 @@ impl SplitBuffer {
     }
 
     /// Get the nth line in the buffer by optional mutable reference
-    pub fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
+    fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
         if n < self.before.len() {
             Some(&mut self.before[n])
         } else if n < self.len() {
@@ -91,7 +137,7 @@ impl SplitBuffer {
     }
 
     /// Remove the nth line and return it. Panics on out of bound.
-    pub fn remove_line(&mut self, n: usize) -> String {
+    fn remove_line(&mut self, n: usize) -> String {
         if n < self.before.len() {
             self.before.remove(n)
         } else if n < self.len() {
@@ -103,7 +149,7 @@ impl SplitBuffer {
     }
 
     /// Insert line at n. Panics on out of bound.
-    pub fn insert_line(&mut self, n: usize, line: String) {
+    fn insert_line(&mut self, n: usize, line: String) {
         if n < self.before.len() {
             self.before.insert(n, line);
         } else if n < self.len() {
@@ -115,7 +161,7 @@ impl SplitBuffer {
     }
 
     /// Convert a vector of lines to a split buffer
-    pub fn from_lines(vec: Vec<String>) -> SplitBuffer {
+    fn from_lines(vec: Vec<String>) -> SplitBuffer {
         SplitBuffer {
             before: vec,
             after: Vec::new(),
@@ -125,7 +171,7 @@ impl SplitBuffer {
     /// Move the center (i.e. efficient point/split) of the split buffer
     ///
     /// Panics on out of bound.
-    pub fn goto(&mut self, y: usize) {
+    fn focus_hint_y(&mut self, y: usize) {
         if y < self.y() {
             for _ in 0..self.y() - y {
                 if !self.up() {
@@ -143,22 +189,20 @@ impl SplitBuffer {
         }
     }
 
-    fn pop_line(&mut self) -> String {
-        self.before.pop().expect("Unexpected condition (Popped the last line)")
-    }
+    fn focus_hint_x(&mut self, _: usize) {}
 
     /// Get the number of lines in the buffer
-    pub fn len(&self) -> usize {
+    fn len(&self) -> usize {
         self.before.len() + self.after.len()
     }
 
     /// Get an iterator over the lines in the buffer
-    pub fn lines<'a>(&'a self) -> BufIter<'a> {
+    fn lines<'a>(&'a self) -> BufIter<'a> {
         self.before.iter().chain(self.after.iter().rev())
     }
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
-    pub fn get_indent(&self, n: usize) -> &str {
+    fn get_indent(&self, n: usize) -> &str {
         let ln = if let Some(s) = self.get_line(n) {
             s
         } else {

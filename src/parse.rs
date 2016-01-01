@@ -85,45 +85,9 @@ impl Editor {
                             }
                             Mode::Command(_) => {
                                 n = match c {
-                                    '0' => {
+                                    '0' ... '9' => {
                                         unset = false;
-                                        n * 10
-                                    }
-                                    '1' => {
-                                        unset = false;
-                                        n * 10 + 1
-                                    }
-                                    '2' => {
-                                        unset = false;
-                                        n * 10 + 2
-                                    }
-                                    '3' => {
-                                        unset = false;
-                                        n * 10 + 3
-                                    }
-                                    '4' => {
-                                        unset = false;
-                                        n * 10 + 4
-                                    }
-                                    '5' => {
-                                        unset = false;
-                                        n * 10 + 5
-                                    }
-                                    '6' => {
-                                        unset = false;
-                                        n * 10 + 6
-                                    }
-                                    '7' => {
-                                        unset = false;
-                                        n * 10 + 7
-                                    }
-                                    '8' => {
-                                        unset = false;
-                                        n * 10 + 8
-                                    }
-                                    '9' => {
-                                        unset = false;
-                                        n * 10 + 9
+                                        n * 10 + (c as u8) - b'0';
                                     }
                                     _ => {
 
