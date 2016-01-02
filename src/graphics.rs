@@ -8,6 +8,39 @@ use buffer::Buffer;
 #[cfg(feature = "orbital")]
 use orbital::Color;
 
+#[cfg(feature = "ansi")]
+mod terminal {
+	extern crate libc;
+
+    use std::mem;
+    use self::libc::{c_int, c_ushort, STDOUT_FILENO};
+    use self::libc::funcs::bsd44::ioctl;
+
+    extern {
+        static tiocgwinsz: c_int;
+    }
+
+    #[repr(C)]
+    struct TermSize {
+        row: c_ushort,
+        col: c_ushort,
+        _x: c_ushort,
+        _y: c_ushort,
+    }
+
+    pub fn termsize() -> Option<(usize, usize)> {
+        unsafe {
+            let mut size: TermSize = mem::zeroed();
+
+            if ioctl(STDOUT_FILENO, tiocgwinsz, &mut size as *mut _) == 0 {
+                Some((size.col as usize, size.row as usize))
+            } else {
+                None
+            }
+        }
+    }
+}
+
 #[cfg(feature = "orbital")]
 impl Editor {
     /// Redraw the window

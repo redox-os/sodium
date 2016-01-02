@@ -1,11 +1,43 @@
 use std::ops::{Index, IndexMut};
 
+pub struct SplitBufIter<'a> {
+    buffer: &'a SplitBuffer,
+    line: usize,
+}
 
-// Wow, I would really love having unboxed trait return types...
-pub type BufIter<'a> = ::std::iter::Chain<::std::slice::Iter<'a, String>, ::std::iter::Rev<::std::slice::Iter<'a, String>>>;
+impl<'a> Iterator for SplitBufIter<'a> {
+    type Item = &'a String;
+
+    fn next(&mut self) -> Option<&'a String> {
+        let ln = self.line;
+        self.nth(ln)
+    }
+
+    fn nth(&mut self, n: usize) -> Option<&'a String> {
+        self.buffer.get_line(n)
+    }
+
+    fn count(self) -> usize {
+        self.buffer.len()
+    }
+}
+
+impl<'a> DoubleEndedIterator for SplitBufIter<'a> {
+    fn next_back(&mut self) -> Option<&'a String> {
+        if self.line == 0 {
+            None
+        } else {
+            self.line -= 1;
+            self.buffer.get_line(self.line)
+        }
+    }
+}
 
 /// A buffer structure
-pub trait Buffer {
+pub trait Buffer<'a> {
+    type Line: 'a;
+    type LineIter: Iterator<Item = &'a Self::Line>;
+
     /// Create a new empty split buffer
     fn new() -> Self;
 
@@ -13,19 +45,19 @@ pub trait Buffer {
     fn from_str(s: &str) -> Self;
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&self, n: usize) -> Option<&String>;
+    fn get_line(&self, n: usize) -> Option<&Self::Line>;
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&mut self, n: usize) -> Option<&mut String>;
+    fn get_line_mut(&mut self, n: usize) -> Option<&mut Self::Line>;
 
     /// Remove the nth line and return it. Panics on out of bound.
-    fn remove_line(&mut self, n: usize) -> String;
+    fn remove_line(&mut self, n: usize) -> Self::Line;
 
     /// Insert line at n. Panics on out of bound.
-    fn insert_line(&mut self, n: usize, line: String);
+    fn insert_line(&mut self, n: usize, line: Self::Line);
 
     /// Convert a vector of lines to a split buffer
-    fn from_lines(vec: Vec<String>) -> SplitBuffer;
+    fn from_lines(vec: &[Self::Line]) -> SplitBuffer;
 
     /// Move the focus (i.e. efficient point/split) of the split buffer
     fn focus_hint_y(&mut self, y: usize);
@@ -37,7 +69,7 @@ pub trait Buffer {
     fn len(&self) -> usize;
 
     /// Get an iterator over the lines in the buffer
-    fn lines<'a>(&'a self) -> BufIter<'a>;
+    fn lines(&'a self) -> Self::LineIter;
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
     fn get_indent(&self, n: usize) -> &str;
@@ -94,7 +126,10 @@ impl SplitBuffer {
 
 }
 
-impl Buffer for SplitBuffer {
+impl<'a> Buffer<'a> for SplitBuffer {
+    type Line = String;
+    type LineIter = SplitBufIter<'a>;
+
     /// Create a new empty split buffer
     fn new() -> Self {
         SplitBuffer {
@@ -160,9 +195,9 @@ impl Buffer for SplitBuffer {
     }
 
     /// Convert a vector of lines to a split buffer
-    fn from_lines(vec: Vec<String>) -> SplitBuffer {
+    fn from_lines(ln: &[String]) -> SplitBuffer {
         SplitBuffer {
-            before: vec,
+            before: ln.to_owned(),
             after: Vec::new(),
         }
     }
@@ -196,8 +231,11 @@ impl Buffer for SplitBuffer {
     }
 
     /// Get an iterator over the lines in the buffer
-    fn lines<'a>(&'a self) -> BufIter<'a> {
-        self.before.iter().chain(self.after.iter().rev())
+    fn lines(&'a self) -> SplitBufIter<'a> {
+        SplitBufIter {
+            buffer: self,
+            line: 0,
+        }
     }
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
