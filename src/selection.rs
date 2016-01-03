@@ -35,5 +35,7 @@ impl Editor {
                 }
             }
         }
+
+        self.hint();
     }
 }

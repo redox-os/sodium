@@ -19,5 +19,7 @@ impl Editor {
             self.buffer[y].remove(x);
             self.redraw_task = RedrawTask::LinesAfter(y);
         }
+
+        self.hint();
     }
 }

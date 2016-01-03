@@ -47,5 +47,7 @@ impl Editor {
                 self.status_bar.msg = format!("Unknown command: {}", c);
             }
         }
+
+        self.hint();
     }
 }

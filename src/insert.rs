@@ -150,6 +150,8 @@ impl Editor {
                 _ => {}
             },
         }
+
+        self.hint();
     }
 
     /// Insert a string

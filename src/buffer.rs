@@ -1,38 +1,5 @@
 use std::ops::{Index, IndexMut};
 
-pub struct SplitBufIter<'a> {
-    buffer: &'a SplitBuffer,
-    line: usize,
-}
-
-impl<'a> Iterator for SplitBufIter<'a> {
-    type Item = &'a String;
-
-    fn next(&mut self) -> Option<&'a String> {
-        let ln = self.line;
-        self.nth(ln)
-    }
-
-    fn nth(&mut self, n: usize) -> Option<&'a String> {
-        self.line = n;
-        self.buffer.get_line(n)
-    }
-
-    fn count(self) -> usize {
-        self.buffer.len()
-    }
-}
-
-impl<'a> DoubleEndedIterator for SplitBufIter<'a> {
-    fn next_back(&mut self) -> Option<&'a String> {
-        if self.line == 0 {
-            None
-        } else {
-            self.line -= 1;
-            self.buffer.get_line(self.line)
-        }
-    }
-}
 
 /// A buffer structure
 pub trait Buffer<'a> {
@@ -60,11 +27,11 @@ pub trait Buffer<'a> {
     /// Convert a vector of lines to a split buffer
     fn from_lines(vec: &[Self::Line]) -> SplitBuffer;
 
-    /// Move the focus (i.e. efficient point/split) of the split buffer
-    fn focus_hint_y(&mut self, y: usize);
-
-    /// Move the focus (i.e. efficient point/split) of the split buffer
+    /// Give a hint on where the operations are most frequent (i.e. where the cursor is). X value.
     fn focus_hint_x(&mut self, x: usize);
+
+    /// Give a hint on where the operations are most frequent (i.e. where the cursor is). Y value.
+    fn focus_hint_y(&mut self, y: usize);
 
     /// Get the number of lines in the buffer
     fn len(&self) -> usize;
@@ -88,6 +55,8 @@ pub trait Buffer<'a> {
 pub struct SplitBuffer {
     before: Vec<String>,
     after: Vec<String>,
+    #[cfg(debug)]
+    _hinted_since_edit: bool,
 }
 
 impl SplitBuffer {
@@ -268,6 +237,55 @@ impl Index<usize> for SplitBuffer {
 impl IndexMut<usize> for SplitBuffer {
 
     fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut String {
+        #[cfg(debug)]
+        fn debug_check(b: &mut SplitBuffer) {
+            if b._hinted_since_edit {
+                b._hinted_since_edit = false;
+            } else {
+                panic!("No focus hint given since last edit!");
+            }
+        }
+
+        #[cfg(not(debug))]
+        fn debug_check(_: &mut SplitBuffer) {}
+
+        debug_check(&mut *self);
+
         self.get_line_mut(index).expect("Out of bound")
+    }
+}
+
+/// A iterator over the lines of a split buffer
+pub struct SplitBufIter<'a> {
+    buffer: &'a SplitBuffer,
+    line: usize,
+}
+
+impl<'a> Iterator for SplitBufIter<'a> {
+    type Item = &'a String;
+
+    fn next(&mut self) -> Option<&'a String> {
+        let ln = self.line;
+        self.nth(ln)
+    }
+
+    fn nth(&mut self, n: usize) -> Option<&'a String> {
+        self.line = n;
+        self.buffer.get_line(n)
+    }
+
+    fn count(self) -> usize {
+        self.buffer.len()
+    }
+}
+
+impl<'a> DoubleEndedIterator for SplitBufIter<'a> {
+    fn next_back(&mut self) -> Option<&'a String> {
+        if self.line == 0 {
+            None
+        } else {
+            self.line -= 1;
+            self.buffer.get_line(self.line)
+        }
     }
 }

@@ -71,4 +71,11 @@ impl Editor {
         }
     }
 
+    pub fn hint(&mut self) {
+        let x = self.cursor().x;
+        let y = self.cursor().y;
+
+        self.buffer.focus_hint_y(y);
+        self.buffer.focus_hint_x(x);
+    }
 }

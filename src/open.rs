@@ -17,10 +17,10 @@ impl Editor {
             file.read_to_string(&mut con);
 
             self.buffer = SplitBuffer::from_str(&con);
+            self.hint();
             OpenStatus::Ok
         } else {
             OpenStatus::NotFound
         }
-
     }
 }

@@ -14,6 +14,8 @@ impl Editor {
                 self.goto(m);
             }
         }
+
+        self.hint();
     }
 }
 

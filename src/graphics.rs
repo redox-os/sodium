@@ -16,6 +16,9 @@ mod terminal {
     use self::libc::{c_int, c_ushort, STDOUT_FILENO};
     use self::libc::funcs::bsd44::ioctl;
 
+    use std::io::stdout;
+    use std::io::prelude::*;
+
     extern {
         static tiocgwinsz: c_int;
     }
@@ -38,6 +41,37 @@ mod terminal {
                 None
             }
         }
+    }
+
+    pub fn csi(b: &[u8]) {
+        let stdout = stdout();
+
+        stdout.write(b"\x1B[");
+        stdout.write(b);
+        stdout.flush();
+    }
+
+    pub fn print(b: &[u8]) {
+        let stdout = stdout();
+
+        stdout.write(b);
+        stdout.flush();
+    }
+
+    pub fn clear() {
+        csi(b"2J");
+    }
+
+    pub fn show_cursor() {
+        csi(b"?25h");
+    }
+
+    pub fn hide_cursor() {
+        csi(b"?25l");
+    }
+
+    pub fn reset_style() {
+        csi(b"0m");
     }
 }
 
