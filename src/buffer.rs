@@ -14,6 +14,7 @@ impl<'a> Iterator for SplitBufIter<'a> {
     }
 
     fn nth(&mut self, n: usize) -> Option<&'a String> {
+        self.line = n;
         self.buffer.get_line(n)
     }
 
