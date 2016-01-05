@@ -10,3 +10,4 @@ Sodium: A modern vi-like editor
 
 [features]
 orbital = []
+ansi = []

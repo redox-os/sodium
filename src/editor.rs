@@ -23,6 +23,7 @@ pub struct Editor {
     /// The y coordinate of the scroll
     pub scroll_y: usize,
     /// The window
+    #[cfg(feature = "orbital")]
     pub window: Window,
     /// The status bar
     pub status_bar: StatusBar,
@@ -44,13 +45,28 @@ impl Editor {
         #[cfg(feature = "orbital")]
         let window = Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
 
+        #[cfg(feature = "orbital")]
         let mut editor = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
             buffer: SplitBuffer::new(),
             scroll_x: 0,
             scroll_y: 0,
-            window: *window,
+            window: *window, // ORBITAL SPECIFIC!
+            status_bar: StatusBar::new(),
+            prompt: String::new(),
+            options: Options::new(),
+            key_state: KeyState::new(),
+            redraw_task: RedrawTask::Null,
+        };
+
+        #[cfg(not(feature = "orbital"))]
+        let mut editor = Editor {
+            current_cursor: 0,
+            cursors: vec![Cursor::new()],
+            buffer: SplitBuffer::new(),
+            scroll_x: 0,
+            scroll_y: 0,
             status_bar: StatusBar::new(),
             prompt: String::new(),
             options: Options::new(),
