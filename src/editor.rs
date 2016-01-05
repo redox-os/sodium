@@ -41,7 +41,6 @@ impl Editor {
     /// Create new default state editor
     pub fn init() {
 
-
         #[cfg(feature = "orbital")]
         let window = Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
 
@@ -74,11 +73,16 @@ impl Editor {
             redraw_task: RedrawTask::Null,
         };
 
+        debugln!(editor, "Starting Sodium");
+
         editor.redraw();
+
+        debugln!(editor, "First redraw of the screen");
 
         loop {
             let inp = editor.get_inst();
             if let Inst(_, Cmd { key: Key::Quit }) = inp {
+                debugln!(editor, "C'ya");
                 break;
             }
             editor.exec(inp);

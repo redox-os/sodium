@@ -3,6 +3,9 @@
 #[cfg(feature = "orbital")]
 extern crate orbital;
 
+#[macro_use]
+pub mod debug;
+
 pub mod editor;
 pub mod buffer;
 pub mod parse;

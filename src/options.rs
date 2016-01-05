@@ -2,6 +2,7 @@ pub struct Options {
     pub highlight: bool,
     pub autoindent: bool,
     pub line_marker: bool,
+    pub debug: bool,
 }
 
 impl Options {
@@ -11,6 +12,7 @@ impl Options {
             highlight: true,
             autoindent: true,
             line_marker: true,
+            debug: true, // TODO: Let this be `true` only in debug compilation cfg
         }
     }
 
@@ -20,6 +22,7 @@ impl Options {
             "hightlight" | "hl" => Some(&mut self.highlight),
             "autoindent" | "ai" => Some(&mut self.autoindent),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(&mut self.line_marker),
+            "debug" | "debug_mode" => Some(&mut self.debug),
             _ => None,
         }
     }
@@ -30,6 +33,7 @@ impl Options {
             "hightlight" | "hl" => Some(self.highlight),
             "autoindent" | "ai" => Some(self.autoindent),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(self.line_marker),
+            "debug" | "debug_mode" => Some(self.debug),
             _ => None,
         }
     }

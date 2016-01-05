@@ -121,7 +121,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             Some(&self.before[n])
         } else if n < self.len() {
-            let n = self.after.len() - (n - self.before.len()) - 1;
+            let n = self.len() + 1 - n;
             Some(&self.after[n])
         } else {
             None
@@ -133,7 +133,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             Some(&mut self.before[n])
         } else if n < self.len() {
-            let n = self.after.len() - (n - self.before.len()) - 1;
+            let n = self.len() + 1 - n;
             Some(&mut self.after[n])
         } else {
             None
@@ -145,7 +145,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             self.before.remove(n)
         } else if n < self.len() {
-            let n = self.after.len() - (n - self.before.len()) - 1;
+            let n = self.len() + 1 - n;
             self.after.remove(n)
         } else {
             panic!("Out of bound");
@@ -157,7 +157,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             self.before.insert(n, line);
         } else if n < self.len() {
-            let n = self.after.len() - (n - self.before.len()) - 1;
+            let n = self.len() + 1 - n;
             self.after.insert(n, line);
         } else {
             panic!("Out of bound");
@@ -210,19 +210,18 @@ impl<'a> Buffer<'a> for SplitBuffer {
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
     fn get_indent(&self, n: usize) -> &str {
-        let ln = if let Some(s) = self.get_line(n) {
-            s
-        } else {
-            return "";
-        };
-        let mut len = 0;
-        for c in ln.chars() {
-            match c {
-                '\t' | ' ' => len += 1,
-                _          => break,
+        if let Some(ln) = self.get_line(n) {
+            let mut len = 0;
+            for c in ln.chars() {
+                match c {
+                    '\t' | ' ' => len += 1,
+                    _          => break,
+                }
             }
+            &ln[..len]
+        } else {
+            ""
         }
-        &ln[..len]
     }
 }
 
@@ -265,13 +264,12 @@ impl<'a> Iterator for SplitBufIter<'a> {
     type Item = &'a String;
 
     fn next(&mut self) -> Option<&'a String> {
-        let ln = self.line;
-        self.nth(ln)
+        self.nth(1)
     }
 
     fn nth(&mut self, n: usize) -> Option<&'a String> {
-        self.line = n;
-        self.buffer.get_line(n)
+        self.line += n;
+        self.buffer.get_line(self.line)
     }
 
     fn count(self) -> usize {
