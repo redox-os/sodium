@@ -162,7 +162,7 @@ pub trait Buffer<'a> {
     fn remove_line(&mut self, n: usize) -> Self::Line;
 
     /// Insert line at n. Panics on out of bound.
-    fn insert_line(&mut self, n: usize, line: Self::Line);
+    fn insert_line(&mut self, n: usize, line: &<Self::Line as Line<'a>>::Slice);
 
     /// Convert a vector of lines to a split buffer
     fn from_lines(vec: &[Self::Line]) -> SplitBuffer;
@@ -295,12 +295,12 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Insert line at n. Panics on out of bound.
-    fn insert_line(&mut self, n: usize, line: String) {
+    fn insert_line(&mut self, n: usize, line: &str) {
         if n < self.before.len() {
-            self.before.insert(n, line);
+            self.before.insert(n, line.into());
         } else if n < self.len() {
             let n = self.len() - 1 - n;
-            self.after.insert(n, line);
+            self.after.insert(n, line.into());
         } else {
             panic!("Out of bound");
         }
@@ -364,7 +364,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }.to_string();
         let begin = nl.len();
 
-        self.insert_line(y, nl + &second_part);
+        self.insert_line(y, &(nl + &second_part));
 
         begin
     }

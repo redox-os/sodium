@@ -11,7 +11,7 @@ use std::iter::FromIterator;
 // TODO: Move the command definitions outta here
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Execute an instruction
-    pub fn exec(&mut self, Inst(para, cmd): Inst) {
+    pub fn exec(&'a mut self, Inst(para, cmd): Inst) {
         use key::Key::*;
         use mode::Mode::*;
         use mode::PrimitiveMode::*;
@@ -74,14 +74,13 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                     }
                     Char('o') => {
                         let y = self.y();
-                        let ln = self.buffer.get_line(y);
                         let ind = if self.options.autoindent {
-                            ln.get_indent()
+                            self.buffer.get_line(y).get_indent()
                         } else {
                             <B::Line as Line>::Slice::new_empty()
                         };
                         let last = ind.len();
-                        self.buffer.insert_line(y, <B::Line as Line<'a>>::from_slice(ind));
+                        self.buffer.insert_line(y, ind);
                         self.goto((last, y + 1));
                         self.cursor_mut().mode =
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
