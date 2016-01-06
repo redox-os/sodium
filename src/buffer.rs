@@ -1,9 +1,24 @@
 use std::ops::{Index, IndexMut};
+use std::cmp::min;
+use std::str::Chars;
 
+pub trait Line<'a> {
+    type Iter: Iterator<Item = char> + 'a;
+
+    fn chars_iter(&'a self) -> Self::Iter;
+}
+
+impl<'a, T: AsRef<str>> Line<'a> for T {
+    type Iter = Chars<'a>;
+
+    fn chars_iter(&self) -> Chars {
+        self.as_ref().chars()
+    }
+}
 
 /// A buffer structure
 pub trait Buffer<'a> {
-    type Line: 'a;
+    type Line: 'a + Line<'a>;
     type LineIter: Iterator<Item = &'a Self::Line>;
 
     /// Create a new empty split buffer
@@ -68,22 +83,12 @@ impl SplitBuffer {
         self.before.last_mut().expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
-    fn up(&mut self) -> bool {
-        if self.before.len() == 1 {
-            false
-        } else {
-            self.after.push(self.before.pop().unwrap());
-            true
-        }
+    fn up(&mut self) {
+        self.after.push(self.before.pop().expect("Popped last element"));
     }
 
-    fn down(&mut self) -> bool {
-        if self.after.len() == 0 {
-            false
-        } else {
-            self.before.push(self.after.pop().unwrap());
-            true
-        }
+    fn down(&mut self) {
+        self.before.push(self.after.pop().expect("Popped last element"));
     }
 
     fn y(&self) -> usize {
@@ -121,7 +126,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             Some(&self.before[n])
         } else if n < self.len() {
-            let n = self.len() + 1 - n;
+            let n = self.len() - 1 - n;
             Some(&self.after[n])
         } else {
             None
@@ -133,7 +138,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             Some(&mut self.before[n])
         } else if n < self.len() {
-            let n = self.len() + 1 - n;
+            let n = self.len() - 1 - n;
             Some(&mut self.after[n])
         } else {
             None
@@ -145,7 +150,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             self.before.remove(n)
         } else if n < self.len() {
-            let n = self.len() + 1 - n;
+            let n = self.len() - 1 - n;
             self.after.remove(n)
         } else {
             panic!("Out of bound");
@@ -157,7 +162,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
         if n < self.before.len() {
             self.before.insert(n, line);
         } else if n < self.len() {
-            let n = self.len() + 1 - n;
+            let n = self.len() - 1 - n;
             self.after.insert(n, line);
         } else {
             panic!("Out of bound");
@@ -177,16 +182,12 @@ impl<'a> Buffer<'a> for SplitBuffer {
     /// Panics on out of bound.
     fn focus_hint_y(&mut self, y: usize) {
         if y < self.y() {
-            for _ in 0..self.y() - y {
-                if !self.up() {
-                    break;
-                }
+            for _ in 0..min(self.y() - y, self.before.len()) {
+                self.up();
             }
         } else if y > self.y() {
-            for _ in 0..y - self.y() {
-                if !self.down() {
-                    break;
-                }
+            for _ in 0..min(y - self.y(), self.after.len()) {
+                self.down();
             }
         } else if y >= self.len() {
             panic!("Out of bound");
@@ -268,8 +269,10 @@ impl<'a> Iterator for SplitBufIter<'a> {
     }
 
     fn nth(&mut self, n: usize) -> Option<&'a String> {
+        let res = self.buffer.get_line(self.line);
         self.line += n;
-        self.buffer.get_line(self.line)
+
+        res
     }
 
     fn count(self) -> usize {
