@@ -17,3 +17,15 @@ macro_rules! debug {
         }
     });
 }
+
+/// If a Option is Some(x) then yield x, else return None
+#[macro_export]
+macro_rules! try_opt {
+    ($e:expr) => ({
+        if let Some(x) = $e {
+            x
+        } else {
+            return None;
+        }
+    });
+}

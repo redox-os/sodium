@@ -4,12 +4,12 @@ use key::Key;
 use mode::{Mode, CommandMode, PrimitiveMode};
 use insert::{InsertOptions, InsertMode};
 use redraw::RedrawTask;
-use buffer::Buffer;
+use buffer::{Buffer, Line, Slice};
 
 use std::iter::FromIterator;
 
 // TODO: Move the command definitions outta here
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Execute an instruction
     pub fn exec(&mut self, Inst(para, cmd): Inst) {
         use key::Key::*;
@@ -74,13 +74,14 @@ impl Editor {
                     }
                     Char('o') => {
                         let y = self.y();
+                        let ln = self.buffer.get_line(y);
                         let ind = if self.options.autoindent {
-                            self.buffer.get_indent(y).to_owned()
+                            ln.get_indent()
                         } else {
-                            String::new()
+                            <B::Line as Line>::Slice::new_empty()
                         };
                         let last = ind.len();
-                        self.buffer.insert_line(y, ind.into());
+                        self.buffer.insert_line(y, <B::Line as Line<'a>>::from_slice(ind));
                         self.goto((last, y + 1));
                         self.cursor_mut().mode =
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
@@ -126,7 +127,7 @@ impl Editor {
                         self.delete();
                     }
                     Char('L') => {
-                        let ln_end = (self.buffer[self.y()].len(), self.y());
+                        let ln_end = (self.buffer.get_line(self.y()).len(), self.y());
                         self.goto(ln_end);
                         mov = true;
                     }
@@ -137,8 +138,8 @@ impl Editor {
                     Char('r') => {
                         let (x, y) = self.pos();
                         let c = self.get_char();
-                        self.buffer[y].remove(x);
-                        self.buffer[y].insert(x, c);
+                        self.buffer.get_line_mut(y).remove(x);
+                        self.buffer.get_line_mut(y).insert(x, c);
                     }
                     Char('R') => {
                         self.cursor_mut().mode =

@@ -1,21 +1,146 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{Range, RangeFull, RangeTo, RangeFrom, Index, IndexMut, Add};
 use std::cmp::min;
 use std::str::Chars;
+use std::string::Drain;
+use collections::range::RangeArgument;
 
-pub trait Line<'a> {
-    type Iter: Iterator<Item = char> + 'a;
+pub trait Slice<'a> : 'a + ToString
+                      + Index<Range<usize>, Output = Self>
+                      + Index<RangeFull, Output = Self>
+                      + Index<RangeTo<usize>, Output = Self>
+                      + Index<RangeFrom<usize>, Output = Self>
+                      + IndexMut<Range<usize>, Output = Self>
+                      + IndexMut<RangeFull, Output = Self>
+                      + IndexMut<RangeTo<usize>, Output = Self>
+                      + IndexMut<RangeFrom<usize>, Output = Self> {
+    /// Get the length of the slice
+    fn len(&self) -> usize;
 
-    fn chars_iter(&'a self) -> Self::Iter;
+    /// Convert the slice to an &str
+    fn as_str(&self) -> &str;
+
+    /// New empty
+    fn new_empty() -> &'static Self;
 }
 
-impl<'a, T: AsRef<str>> Line<'a> for T {
-    type Iter = Chars<'a>;
+impl<'a> Slice<'a> for str {
+    fn len(&self) -> usize {
+        str::len(self)
+    }
 
-    fn chars_iter(&self) -> Chars {
-        self.as_ref().chars()
+    fn as_str(&self) -> &str {
+        self
+    }
+
+    fn new_empty() -> &'static str {
+        ""
     }
 }
 
+
+pub trait Line<'a> : ToString + Add<&'a str, Output = Self> + From<&'a str> {
+    // TODO: Try to remove these lifetimes
+    /// The characters iterator type
+    type Iter: Iterator<Item = char> + DoubleEndedIterator + 'a;
+    /// The draining characters iterator type
+    type Drain: Iterator<Item = char> + DoubleEndedIterator + 'a;
+    /// The slice type
+    // TODO: Move this to seperate trait.
+    type Slice: Slice<'a> + ?Sized;
+
+    /// Convert the line to a slice
+    fn as_slice(&self) -> &Self::Slice;
+
+    /// Convert the line to a slice (mutable)
+    fn as_slice_mut(&mut self) -> &mut Self::Slice;
+
+    /// Get an iterator over the characters
+    fn chars(&self) -> Self::Iter;
+
+    /// Get a draining iterator over the characters
+    fn drain<R: RangeArgument<usize>>(&'a mut self, range: R) -> Self::Drain;
+
+    /// Insert a character into the line
+    fn insert(&mut self, idx: usize, ch: char);
+
+    /// Removes a character and returns it
+    fn remove(&mut self, idx: usize) -> char;
+
+    /// Push a string to the end of the line
+    fn push_slice(&mut self, s: &Self::Slice);
+
+    /// Convert a slice to a line
+    fn from_slice(s: &Self::Slice) -> Self;
+
+    /// Get the length of the line
+    fn len(&self) -> usize;
+
+    /// Clear the line (make it empty)
+    fn clear(&mut self);
+
+    /// Get the leading whitespaces of the nth line. Used for autoindenting.
+    fn get_indent(&self) -> &Self::Slice;
+}
+
+
+impl<'a> Line<'a> for String {
+    type Iter = Chars<'a>;
+    type Drain = Drain<'a>;
+    type Slice = str;
+
+    fn as_slice(&self) -> &Self::Slice {
+        &self
+    }
+
+    fn as_slice_mut(&mut self) -> &mut Self::Slice {
+        &mut self
+    }
+
+    fn chars(&self) -> Chars<'a> {
+        String::chars(self)
+    }
+
+    fn drain<R: RangeArgument<usize>>(&'a mut self, range: R) -> Drain<'a> {
+        String::drain(self, range)
+    }
+
+    fn insert(&mut self, idx: usize, ch: char) {
+        String::insert(self, idx, ch);
+    }
+
+    fn remove(&mut self, idx: usize) -> char {
+        String::remove(self, idx)
+    }
+
+    fn push_slice(&mut self, s: &str) {
+        String::push_str(self, s);
+    }
+
+    fn from_slice(s: &Self::Slice) -> Self {
+        s.into()
+    }
+
+    fn len(&self) -> usize {
+        String::len(self)
+    }
+
+    fn clear(&mut self) {
+        self.clear();
+    }
+
+    fn get_indent(&self) -> &str {
+        let mut len = 0;
+        for c in self.chars() {
+            match c {
+                '\t' | ' ' => len += 1,
+                _          => break,
+            }
+        }
+        &self[..len]
+    }
+}
+
+// TODO Take slices instead of Self::Line!
 /// A buffer structure
 pub trait Buffer<'a> {
     type Line: 'a + Line<'a>;
@@ -28,10 +153,10 @@ pub trait Buffer<'a> {
     fn from_str(s: &str) -> Self;
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&self, n: usize) -> Option<&Self::Line>;
+    fn get_line(&self, n: usize) -> &Self::Line;
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&mut self, n: usize) -> Option<&mut Self::Line>;
+    fn get_line_mut(&mut self, n: usize) -> &mut Self::Line;
 
     /// Remove the nth line and return it. Panics on out of bound.
     fn remove_line(&mut self, n: usize) -> Self::Line;
@@ -54,8 +179,8 @@ pub trait Buffer<'a> {
     /// Get an iterator over the lines in the buffer
     fn lines(&'a self) -> Self::LineIter;
 
-    /// Get the leading whitespaces of the nth line. Used for autoindenting.
-    fn get_indent(&self, n: usize) -> &str;
+    /// Insert a newline at a given point (yields the indentation of the previous line)
+    fn insert_newline(&mut self, x: usize, y: usize, autoindent: bool) -> usize;
 }
 
 
@@ -122,26 +247,38 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&self, n: usize) -> Option<&String> {
+    fn get_line(&self, n: usize) -> &String {
         if n < self.before.len() {
-            Some(&self.before[n])
+            &self.before[n]
         } else if n < self.len() {
             let n = self.len() - 1 - n;
-            Some(&self.after[n])
+            &self.after[n]
         } else {
-            None
+            panic!("Out of bound");
         }
     }
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
+    fn get_line_mut(&mut self, n: usize) -> &mut String {
+        #[cfg(debug)]
+        fn debug_check(b: &mut B) {
+            if b._hinted_since_edit {
+                b._hinted_since_edit = false;
+            } else {
+                panic!("No focus hint given since last edit!");
+            }
+        }
+
+        #[cfg(debug)]
+        debug_check(&mut *self);
+
         if n < self.before.len() {
-            Some(&mut self.before[n])
+            &mut self.before[n]
         } else if n < self.len() {
             let n = self.len() - 1 - n;
-            Some(&mut self.after[n])
+            &mut self.after[n]
         } else {
-            None
+            panic!("Out of bound");
         }
     }
 
@@ -172,7 +309,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     /// Convert a vector of lines to a split buffer
     fn from_lines(ln: &[String]) -> SplitBuffer {
         SplitBuffer {
-            before: ln.to_owned(),
+            before: ln.into(),
             after: Vec::new(),
         }
     }
@@ -209,51 +346,31 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Get the leading whitespaces of the nth line. Used for autoindenting.
-    fn get_indent(&self, n: usize) -> &str {
-        if let Some(ln) = self.get_line(n) {
-            let mut len = 0;
-            for c in ln.chars() {
-                match c {
-                    '\t' | ' ' => len += 1,
-                    _          => break,
-                }
-            }
-            &ln[..len]
+    fn insert_newline(&mut self, x: usize, y: usize, autoindent: bool) -> usize {
+        let slice = self.get_line(y).as_slice();
+
+        // TODO Is this efficient?
+        // TODO Make RangeTo work
+        // (instead of `0..`)
+        let first_part  = slice[..x].to_string();
+        let second_part = slice[x..].to_string();
+
+        *self.get_line_mut(y) = first_part.as_str().into();
+
+        let nl = if autoindent {
+            self.get_line(y).get_indent()
         } else {
             ""
-        }
+        }.to_string();
+        let begin = nl.len();
+
+        self.insert_line(y, nl + &second_part);
+
+        begin
     }
 }
 
 
-impl Index<usize> for SplitBuffer {
-    type Output = String;
-
-    fn index<'a>(&'a self, index: usize) -> &'a String {
-        self.get_line(index).expect("Out of bound")
-    }
-}
-impl IndexMut<usize> for SplitBuffer {
-
-    fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut String {
-        #[cfg(debug)]
-        fn debug_check(b: &mut SplitBuffer) {
-            if b._hinted_since_edit {
-                b._hinted_since_edit = false;
-            } else {
-                panic!("No focus hint given since last edit!");
-            }
-        }
-
-        #[cfg(not(debug))]
-        fn debug_check(_: &mut SplitBuffer) {}
-
-        debug_check(&mut *self);
-
-        self.get_line_mut(index).expect("Out of bound")
-    }
-}
 
 /// A iterator over the lines of a split buffer
 pub struct SplitBufIter<'a> {
@@ -269,10 +386,14 @@ impl<'a> Iterator for SplitBufIter<'a> {
     }
 
     fn nth(&mut self, n: usize) -> Option<&'a String> {
-        let res = self.buffer.get_line(self.line);
-        self.line += n;
+        if n + self.line < self.buffer.len() {
+            let res = self.buffer.get_line(self.line);
+            self.line += n;
 
-        res
+            Some(res)
+        } else {
+            None
+        }
     }
 
     fn count(self) -> usize {
@@ -282,11 +403,11 @@ impl<'a> Iterator for SplitBufIter<'a> {
 
 impl<'a> DoubleEndedIterator for SplitBufIter<'a> {
     fn next_back(&mut self) -> Option<&'a String> {
-        if self.line == 0 {
+        if self.line == 0 || self.line > self.buffer.len() {
             None
         } else {
             self.line -= 1;
-            self.buffer.get_line(self.line)
+            Some(self.buffer.get_line(self.line))
         }
     }
 }

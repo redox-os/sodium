@@ -1,9 +1,9 @@
 use editor::Editor;
 use parse::Inst;
 use position::to_signed_pos;
-use buffer::Buffer;
+use buffer::{Buffer, Line};
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Convert an instruction to a motion (new coordinate). Returns None if the instructions given
     /// either is invalid or has no movement.
     ///
@@ -24,7 +24,7 @@ impl Editor {
             Char('k') => Some(self.up(n.d())),
             Char('g') => Some((0, n.or(1) - 1)),
             Char('G') => Some((0, self.buffer.len() - 1)),
-            Char('L') => Some((self.buffer[y].len() - 1, y)),
+            Char('L') => Some((self.buffer.get_line(y).len() - 1, y)),
             Char('H') => Some((0, y)),
             Char('t') => {
 
@@ -73,7 +73,7 @@ impl Editor {
             Char('k') => Some(self.up_unbounded(n.d())),
             Char('g') => Some((0, n.or(1) as isize - 1)),
             Char('G') => Some((0, self.buffer.len() as isize - 1)),
-            Char('L') => Some(to_signed_pos((x, self.buffer[y].len()))),
+            Char('L') => Some(to_signed_pos((x, self.buffer.get_line(y).len()))),
             Char('H') => Some((0, y as isize)),
             Char('t') => {
 

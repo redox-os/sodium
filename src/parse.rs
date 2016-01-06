@@ -2,6 +2,7 @@ use key::{Cmd, Key};
 use editor::Editor;
 use redraw::RedrawTask;
 use mode::Mode;
+use buffer::Buffer;
 
 #[cfg(feature = "orbital")]
 use orbital::{EventOption, Event};
@@ -36,7 +37,7 @@ impl Parameter {
     }
 }
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Get the next character input. Useful for commands taking a character as post-parameter,
     /// such as r (replace).
     pub fn get_char(&mut self) -> char {

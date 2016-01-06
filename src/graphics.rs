@@ -3,7 +3,7 @@ use redraw::RedrawTask;
 use mode::Mode;
 use mode::PrimitiveMode;
 use mode::CommandMode;
-use buffer::Buffer;
+use buffer::{Buffer, Line};
 
 #[cfg(feature = "orbital")]
 use orbital::Color;
@@ -157,9 +157,9 @@ mod terminal {
 }
 
 #[cfg(feature = "orbital")]
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Redraw the window
-    pub fn redraw(&mut self) {
+    pub fn redraw(&'a mut self) {
         // TODO: Only draw when relevant for the window
         let (mut pos_x, pos_y) = self.pos();
         // Redraw window
@@ -285,7 +285,7 @@ impl Editor {
 }
 
 #[cfg(feature = "orbital")]
-fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
+fn status_bar<'a, B: Buffer<'a>>(editor: &mut Editor<B>, text: String, a: u32, b: u32) {
 
     let h = editor.window.height();
     let w = editor.window.width();

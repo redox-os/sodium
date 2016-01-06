@@ -11,13 +11,13 @@ use parse::Inst;
 use orbital::Window;
 
 /// The current state of the editor, including the file, the cursor, the scrolling info, etc.
-pub struct Editor {
+pub struct Editor<B> {
     /// The current cursor
     pub current_cursor: u8,
     /// The cursors
     pub cursors: Vec<Cursor>,
     /// The buffer (document)
-    pub buffer: SplitBuffer,
+    pub buffer: B,
     /// The x coordinate of the scroll
     pub scroll_x: usize,
     /// The y coordinate of the scroll
@@ -37,7 +37,7 @@ pub struct Editor {
     pub redraw_task: RedrawTask,
 }
 
-impl Editor {
+impl<'a, B: Buffer<'a> + 'a> Editor<B> {
     /// Create new default state editor
     pub fn init() {
 
@@ -48,7 +48,7 @@ impl Editor {
         let mut editor = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
-            buffer: SplitBuffer::new(),
+            buffer: B::new(),
             scroll_x: 0,
             scroll_y: 0,
             window: *window, // ORBITAL SPECIFIC!
@@ -63,7 +63,7 @@ impl Editor {
         let mut editor = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
-            buffer: SplitBuffer::new(),
+            buffer: B::new(),
             scroll_x: 0,
             scroll_y: 0,
             status_bar: StatusBar::new(),
@@ -89,13 +89,5 @@ impl Editor {
             editor.redraw();
             editor.status_bar.mode = editor.cursor().mode.to_string();
         }
-    }
-
-    pub fn hint(&mut self) {
-        let x = self.cursor().x;
-        let y = self.cursor().y;
-
-        self.buffer.focus_hint_y(y);
-        self.buffer.focus_hint_x(x);
     }
 }

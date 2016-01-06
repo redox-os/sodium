@@ -1,12 +1,12 @@
 use editor::Editor;
-use buffer::Buffer;
+use buffer::{Buffer, Line};
 
 /// Convert a usize tuple to isize
 pub fn to_signed_pos((x, y): (usize, usize)) -> (isize, isize) {
     (x as isize, y as isize)
 }
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Get the position of the current cursor, bounded
     #[inline]
     pub fn pos(&self) -> (usize, usize) {
@@ -37,7 +37,7 @@ impl Editor {
             y
         };
 
-        let ln = self.buffer[y].len();
+        let ln = self.buffer.get_line(y).len();
         if x >= ln {
             if ln == 0 {
                 (0, y)
@@ -69,5 +69,15 @@ impl Editor {
         };
 
         (x, y)
+    }
+
+    /// Give a hint about the cursor position to the buffer, used for setting the center/focus in
+    /// which operations are most efficient.
+    pub fn hint(&mut self) {
+        let x = self.cursor().x;
+        let y = self.cursor().y;
+
+        self.buffer.focus_hint_y(y);
+        self.buffer.focus_hint_x(x);
     }
 }

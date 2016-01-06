@@ -8,7 +8,7 @@ pub enum OpenStatus {
     NotFound,
 }
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Open a file
     pub fn open(&mut self, path: &str) -> OpenStatus {
         self.status_bar.file = path.to_string();
@@ -16,7 +16,7 @@ impl Editor {
             let mut con = String::new();
             file.read_to_string(&mut con);
 
-            self.buffer = SplitBuffer::from_str(&con);
+            self.buffer = B::from_str(&con);
             self.hint();
             OpenStatus::Ok
         } else {

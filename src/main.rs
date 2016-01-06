@@ -1,10 +1,13 @@
 #![feature(stmt_expr_attributes)]
+#![feature(collections_range)]
 
 #[cfg(feature = "orbital")]
 extern crate orbital;
 
+extern crate collections;
+
 #[macro_use]
-pub mod debug;
+pub mod macros;
 
 pub mod editor;
 pub mod buffer;

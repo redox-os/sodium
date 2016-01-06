@@ -1,7 +1,8 @@
 use editor::Editor;
 use open::OpenStatus;
+use buffer::Buffer;
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Invoke a command in the prompt
     pub fn invoke(&mut self, cmd: String) {
         let mut split = cmd.split(' ');

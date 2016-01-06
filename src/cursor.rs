@@ -1,5 +1,6 @@
 use editor::Editor;
 use mode::{Mode, CommandMode, PrimitiveMode};
+use buffer::{Buffer, Line};
 
 #[derive(Clone)]
 /// A cursor, i.e. a state defining a mode, and a position. The cursor does not define the content
@@ -24,12 +25,12 @@ impl Cursor {
     }
 }
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Get the character under the cursor
     #[inline]
     pub fn current(&self) -> Option<char> {
         let (x, y) = self.pos();
-        match self.buffer[y].chars().nth(x) {
+        match self.buffer.get_line(y).chars().nth(x) {
             Some(c) => Some(c),
             None => None,
         }

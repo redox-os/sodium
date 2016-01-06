@@ -1,7 +1,7 @@
 use editor::Editor;
-use buffer::Buffer;
+use buffer::{Buffer, Line};
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Goto a given position. Does not automatically bound.
     #[inline]
     pub fn goto(&mut self, (x, y): (usize, usize)) {
@@ -25,22 +25,22 @@ impl Editor {
     pub fn after(&self, n: usize, (x, y): (usize, usize)) -> Option<(usize, usize)> {
 
         // TODO: Make this more idiomatic {
-        if x + n < self.buffer[y].len() {
+        if x + n < self.buffer.get_line(y).len() {
 
             Some((x + n, y))
         } else {
             if y + 1 >= self.buffer.len() {
                 None
             } else {
-                let mut mv = n + x - self.buffer[y].len();
+                let mut mv = n + x - self.buffer.get_line(y).len();
                 let mut ry = y + 1;
 
                 loop {
-                    if mv < self.buffer[ry].len() {
+                    if mv < self.buffer.get_line(ry).len() {
                         return Some((mv, ry));
                     } else {
                         if ry + 1 < self.buffer.len() {
-                            mv -= self.buffer[ry].len();
+                            mv -= self.buffer.get_line(ry).len();
                             ry += 1;
                         } else {
                             return None;
@@ -66,11 +66,11 @@ impl Editor {
                 let mut ry = y - 1;
 
                 loop {
-                    if mv <= self.buffer[ry].len() {
-                        return Some((self.buffer[ry].len() - mv, ry));
+                    if mv <= self.buffer.get_line(ry).len() {
+                        return Some((self.buffer.get_line(ry).len() - mv, ry));
                     } else {
-                        if ry > 0 && mv >= self.buffer[ry].len() {
-                            mv -= self.buffer[ry].len();
+                        if ry > 0 && mv >= self.buffer.get_line(ry).len() {
+                            mv -= self.buffer.get_line(ry).len();
                             ry -= 1;
                         } else if ry == 0 {
                             return None;
@@ -140,7 +140,7 @@ impl Editor {
         let mut dn = 0;
         let mut x  = self.x();
 
-        for ch in self.buffer[self.y()].chars().skip(x) {
+        for ch in self.buffer.get_line(self.y()).chars().skip(x) {
             if dn == n {
                 if ch == c {
                     dn += 1;
@@ -160,7 +160,7 @@ impl Editor {
         let mut x  = self.x();
         let y      = self.y();
 
-        for ch in self.buffer[y].chars().rev().skip(self.buffer[y].len() - x) {
+        for ch in self.buffer.get_line(y).chars().rev().skip(self.buffer.get_line(y).len() - x) {
             if dn == n {
                 if ch == c {
                     dn += 1;

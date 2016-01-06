@@ -1,13 +1,13 @@
 use editor::Editor;
-use buffer::Buffer;
+use buffer::{Buffer, Line};
 use std::collections::VecDeque;
 
-impl Editor {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Remove from a given motion (row based), i.e. if the motion given is to another line, all
     /// the lines from the current one to the one defined by the motion are removed. If the motion
     /// defines a position on the same line, only the characters from the current position to the
     /// motion's position are removed.
-    pub fn remove_rb<'a>(&mut self, (x, y): (isize, isize)) {
+    pub fn remove_rb(&'a mut self, (x, y): (isize, isize)) {
         if y == self.y() as isize {
             let (x, y) = self.bound((x as usize, y as usize));
             // Single line mode
@@ -16,7 +16,7 @@ impl Editor {
             } else {
                 (self.x(), x)
             };
-            for _ in self.buffer[y].drain(a..b) {}
+            for _ in self.buffer.get_line_mut(y).drain(a..b) {}
         } else {
             let (_, y) = self.bound((x as usize, y as usize));
             // Full line mode
@@ -31,7 +31,7 @@ impl Editor {
                 if self.buffer.len() > 1 {
                     self.buffer.remove_line(a);
                 } else {
-                    self.buffer[0] = String::new();
+                    self.buffer.get_line_mut(0).clear();
                 }
             }
         }
