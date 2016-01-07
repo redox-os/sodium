@@ -10,7 +10,7 @@ pub enum OpenStatus {
 
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Open a file
-    pub fn open(&mut self, path: &str) -> OpenStatus {
+    pub fn open(&'a mut self, path: &str) -> OpenStatus {
         self.status_bar.file = path.to_string();
         if let Some(mut file) = File::open(path).ok() {
             let mut con = String::new();

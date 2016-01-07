@@ -79,7 +79,7 @@ pub trait Line<'a> : ToString + Add<&'a str, Output = Self> + From<&'a str> {
     fn clear(&mut self);
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
-    fn get_indent(&self) -> &Self::Slice;
+    fn get_indent(&'a self) -> &Self::Slice;
 }
 
 
@@ -128,7 +128,7 @@ impl<'a> Line<'a> for String {
         self.clear();
     }
 
-    fn get_indent(&self) -> &str {
+    fn get_indent(&'a self) -> &str {
         let mut len = 0;
         for c in self.chars() {
             match c {
@@ -153,10 +153,10 @@ pub trait Buffer<'a> {
     fn from_str(s: &str) -> Self;
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&self, n: usize) -> &Self::Line;
+    fn get_line(&'a self, n: usize) -> &'a Self::Line;
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&mut self, n: usize) -> &mut Self::Line;
+    fn get_line_mut(&'a mut self, n: usize) -> &'a mut Self::Line;
 
     /// Remove the nth line and return it. Panics on out of bound.
     fn remove_line(&mut self, n: usize) -> Self::Line;
@@ -247,7 +247,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&self, n: usize) -> &String {
+    fn get_line(&'a self, n: usize) -> &'a String {
         if n < self.before.len() {
             &self.before[n]
         } else if n < self.len() {
@@ -259,7 +259,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&mut self, n: usize) -> &mut String {
+    fn get_line_mut(&'a mut self, n: usize) -> &'a mut String {
         #[cfg(debug)]
         fn debug_check(b: &mut B) {
             if b._hinted_since_edit {

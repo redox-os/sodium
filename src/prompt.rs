@@ -4,7 +4,7 @@ use buffer::Buffer;
 
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Invoke a command in the prompt
-    pub fn invoke(&mut self, cmd: String) {
+    pub fn invoke(&'a mut self, cmd: String) {
         let mut split = cmd.split(' ');
         let base_cmd = split.nth(0).unwrap_or("");
         let sec_cmd = split.nth(0).unwrap_or("");

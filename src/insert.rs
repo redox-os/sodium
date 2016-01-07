@@ -31,7 +31,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     /// position. For example append will append character after the cursor, but visually it have
     /// delta x = 1, so it will look like normal insert mode, except when going back to normal
     /// mode, the cursor will move back (visually), because the delta x will drop to 0.
-    pub fn delta(&self) -> usize {
+    pub fn delta(&'a self) -> usize {
         let (x, y) = self.pos();
         match self.cursor().mode {
             _ if x > self.buffer.get_line(y).len() => {
@@ -46,7 +46,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     }
 
     /// Insert text under the current cursor.
-    pub fn insert(&mut self, k: Key, InsertOptions { mode }: InsertOptions) {
+    pub fn insert(&'a mut self, k: Key, InsertOptions { mode }: InsertOptions) {
         let (mut x, mut y) = self.pos();
         match mode {
             InsertMode::Insert | InsertMode::Append => {
@@ -143,7 +143,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     }
 
     /// Insert a string
-    pub fn insert_str(&mut self, txt: String, opt: InsertOptions) {
+    pub fn insert_str(&'a mut self, txt: String, opt: InsertOptions) {
         for c in txt.chars() {
             self.insert(Key::Char(c), opt);
         }

@@ -5,7 +5,7 @@ use buffer::{Buffer, Line};
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Delete a character
     #[inline]
-    pub fn delete(&mut self) {
+    pub fn delete(&'a mut self) {
         let (x, y) = self.pos();
         if x == 0 {
             if y != 0 {

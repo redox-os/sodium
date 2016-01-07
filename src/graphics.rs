@@ -250,7 +250,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     }
 
     /// Redraw the status bar
-    pub fn redraw_status_bar(&mut self) {
+    pub fn redraw_status_bar(&'a mut self) {
         let h = self.window.height();
         let w = self.window.width();
         let mode = self.cursor().mode;
@@ -285,7 +285,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 }
 
 #[cfg(feature = "orbital")]
-fn status_bar<'a, B: Buffer<'a>>(editor: &mut Editor<B>, text: String, a: u32, b: u32) {
+fn status_bar<'a, B: Buffer<'a>>(editor: &'a mut Editor<B>, text: String, a: u32, b: u32) {
 
     let h = editor.window.height();
     let w = editor.window.width();
