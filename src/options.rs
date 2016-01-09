@@ -68,5 +68,4 @@ impl Options {
             None => Err(()),
         }
     }
-
 }

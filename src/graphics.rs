@@ -10,7 +10,7 @@ use orbital::Color;
 
 #[cfg(feature = "ansi")]
 mod terminal {
-	extern crate libc;
+    extern crate libc;
 
     use std::mem;
     use self::libc::{c_int, c_uint, c_ushort, c_uchar, STDOUT_FILENO};
@@ -19,12 +19,12 @@ mod terminal {
     use std::io::stdout;
     use std::io::prelude::*;
 
-    extern {
+    extern "C" {
         static tiocgwinsz: c_int;
 
-		fn tcgetattr(filedes: c_int, termptr: *mut Termios) -> c_int;
-		fn tcsetattr(filedes: c_int, opt: c_int, termptr: *mut Termios) -> c_int;
-		fn cfmakeraw(termptr: *mut Termios);
+        fn tcgetattr(filedes: c_int, termptr: *mut Termios) -> c_int;
+        fn tcsetattr(filedes: c_int, opt: c_int, termptr: *mut Termios) -> c_int;
+        fn cfmakeraw(termptr: *mut Termios);
     }
 
     #[repr(C)]
@@ -36,85 +36,81 @@ mod terminal {
     }
 
     pub fn termsize() -> Option<(usize, usize)> {
-		unsafe {
-			let mut size: TermSize = mem::zeroed();
+        unsafe {
+            let mut size: TermSize = mem::zeroed();
 
-			if ioctl(STDOUT_FILENO, tiocgwinsz as u64, &mut size as *mut _) == 0 {
-				Some((size.col as usize, size.row as usize))
-			} else {
-				None
-			}
-		}
-	}
+            if ioctl(STDOUT_FILENO, tiocgwinsz as u64, &mut size as *mut _) == 0 {
+                Some((size.col as usize, size.row as usize))
+            } else {
+                None
+            }
+        }
+    }
 
     #[derive(Clone)]
-	struct Termios {
-		c_iflag: c_uint,
-		c_oflag: c_uint,
-		c_cflag: c_uint,
-		c_lflag: c_uint,
-		c_line: c_uchar,
-		c_cc: [c_uchar; 32],
-		c_ispeed: c_uint,
-		c_ospeed: c_uint,
-	}
+    struct Termios {
+        c_iflag: c_uint,
+        c_oflag: c_uint,
+        c_cflag: c_uint,
+        c_lflag: c_uint,
+        c_line: c_uchar,
+        c_cc: [c_uchar; 32],
+        c_ispeed: c_uint,
+        c_ospeed: c_uint,
+    }
 
-	fn get_terminal_attr() -> (Termios, c_int) {
-		unsafe {
-			let mut ios = Termios {
-				c_iflag: 0,
-				c_oflag: 0,
-				c_cflag: 0,
-				c_lflag: 0,
-				c_line: 0,
-				c_cc: [0; 32],
-				c_ispeed: 0,
-				c_ospeed: 0
-			};
+    fn get_terminal_attr() -> (Termios, c_int) {
+        unsafe {
+            let mut ios = Termios {
+                c_iflag: 0,
+                c_oflag: 0,
+                c_cflag: 0,
+                c_lflag: 0,
+                c_line: 0,
+                c_cc: [0; 32],
+                c_ispeed: 0,
+                c_ospeed: 0,
+            };
 
-			(ios, tcgetattr(0, &mut ios))
-		}
-	}
+            (ios, tcgetattr(0, &mut ios))
+        }
+    }
 
-	fn make_raw(ios: &mut Termios) {
-		unsafe {
-			cfmakeraw(&mut *ios);
-		}
-	}
+    fn make_raw(ios: &mut Termios) {
+        unsafe {
+            cfmakeraw(&mut *ios);
+        }
+    }
 
-	fn set_terminal_attr(ios: *mut Termios) -> c_int {
-		unsafe {
-			tcsetattr(0, 0, ios)
-		}
-	}
+    fn set_terminal_attr(ios: *mut Termios) -> c_int {
+        unsafe { tcsetattr(0, 0, ios) }
+    }
 
-	pub struct TerminalRestorer {
-		prev_ios: Termios
-	}
+    pub struct TerminalRestorer {
+        prev_ios: Termios,
+    }
 
-	impl Drop for TerminalRestorer {
-		fn drop(&mut self) {
-			set_terminal_attr(&mut self.prev_ios as *mut _);
-		}
-	}
+    impl Drop for TerminalRestorer {
+        fn drop(&mut self) {
+            set_terminal_attr(&mut self.prev_ios as *mut _);
+        }
+    }
 
-	pub fn set_terminal_raw_mode() -> TerminalRestorer {
-		let (ios, err) = get_terminal_attr();
+    pub fn set_terminal_raw_mode() -> TerminalRestorer {
+        let (ios, err) = get_terminal_attr();
         let prev_ios = ios.clone();
-		if err != 0 {
-			panic!("Can't load termios settings properly");
-		}
+        if err != 0 {
+            panic!("Can't load termios settings properly");
+        }
 
-		make_raw(&mut ios);
+        make_raw(&mut ios);
 
-		if set_terminal_attr(&mut ios as *mut _) != 0 {
-			panic!("Can't init termios raw mode properly");
-		}
+        if set_terminal_attr(&mut ios as *mut _) != 0 {
+            panic!("Can't init termios raw mode properly");
+        }
 
-		TerminalRestorer {
-			prev_ios: prev_ios,
-		}
-	}
+        TerminalRestorer { prev_ios: prev_ios }
+    }
 
     pub fn csi(b: &[u8]) {
         let stdout = stdout();
@@ -215,7 +211,7 @@ impl Editor {
                         '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
                         '.' | ',' => (241, 213, 226),
                         '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
-                        '0' ... '9' => (209, 209, 177),
+                        '0'...'9' => (209, 209, 177),
                         _ => (255, 255, 255),
                     }
                 } else {
@@ -293,7 +289,10 @@ fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
     let mode = editor.cursor().mode;
 
     for (n, c) in (if text.len() as u32 > w / (8 * b) {
-                      text.chars().take((w / (8 * b) - 5) as usize).chain(vec!['.'; 3]).collect::<Vec<_>>()
+                      text.chars()
+                          .take((w / (8 * b) - 5) as usize)
+                          .chain(vec!['.'; 3])
+                          .collect::<Vec<_>>()
                   } else {
                       text.chars().collect()
                   })

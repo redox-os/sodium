@@ -34,9 +34,7 @@ impl Editor {
     pub fn delta(&self) -> usize {
         let (x, y) = self.pos();
         match self.cursor().mode {
-            _ if x > self.buffer[y].len() => {
-                0
-            }
+            _ if x > self.buffer[y].len() => 0,
             Mode::Primitive(PrimitiveMode::Insert(InsertOptions { mode: InsertMode::Append }))
                 if x == self.buffer[y].len() => 0,
 
@@ -54,7 +52,7 @@ impl Editor {
 
                 match k {
                     Key::Char('\n') => {
-                        let first_part  = self.buffer[y][..x + d].to_owned();
+                        let first_part = self.buffer[y][..x + d].to_owned();
                         let second_part = self.buffer[y][x + d..].to_owned();
 
                         self.buffer[y] = first_part;
@@ -119,36 +117,38 @@ impl Editor {
                     _ => {}
                 }
             }
-            InsertMode::Replace => match k {
-                Key::Char(c) => {
-                    if x == self.buffer[y].len() {
-                        let next = self.next(1);
-                        if let Some(p) = next {
-                            self.goto(p);
-                            x = self.x();
-                            y = self.y();
-                        }
-                    }
-
-                    if self.buffer.len() != y {
-                        if self.buffer[y].len() == x {
+            InsertMode::Replace => {
+                match k {
+                    Key::Char(c) => {
+                        if x == self.buffer[y].len() {
                             let next = self.next(1);
                             if let Some(p) = next {
                                 self.goto(p);
+                                x = self.x();
+                                y = self.y();
                             }
-                        } else {
-                            self.buffer[y].remove(x);
-                            self.buffer[y].insert(x, c);
                         }
+
+                        if self.buffer.len() != y {
+                            if self.buffer[y].len() == x {
+                                let next = self.next(1);
+                                if let Some(p) = next {
+                                    self.goto(p);
+                                }
+                            } else {
+                                self.buffer[y].remove(x);
+                                self.buffer[y].insert(x, c);
+                            }
+                        }
+                        let next = self.next(1);
+                        if let Some(p) = next {
+                            self.goto(p);
+                        }
+                        self.redraw_task = RedrawTask::Lines(y..y + 1);
                     }
-                    let next = self.next(1);
-                    if let Some(p) = next {
-                        self.goto(p);
-                    }
-                    self.redraw_task = RedrawTask::Lines(y..y + 1);
+                    _ => {}
                 }
-                _ => {}
-            },
+            }
         }
 
         self.hint();
@@ -160,5 +160,4 @@ impl Editor {
             self.insert(Key::Char(c), opt);
         }
     }
-
 }

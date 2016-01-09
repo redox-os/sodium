@@ -52,8 +52,8 @@ impl Editor {
                         self.redraw_task = RedrawTask::StatusBar;
                         return c;
                     }
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
     }
@@ -70,9 +70,10 @@ impl Editor {
         // self.status_bar.cmd = String::new();
         #[cfg(feature = "orbital")]
         loop {
-             match self.window.poll()
-                       .unwrap_or(Event::new())
-                       .to_option() {
+            match self.window
+                      .poll()
+                      .unwrap_or(Event::new())
+                      .to_option() {
                 EventOption::Key(key_event) => {
                     if let Some(k) = self.key_state.feed(key_event) {
                         let c = k.to_char();
@@ -85,7 +86,7 @@ impl Editor {
                             }
                             Mode::Command(_) => {
                                 n = match c {
-                                    '0' ... '9' => {
+                                    '0'...'9' => {
                                         unset = false;
                                         n * 10 + ((c as u8) - b'0') as usize
                                     }
@@ -100,23 +101,21 @@ impl Editor {
                         }
                     }
                     match key {
-                        Key::Null => {},
+                        Key::Null => {}
                         _ => {
-                            return Inst(
-                                if unset {
-                                    Parameter::Null
-                                } else {
-                                    Parameter::Int(n)
-                                },
-                                Cmd { key: key }
-                            );
-                        },
+                            return Inst(if unset {
+                                            Parameter::Null
+                                        } else {
+                                            Parameter::Int(n)
+                                        },
+                                        Cmd { key: key });
+                        }
                     }
-                },
+                }
                 EventOption::Quit(_) => {
                     return Inst(Parameter::Null, Cmd { key: Key::Quit });
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
 

@@ -26,12 +26,7 @@ impl KeyState {
     /// Feed the keystate
     #[cfg(feature = "orbital")]
     pub fn feed(&mut self, k: KeyEvent) -> Option<Key> {
-        use orbital::{
-            K_ALT,
-            K_CTRL,
-            K_LEFT_SHIFT,
-            K_RIGHT_SHIFT
-        };
+        use orbital::{K_ALT, K_CTRL, K_LEFT_SHIFT, K_RIGHT_SHIFT};
 
         let c = k.character;
         match c {
