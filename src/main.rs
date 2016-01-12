@@ -27,7 +27,6 @@ pub mod delete;
 pub mod exec;
 pub mod invert;
 
-#[no_mangle]
-pub fn main() {
+fn main() {
     editor::Editor::init();
 }
