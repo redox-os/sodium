@@ -76,11 +76,15 @@ pub struct SplitBuffer {
 
 impl SplitBuffer {
     fn cur_line(&self) -> &String {
-        self.before.last().expect("Unexpected condition (the first part of the split buffer is empty)")
+        self.before
+            .last()
+            .expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
     fn cur_line_mut(&mut self) -> &mut String {
-        self.before.last_mut().expect("Unexpected condition (the first part of the split buffer is empty)")
+        self.before
+            .last_mut()
+            .expect("Unexpected condition (the first part of the split buffer is empty)")
     }
 
     fn up(&mut self) {
@@ -98,7 +102,6 @@ impl SplitBuffer {
     fn pop_line(&mut self) -> String {
         self.before.pop().expect("Unexpected condition (Popped the last line)")
     }
-
 }
 
 impl<'a> Buffer<'a> for SplitBuffer {
@@ -216,7 +219,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
             for c in ln.chars() {
                 match c {
                     '\t' | ' ' => len += 1,
-                    _          => break,
+                    _ => break,
                 }
             }
             &ln[..len]
@@ -235,7 +238,6 @@ impl Index<usize> for SplitBuffer {
     }
 }
 impl IndexMut<usize> for SplitBuffer {
-
     fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut String {
         #[cfg(debug)]
         fn debug_check(b: &mut SplitBuffer) {

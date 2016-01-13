@@ -138,7 +138,7 @@ impl Editor {
     /// Get n'th next ocurrence of a given charecter (relatively to the cursor)
     pub fn next_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let mut x  = self.x();
+        let mut x = self.x();
 
         for ch in self.buffer[self.y()].chars().skip(x) {
             if dn == n {
@@ -157,8 +157,8 @@ impl Editor {
     /// Get n'th previous ocurrence of a given charecter (relatively to the cursor)
     pub fn previous_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let mut x  = self.x();
-        let y      = self.y();
+        let mut x = self.x();
+        let y = self.y();
 
         for ch in self.buffer[y].chars().rev().skip(self.buffer[y].len() - x) {
             if dn == n {
@@ -173,6 +173,4 @@ impl Editor {
 
         None
     }
-
-
 }

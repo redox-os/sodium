@@ -1,14 +1,5 @@
 #[cfg(feature = "orbital")]
-use orbital::{
-    KeyEvent,
-    K_BKSP,
-    K_LEFT,
-    K_RIGHT,
-    K_UP,
-    K_DOWN,
-    K_TAB,
-    K_ESC,
-};
+use orbital::{KeyEvent, K_BKSP, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_TAB, K_ESC};
 
 #[derive(Copy, Clone, PartialEq)]
 /// A key
@@ -31,20 +22,24 @@ impl Key {
     #[cfg(feature = "orbital")]
     pub fn from_event(k: KeyEvent) -> Key {
         match k.character {
-            '\0' => match k.scancode {
-                s if k.pressed => match s {
-                    K_BKSP => Key::Backspace,
-                    K_LEFT => Key::Left,
-                    K_RIGHT => Key::Right,
-                    K_UP => Key::Up,
-                    K_DOWN => Key::Down,
-                    K_TAB => Key::Tab,
-                    K_ESC => Key::Escape,
-                    _ => Key::Unknown(s),
+            '\0' => {
+                match k.scancode {
+                    s if k.pressed => {
+                        match s {
+                            K_BKSP => Key::Backspace,
+                            K_LEFT => Key::Left,
+                            K_RIGHT => Key::Right,
+                            K_UP => Key::Up,
+                            K_DOWN => Key::Down,
+                            K_TAB => Key::Tab,
+                            K_ESC => Key::Escape,
+                            _ => Key::Unknown(s),
 
-                },
-                _ => Key::Null,
-            },
+                        }
+                    }
+                    _ => Key::Null,
+                }
+            }
             c => Key::Char(c),
         }
     }

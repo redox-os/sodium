@@ -25,7 +25,8 @@ impl Mode {
             Command(Normal) => "Normal",
             Primitive(Insert(_)) => "Insert",
             Primitive(Prompt) => "Prompt",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 

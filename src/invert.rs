@@ -43,10 +43,12 @@ pub fn invert(c: char) -> char {
         '}' => '{',
         '!' => '?',
         '?' => '!',
-        a => if a.is_lowercase() {
-            a.to_uppercase().next().unwrap_or('?')
-        } else {
-            a.to_lowercase().next().unwrap_or('?')
-        },
+        a => {
+            if a.is_lowercase() {
+                a.to_uppercase().next().unwrap_or('?')
+            } else {
+                a.to_lowercase().next().unwrap_or('?')
+            }
+        }
     }
 }
