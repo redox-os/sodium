@@ -52,4 +52,15 @@ impl Editor {
     pub fn next_cursor(&mut self) {
         self.current_cursor = (self.current_cursor.wrapping_add(1)) % (self.cursors.len() as u8);
     }
+
+    /// Go to previous cursor
+    #[inline]
+    pub fn prev_cursor(&mut self) {
+        if self.current_cursor != 0 {
+            self.current_cursor -= 1;
+        }
+        else {
+            self.current_cursor = self.cursors.len() as u8;
+        }
+    }
 }

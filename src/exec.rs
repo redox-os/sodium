@@ -174,7 +174,8 @@ impl Editor {
                         // Branch cursor
                         if self.cursors.len() < 255 {
                             let cursor = self.cursor().clone();
-                            self.cursors.push(cursor);
+                            self.cursors.insert(self.current_cursor as usize, cursor);
+                            self.next_cursor();
                         }
                         else {
                             self.status_bar.msg = format!("At max 255 cursors");
@@ -184,7 +185,7 @@ impl Editor {
                         // Delete cursor
                         if self.cursors.len() > 1 {
                             self.cursors.remove(self.current_cursor as usize);
-                            self.next_cursor();
+                            self.prev_cursor();
                         }
                         else {
                             self.status_bar.msg = format!("No other cursors!");
