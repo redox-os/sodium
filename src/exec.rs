@@ -172,13 +172,23 @@ impl Editor {
                     }
                     Char('b') => {
                         // Branch cursor
-                        let cursor = self.cursor().clone();
-                        self.cursors.push(cursor);
+                        if self.cursors.len() < 255 {
+                            let cursor = self.cursor().clone();
+                            self.cursors.push(cursor);
+                        }
+                        else {
+                            self.status_bar.msg = format!("At max 255 cursors");
+                        }
                     }
                     Char('B') => {
                         // Delete cursor
-                        self.cursors.remove(self.current_cursor as usize);
-                        self.next_cursor();
+                        if self.cursors.len() > 1 {
+                            self.cursors.remove(self.current_cursor as usize);
+                            self.next_cursor();
+                        }
+                        else {
+                            self.status_bar.msg = format!("No other cursors!");
+                        }
                     }
                     Char('t') => {
                         let ch = self.get_char();
