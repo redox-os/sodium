@@ -20,7 +20,7 @@ pub trait Slice<'a> : 'a + ToString
     fn as_str(&self) -> &str;
 
     /// New empty
-    fn new_empty() -> &'static Self;
+    fn new_empty() -> &'a Self;
 }
 
 impl<'a> Slice<'a> for str {
@@ -32,13 +32,13 @@ impl<'a> Slice<'a> for str {
         self
     }
 
-    fn new_empty() -> &'static str {
+    fn new_empty() -> &'a str {
         ""
     }
 }
 
 
-pub trait Line<'a> : ToString + Add<&'a str, Output = Self> + From<&'a str> {
+pub trait Line<'a> : 'a + ToString + Add<&'a str, Output = Self> + From<&'a str> {
     // TODO: Try to remove these lifetimes
     /// The characters iterator type
     type Iter: Iterator<Item = char> + DoubleEndedIterator + 'a;
@@ -79,7 +79,7 @@ pub trait Line<'a> : ToString + Add<&'a str, Output = Self> + From<&'a str> {
     fn clear(&mut self);
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
-    fn get_indent(&'a self) -> &Self::Slice;
+    fn get_indent(&self) -> &Self::Slice;
 }
 
 
@@ -128,7 +128,7 @@ impl<'a> Line<'a> for String {
         self.clear();
     }
 
-    fn get_indent(&'a self) -> &str {
+    fn get_indent(&self) -> &str {
         let mut len = 0;
         for c in self.chars() {
             match c {
@@ -142,7 +142,7 @@ impl<'a> Line<'a> for String {
 
 // TODO Take slices instead of Self::Line!
 /// A buffer structure
-pub trait Buffer<'a> {
+pub trait Buffer<'a> : 'a {
     type Line: 'a + Line<'a>;
     type LineIter: Iterator<Item = &'a Self::Line>;
 

@@ -73,9 +73,10 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
                     }
                     Char('o') => {
-                        let y = self.y();
+                        let y  = self.y();
+                        let ln = self.buffer.get_line(y);
                         let ind = if self.options.autoindent {
-                            self.buffer.get_line(y).get_indent()
+                            ln.get_indent()
                         } else {
                             <B::Line as Line>::Slice::new_empty()
                         };

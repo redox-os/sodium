@@ -1,5 +1,6 @@
 #![feature(stmt_expr_attributes)]
 #![feature(collections_range)]
+#![feature(type_ascription)]
 
 #[cfg(feature = "orbital")]
 extern crate orbital;
@@ -32,5 +33,8 @@ pub mod invert;
 
 #[no_mangle]
 pub fn main() {
-    editor::Editor::init();
+    use editor::Editor;
+    use buffer::SplitBuffer;
+
+    Editor::<SplitBuffer>::init();
 }
