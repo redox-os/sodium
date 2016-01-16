@@ -21,4 +21,16 @@ impl Editor {
 
         self.hint();
     }
+
+    #[inline]
+    pub fn backspace(&mut self) {
+        let previous = self.previous(1);
+        if let Some(p) = previous {
+            self.goto(p);
+            self.delete();
+        }
+        else {
+            self.status_bar.msg = format!("Can't delete file start");
+        }
+    }
 }

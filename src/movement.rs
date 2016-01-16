@@ -9,7 +9,8 @@ impl Editor {
         self.cursor_mut().x = x;
     }
 
-    /// Get the previous position, i.e. the position before the cursor (*not* left to the cursor)
+    /// Get the previous position, i.e. the position before the cursor (*not* left to the cursor).
+    /// Includes newline positions.
     #[inline]
     pub fn previous(&self, n: usize) -> Option<(usize, usize)> {
         self.before(n, self.pos())
@@ -53,7 +54,8 @@ impl Editor {
         // }
     }
 
-    /// Get the position before a given position, i.e. a generalisation .before()
+    /// Get the position before a given position, i.e. a generalisation .before(). Includes
+    /// newline positions.
     #[inline]
     pub fn before(&self, n: usize, (x, y): (usize, usize)) -> Option<(usize, usize)> {
         if x >= n {
@@ -62,7 +64,7 @@ impl Editor {
             if y == 0 {
                 None
             } else {
-                let mut mv = n - x;
+                let mut mv = n - x - 1;
                 let mut ry = y - 1;
 
                 loop {

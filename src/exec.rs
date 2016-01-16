@@ -118,13 +118,7 @@ impl Editor {
                         mov = true;
                     }
                     Char('x') => self.delete(),
-                    Char('X') => {
-                        let previous = self.previous(1);
-                        if let Some(p) = previous {
-                            self.goto(p);
-                        }
-                        self.delete();
-                    }
+                    Char('X') => self.backspace(),
                     Char('L') => {
                         let ln_end = (self.buffer[self.y()].len(), self.y());
                         self.goto(ln_end);
