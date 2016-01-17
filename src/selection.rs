@@ -9,7 +9,7 @@ impl Editor {
     /// motion's position are removed.
     pub fn remove_rb<'a>(&mut self, (x, y): (isize, isize)) {
         if y == self.y() as isize {
-            let (x, y) = self.bound((x as usize, y as usize));
+            let (x, y) = self.bound((x as usize, y as usize), true);
             // Single line mode
             let (a, b) = if self.x() > x {
                 (x, self.x())
@@ -18,7 +18,7 @@ impl Editor {
             };
             for _ in self.buffer[y].drain(a..b) {}
         } else {
-            let (_, y) = self.bound((x as usize, y as usize));
+            let (_, y) = self.bound((x as usize, y as usize), true);
             // Full line mode
             let (a, b) = if self.y() < y {
                 (self.y(), y)

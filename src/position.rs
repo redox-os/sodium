@@ -11,7 +11,7 @@ impl Editor {
     #[inline]
     pub fn pos(&self) -> (usize, usize) {
         let cursor = self.cursor();
-        self.bound((cursor.x, cursor.y))
+        self.bound((cursor.x, cursor.y), false)
     }
 
     #[inline]
@@ -28,7 +28,7 @@ impl Editor {
 
     /// Convert a position value to a bounded position value
     #[inline]
-    pub fn bound(&self, (x, mut y): (usize, usize)) -> (usize, usize) {
+    pub fn bound(&self, (x, mut y): (usize, usize), tight: bool) -> (usize, usize) {
 
 
         y = if y >= self.buffer.len() {
@@ -37,7 +37,7 @@ impl Editor {
             y
         };
 
-        let ln = self.buffer[y].len();
+        let ln = self.buffer[y].len() + if tight {0} else {1};
         if x >= ln {
             if ln == 0 {
                 (0, y)
@@ -52,9 +52,8 @@ impl Editor {
     /// Bound horizontally, i.e. don't change the vertical axis only make sure that the horizontal
     /// axis is bounded.
     #[inline]
-    pub fn bound_hor(&self, (x, y): (usize, usize)) -> (usize, usize) {
-
-        (self.bound((x, y)).0, y)
+    pub fn bound_hor(&self, (x, y): (usize, usize), tight: bool) -> (usize, usize) {
+        (self.bound((x, y), tight).0, y)
     }
     /// Bound vertically, i.e. don't change the horizontal axis only make sure that the vertical
     /// axis is bounded.
