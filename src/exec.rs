@@ -27,6 +27,10 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
             match mode {
                 Primitive(Prompt) => self.prompt = String::new(),
+                Primitive(Insert(_)) => {
+                    let left = self.left(1);
+                    self.goto(left);
+                }
                 _ => {}
             }
             self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
@@ -66,9 +70,11 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
                     }
                     Char('a') => {
+                        let pos = self.right(1, false);
+                        self.goto( pos );
                         self.cursor_mut().mode =
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                mode: InsertMode::Append,
+                                mode: InsertMode::Insert,
                             }));
 
                     }
@@ -104,7 +110,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                         mov = true;
                     }
                     Char('l') => {
-                        let right = self.right(n);
+                        let right = self.right(n, true);
                         self.goto(right);
                         mov = true;
                     }
@@ -118,13 +124,15 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                         self.goto(up);
                         mov = true;
                     }
-                    Char('x') => self.delete(),
-                    Char('X') => {
-                        let previous = self.previous(1);
-                        if let Some(p) = previous {
-                            self.goto(p);
-                        }
+                    Char('x') => {
                         self.delete();
+                        let bounded = self.bound(self.pos(), true);
+                        self.goto(bounded);
+                    }
+                    Char('X') => {
+                        self.backspace();
+                        let bounded = self.bound(self.pos(), true);
+                        self.goto(bounded);
                     }
                     Char('L') => {
                         let ln_end = (self.buffer.get_line(self.y()).len(), self.y());
@@ -173,13 +181,24 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                     }
                     Char('b') => {
                         // Branch cursor
-                        let cursor = self.cursor().clone();
-                        self.cursors.push(cursor);
+                        if self.cursors.len() < 255 {
+                            let cursor = self.cursor().clone();
+                            self.cursors.insert(self.current_cursor as usize, cursor);
+                            self.next_cursor();
+                        }
+                        else {
+                            self.status_bar.msg = format!("At max 255 cursors");
+                        }
                     }
                     Char('B') => {
                         // Delete cursor
-                        self.cursors.remove(self.current_cursor as usize);
-                        self.next_cursor();
+                        if self.cursors.len() > 1 {
+                            self.cursors.remove(self.current_cursor as usize);
+                            self.prev_cursor();
+                        }
+                        else {
+                            self.status_bar.msg = format!("No other cursors!");
+                        }
                     }
                     Char('t') => {
                         let ch = self.get_char();

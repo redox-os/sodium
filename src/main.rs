@@ -31,7 +31,6 @@ pub mod delete;
 pub mod exec;
 pub mod invert;
 
-#[no_mangle]
 pub fn main() {
     use editor::Editor;
     use buffer::SplitBuffer;

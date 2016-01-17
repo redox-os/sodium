@@ -1,14 +1,15 @@
 use editor::Editor;
 use redraw::RedrawTask;
 use buffer::{Buffer, Line};
+use cursor::Cursor;
 
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Delete a character
     #[inline]
-    pub fn delete(&'a mut self) {
-        let (x, y) = self.pos();
-        if x == 0 {
-            if y != 0 {
+    pub fn delete(&mut self) {
+        let &Cursor{ x, y, ..} = self.cursor();
+        if x == self.buffer.get_line(y).len() {
+            if y + 1 < self.buffer.len() {
                 let s = self.buffer.remove_line(y);
                 self.buffer.get_line_mut(y - 1).push_slice(s.as_slice());
                 let len = self.buffer.get_line(y - 1).len();
@@ -21,5 +22,16 @@ impl<'a, B: Buffer<'a>> Editor<B> {
         }
 
         self.hint();
+    }
+
+    #[inline]
+    pub fn backspace(&mut self) {
+        let previous = self.previous(1);
+        if let Some(p) = previous {
+            self.goto(p);
+            self.delete();
+        } else {
+            self.status_bar.msg = "Can't delete file start".to_owned();
+        }
     }
 }

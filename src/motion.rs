@@ -19,7 +19,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
         match cmd.key {
             Char('h') => Some(self.left(n.d())),
-            Char('l') => Some(self.right(n.d())),
+            Char('l') => Some(self.right(n.d(), true)),
             Char('j') => Some(self.down(n.d())),
             Char('k') => Some(self.up(n.d())),
             Char('g') => Some((0, n.or(1) - 1)),
