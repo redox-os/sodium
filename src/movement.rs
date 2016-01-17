@@ -86,8 +86,8 @@ impl Editor {
 
     /// Get the position of the character right to the cursor (horizontally bounded)
     #[inline]
-    pub fn right(&self, n: usize) -> (usize, usize) {
-        self.bound_hor((self.x() + n, self.y()))
+    pub fn right(&self, n: usize, tight: bool) -> (usize, usize) {
+        self.bound_hor((self.x() + n, self.y()), tight)
     }
     /// Get the position of the character right to the cursor (unbounded)
     #[inline]

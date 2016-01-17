@@ -167,9 +167,6 @@ impl Editor {
 
         let w = self.window.width();
 
-        pos_x += self.delta();
-
-
         if self.options.line_marker {
             self.window.rect(0,
                              (pos_y - self.scroll_y) as i32 * 16,
