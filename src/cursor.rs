@@ -28,7 +28,7 @@ impl Cursor {
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Get the character under the cursor
     #[inline]
-    pub fn current(&'a self) -> Option<char> {
+    pub fn current(&self) -> Option<char> {
         let (x, y) = self.pos();
         match self.buffer.get_line(y).chars().nth(x) {
             Some(c) => Some(c),
@@ -38,25 +38,25 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
     /// Get the current cursor
     #[inline]
-    pub fn cursor(&'a self) -> &Cursor {
+    pub fn cursor(&self) -> &Cursor {
         self.cursors.get(self.current_cursor as usize).unwrap()
     }
 
     /// Get the current cursor mutably
     #[inline]
-    pub fn cursor_mut(&'a mut self) -> &mut Cursor {
+    pub fn cursor_mut(&mut self) -> &mut Cursor {
         self.cursors.get_mut(self.current_cursor as usize).unwrap()
     }
 
     /// Go to next cursor
     #[inline]
-    pub fn next_cursor(&'a mut self) {
+    pub fn next_cursor(&mut self) {
         self.current_cursor = (self.current_cursor.wrapping_add(1)) % (self.cursors.len() as u8);
     }
 
     /// Go to previous cursor
     #[inline]
-    pub fn prev_cursor(&'a mut self) {
+    pub fn prev_cursor(&mut self) {
         if self.current_cursor != 0 {
             self.current_cursor -= 1;
         }

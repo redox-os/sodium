@@ -40,7 +40,7 @@ impl Parameter {
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Get the next character input. Useful for commands taking a character as post-parameter,
     /// such as r (replace).
-    pub fn get_char(&'a mut self) -> char {
+    pub fn get_char(&mut self) -> char {
         #[cfg(feature = "orbital")]
         loop {
             match self.window
@@ -61,7 +61,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
     /// Get the next instruction, i.e. the next input of a command together with a numeral
     /// parameter.
-    pub fn get_inst(&'a mut self) -> Inst {
+    pub fn get_inst(&mut self) -> Inst {
         let mut n = 0;
         let mut unset = true;
 

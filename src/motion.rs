@@ -11,7 +11,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     /// movements. These are useful for commands which takes a motion as post-parameter, such as d.
     /// d deletes the text given by the motion following. Other commands can make use of motions,
     /// using this method.
-    pub fn to_motion(&'a mut self, Inst(n, cmd): Inst) -> Option<(usize, usize)> {
+    pub fn to_motion(&mut self, Inst(n, cmd): Inst) -> Option<(usize, usize)> {
         use key::Key::*;
 
         let x = self.x();
@@ -60,7 +60,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     /// Like to_motion() but does not bound to the text. Therefore it returns an isize, and in some
     /// cases it's a position which is out of bounds. This is useful when commands want to mesure
     /// the relative movement over the movement.
-    pub fn to_motion_unbounded(&'a mut self, Inst(n, cmd): Inst) -> Option<(isize, isize)> {
+    pub fn to_motion_unbounded(&mut self, Inst(n, cmd): Inst) -> Option<(isize, isize)> {
         use key::Key::*;
 
         let x = self.x();

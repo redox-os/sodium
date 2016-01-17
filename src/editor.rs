@@ -37,12 +37,12 @@ pub struct Editor<B> {
     pub redraw_task: RedrawTask,
 }
 
-impl<'a, B: Buffer<'a> + 'a> Editor<B> {
+impl<'a, B: Buffer<'a>> Editor<B> {
     /// Create new default state editor
     pub fn init() {
 
         #[cfg(feature = "orbital")]
-        let window = *Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
+        let window = Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
 
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
@@ -51,7 +51,7 @@ impl<'a, B: Buffer<'a> + 'a> Editor<B> {
             buffer: B::new(),
             scroll_x: 0,
             scroll_y: 0,
-            window: window, // ORBITAL SPECIFIC!
+            window: *window, // ORBITAL SPECIFIC!
             status_bar: StatusBar::new(),
             prompt: String::new(),
             options: Options::new(),

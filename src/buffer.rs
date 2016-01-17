@@ -153,10 +153,10 @@ pub trait Buffer<'a> : 'a {
     fn from_str(s: &str) -> Self;
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&'a self, n: usize) -> &'a Self::Line;
+    fn get_line(&self, n: usize) -> &Self::Line;
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&'a mut self, n: usize) -> &'a mut Self::Line;
+    fn get_line_mut(&mut self, n: usize) -> &mut Self::Line;
 
     /// Remove the nth line and return it. Panics on out of bound.
     fn remove_line(&mut self, n: usize) -> Self::Line;
@@ -177,7 +177,7 @@ pub trait Buffer<'a> : 'a {
     fn len(&self) -> usize;
 
     /// Get an iterator over the lines in the buffer
-    fn lines(&'a self) -> Self::LineIter;
+    fn lines<'b: 'a>(&'b self) -> Self::LineIter;
 
     /// Insert a newline at a given point (yields the indentation of the previous line)
     fn insert_newline(&mut self, x: usize, y: usize, autoindent: bool) -> usize;
@@ -247,7 +247,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Get the nth line in the buffer by option reference
-    fn get_line(&'a self, n: usize) -> &'a String {
+    fn get_line(&self, n: usize) -> &String {
         if n < self.before.len() {
             &self.before[n]
         } else if n < self.len() {
@@ -259,7 +259,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Get the nth line in the buffer by optional mutable reference
-    fn get_line_mut(&'a mut self, n: usize) -> &'a mut String {
+    fn get_line_mut(&mut self, n: usize) -> &mut String {
         #[cfg(debug)]
         fn debug_check(b: &mut B) {
             if b._hinted_since_edit {
@@ -339,7 +339,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     /// Get an iterator over the lines in the buffer
-    fn lines(&'a self) -> SplitBufIter<'a> {
+    fn lines<'b: 'a>(&'b self) -> SplitBufIter<'b> {
         SplitBufIter {
             buffer: self,
             line: 0,

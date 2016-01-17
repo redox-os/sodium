@@ -2,7 +2,7 @@ use editor::Editor;
 use buffer::{Buffer, Line};
 
 impl<'a, B: Buffer<'a>> Editor<B> {
-    pub fn invert_chars(&'a mut self, n: usize) {
+    pub fn invert_chars(&mut self, n: usize) {
         for _ in 0..n {
             let (x, y) = self.pos();
             let current = self.current();

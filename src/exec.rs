@@ -11,7 +11,7 @@ use std::iter::FromIterator;
 // TODO: Move the command definitions outta here
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Execute an instruction
-    pub fn exec(&'a mut self, Inst(para, cmd): Inst) {
+    pub fn exec(&mut self, Inst(para, cmd): Inst) {
         use key::Key::*;
         use mode::Mode::*;
         use mode::PrimitiveMode::*;
