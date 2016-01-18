@@ -7,7 +7,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     /// the lines from the current one to the one defined by the motion are removed. If the motion
     /// defines a position on the same line, only the characters from the current position to the
     /// motion's position are removed.
-    pub fn remove_rb(&mut self, (x, y): (isize, isize)) {
+    pub fn remove_rb<'b: 'a>(&'b mut self, (x, y): (isize, isize)) {
         if y == self.y() as isize {
             let (x, y) = self.bound((x as usize, y as usize), true);
             // Single line mode

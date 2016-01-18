@@ -159,7 +159,7 @@ mod terminal {
 #[cfg(feature = "orbital")]
 impl<'a, B: Buffer<'a>> Editor<B> {
     /// Redraw the window
-    pub fn redraw(&mut self) {
+    pub fn redraw<'b: 'a>(&'b mut self) {
         // I was here -- bug
 
         // TODO: Only draw when relevant for the window

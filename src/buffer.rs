@@ -66,6 +66,9 @@ pub trait Line<'a> : 'a + ToString + Add<&'a str, Output = Self> + From<&'a str>
     /// Removes a character and returns it
     fn remove(&mut self, idx: usize) -> char;
 
+    /// Set char
+    fn set_char(&mut self, idx: usize, ch: char);
+
     /// Push a string to the end of the line
     fn push_slice(&mut self, s: &Self::Slice);
 
@@ -110,6 +113,12 @@ impl<'a> Line<'a> for String {
 
     fn remove(&mut self, idx: usize) -> char {
         String::remove(self, idx)
+    }
+
+    fn set_char(&mut self, idx: usize, ch: char) {
+        // TODO: Performance
+        self.remove(idx);
+        self.insert(idx, ch);
     }
 
     fn push_slice(&mut self, s: &str) {
@@ -347,13 +356,18 @@ impl<'a> Buffer<'a> for SplitBuffer {
     }
 
     fn insert_newline(&mut self, x: usize, y: usize, autoindent: bool) -> usize {
-        let slice = self.get_line(y).as_slice();
+        let first_part;
+        let second_part;
 
-        // TODO Is this efficient?
-        // TODO Make RangeTo work
-        // (instead of `0..`)
-        let first_part  = slice[..x].to_string();
-        let second_part = slice[x..].to_string();
+        {
+            let slice = self.get_line(y).as_slice();
+
+            // TODO Is this efficient?
+            // TODO Make RangeTo work
+            // (instead of `0..`)
+            first_part  = slice[..x].to_owned();
+            second_part = slice[x..].to_owned();
+        }
 
         *self.get_line_mut(y) = first_part.as_str().into();
 
