@@ -108,7 +108,7 @@ impl<'a> Line<'a> for String {
     }
 
     fn as_slice_mut(&mut self) -> &mut Self::Slice {
-        &mut self
+        self
     }
 
     fn chars(&self) -> Chars<'a> {
@@ -191,32 +191,37 @@ pub trait Buffer<'a> : 'a {
 
     /// Insert a newline at a given point (yields the indentation of the previous line)
     fn insert_newline<'b: 'a>(&'b mut self, x: usize, y: usize, autoindent: bool) -> usize {
-        let first_part;
-        let second_part;
+        // TODO { Shitty code
+        let first_part: Self::Line;
+        let second_part: Self::Line;
 
-        let slice = self.get_line(y).as_slice();
+        {
+            let slice = self.get_line(y).as_slice();
 
-        // TODO Is this efficient?
-        // TODO Make RangeTo work
-        // (instead of `0..`)
-        // TODO why the hell don't half ranges works
-        first_part  = &slice[0..x]; // Fuck you, borrowck
-        second_part = &slice[x..slice.len()]; // fuuuu
+            // TODO Is this efficient?
+            // TODO Make RangeTo work
+            // (instead of `0..`)
+            // TODO why the hell don't half ranges works
+            first_part  = slice[0..x].to_line(); // Fuck you, borrowck
+            second_part = slice[x..slice.len()].to_line(); // fuuuu
+        }
 
-        *self.get_line_mut(y) = first_part.as_str().into();
 
-        let mut nl = if autoindent {
+        *self.get_line_mut(y) = first_part;
+
+        let mut nl: Self::Line = if autoindent {
             self.get_line(y).get_indent()
         } else {
             <<Self as Buffer<'a>>::Line as Line<'a>>::Slice::new_empty()
-        };
+        }.to_line();
         let begin = nl.len();
 
-        nl.to_line::<Self::Line>().push_slice(second_part);
+        nl.push_slice(second_part.as_slice());
 
-        self.insert_line(y, nl);
+        self.insert_line(y, nl.as_slice());
 
         begin
+        // TODO: Shitty code }
     }
 }
 

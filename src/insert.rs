@@ -24,9 +24,9 @@ pub struct InsertOptions {
     pub mode: InsertMode,
 }
 
-impl<'a, B: Buffer<'a>> Editor<B> {
+impl<'a, 'b: 'a, B: Buffer<'a>> Editor<B> {
     /// Insert text under the current cursor.
-    pub fn insert(&mut self, k: Key, InsertOptions { mode }: InsertOptions) {
+    pub fn insert(&'b mut self, k: Key, InsertOptions { mode }: InsertOptions) {
         let (mut x, mut y) = self.pos();
         match mode {
             InsertMode::Insert => {
@@ -84,7 +84,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     }
 
     /// Insert a string
-    pub fn insert_str(&mut self, txt: String, opt: InsertOptions) {
+    pub fn insert_str(&'b mut self, txt: String, opt: InsertOptions) {
         for c in txt.chars() {
             self.insert(Key::Char(c), opt);
         }
