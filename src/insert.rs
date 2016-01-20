@@ -36,7 +36,7 @@ impl<'a, 'b: 'a, B: Buffer<'a>> Editor<B> {
 
                         self.redraw_task = RedrawTask::LinesAfter(y);
                         self.goto((begin, y + 1));
-                    }
+                    },
                     Key::Backspace => self.backspace(),
                     Key::Char(c) => {
                         self.buffer.get_line_mut(y).insert(x, c);
@@ -44,10 +44,10 @@ impl<'a, 'b: 'a, B: Buffer<'a>> Editor<B> {
                         self.redraw_task = RedrawTask::Lines(y..y + 1);
                         let right = self.right(1, false);
                         self.goto(right);
-                    }
-                    _ => {}
+                    },
+                    _ => {},
                 }
-            }
+            },
             InsertMode::Replace => match k {
                 Key::Char(c) => {
                     if x == self.buffer.get_line(y).len() {
@@ -75,8 +75,8 @@ impl<'a, 'b: 'a, B: Buffer<'a>> Editor<B> {
                         self.goto(p);
                     }
                     self.redraw_task = RedrawTask::Lines(y..y + 1);
-                }
-                _ => {}
+                },
+                _ => {},
             },
         }
 

@@ -43,40 +43,16 @@ impl KeyState {
                     K_LEFT_SHIFT | K_RIGHT_SHIFT => self.shift = k.pressed,
                     _ if k.pressed => {
                         return Some(Key::from_event(k));
-                    }
-                    _ => {}
+                    },
+                    _ => {},
                 }
-            }
+
+                None
+            },
             _ if k.pressed => {
-                return Some(Key::from_event(k));
-            }
-            _ => {}
+                Some(Key::from_event(k))
+            },
+            _ => None,
         }
-
-        None
-    }
-
-    #[cfg(feature = "ansi")]
-    pub fn feed(&mut self, stdin: &mut Stdin) -> Option<Key> {
-        match c {
-            '\0' => {
-                // "I once lived here" - bug
-                match k.scancode {
-                    K_ALT => self.alt = k.pressed,
-                    K_CTRL => self.ctrl = k.pressed,
-                    K_LEFT_SHIFT | K_RIGHT_SHIFT => self.shift = k.pressed,
-                    _ if k.pressed => {
-                        return Some(Key::from_event(k));
-                    }
-                    _ => {}
-                }
-            }
-            _ if k.pressed => {
-                return Some(Key::from_event(k));
-            }
-            _ => {}
-        }
-
-        None
     }
 }

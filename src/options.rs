@@ -44,7 +44,7 @@ impl Options {
             Some(x) => {
                 *x = true;
                 Ok(())
-            }
+            },
             None => Err(()),
         }
     }
@@ -54,7 +54,7 @@ impl Options {
             Some(x) => {
                 *x = false;
                 Ok(())
-            }
+            },
             None => Err(()),
         }
     }
@@ -64,9 +64,8 @@ impl Options {
             Some(x) => {
                 *x = !*x;
                 Ok(())
-            }
+            },
             None => Err(()),
         }
     }
-
 }

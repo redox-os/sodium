@@ -27,7 +27,6 @@ impl<'a, B: Buffer<'a>> Editor<B> {
             Char('L') => Some((self.buffer.get_line(y).len() - 1, y)),
             Char('H') => Some((0, y)),
             Char('t') => {
-
                 let ch = self.get_char();
 
                 if let Some(o) = self.next_ocur(ch, n.d()) {
@@ -35,9 +34,8 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                 } else {
                     None
                 }
-            }
+            },
             Char('f') => {
-
                 let ch = self.get_char();
 
                 if let Some(o) = self.previous_ocur(ch, n.d()) {
@@ -45,16 +43,16 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                 } else {
                     None
                 }
-            }
+            },
             Char(c) => {
                 self.status_bar.msg = format!("Motion not defined: '{}'", c);
                 self.redraw_status_bar();
                 None
-            }
+            },
             _ => {
                 self.status_bar.msg = format!("Motion not defined");
                 None
-            }
+            },
         }
     }
     /// Like to_motion() but does not bound to the text. Therefore it returns an isize, and in some
@@ -84,7 +82,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                 } else {
                     None
                 }
-            }
+            },
             Char('f') => {
 
                 let ch = self.get_char();
@@ -94,7 +92,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                 } else {
                     None
                 }
-            }
+            },
             _ => None,
         }
     }

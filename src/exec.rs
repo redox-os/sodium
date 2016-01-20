@@ -30,8 +30,8 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                 Primitive(Insert(_)) => {
                     let left = self.left(1);
                     self.goto(left);
-                }
-                _ => {}
+                },
+                _ => {},
             }
             self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
 
@@ -68,7 +68,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                                 mode: InsertMode::Insert,
                             }));
 
-                    }
+                    },
                     Char('a') => {
                         let pos = self.right(1, false);
                         self.goto( pos );
@@ -76,8 +76,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                                 mode: InsertMode::Insert,
                             }));
-
-                    }
+                    },
                     Char('o') => {
                         let y  = self.y();
                         let ln = self.buffer.get_line(y);
@@ -93,78 +92,78 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                                 mode: InsertMode::Insert,
                             }));
-                    }
+                    },
                     Char('h') => {
                         let left = self.left(n);
                         self.goto(left);
                         mov = true;
-                    }
+                    },
                     Char('j') => {
                         let down = self.down(n);
                         self.goto(down);
                         mov = true;
-                    }
+                    },
                     Char('k') => {
                         let up = self.up(n);
                         self.goto(up);
                         mov = true;
-                    }
+                    },
                     Char('l') => {
                         let right = self.right(n, true);
                         self.goto(right);
                         mov = true;
-                    }
+                    },
                     Char('J') => {
                         let down = self.down(15 * n);
                         self.goto(down);
                         mov = true;
-                    }
+                    },
                     Char('K') => {
                         let up = self.up(15 * n);
                         self.goto(up);
                         mov = true;
-                    }
+                    },
                     Char('x') => {
                         self.delete();
                         let bounded = self.bound(self.pos(), true);
                         self.goto(bounded);
-                    }
+                    },
                     Char('X') => {
                         self.backspace();
                         let bounded = self.bound(self.pos(), true);
                         self.goto(bounded);
-                    }
+                    },
                     Char('L') => {
                         let ln_end = (self.buffer.get_line(self.y()).len(), self.y());
                         self.goto(ln_end);
                         mov = true;
-                    }
+                    },
                     Char('H') => {
                         self.cursor_mut().x = 0;
                         mov = true;
-                    }
+                    },
                     Char('r') => {
                         let (x, y) = self.pos();
                         let c = self.get_char();
                         self.buffer.get_line_mut(y).set_char(x, c);
-                    }
+                    },
                     Char('R') => {
                         self.cursor_mut().mode =
                             Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                                 mode: InsertMode::Replace,
                             }));
-                    }
+                    },
                     Char('d') => {
                         let ins = self.get_inst();
                         if let Some(m) = self.to_motion_unbounded(ins) {
                             self.remove_rb(m);
                         }
-                    }
+                    },
                     Char('G') => {
                         let last = self.buffer.len() - 1;
                         self.goto((0, last));
                         mov = true;
-                    }
+                    },
                     Char('g') => {
                         if let Parameter::Int(n) = para {
                             self.goto((0, n - 1));
@@ -177,7 +176,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             }
                         }
 
-                    }
+                    },
                     Char('b') => {
                         // Branch cursor
                         if self.cursors.len() < 255 {
@@ -188,7 +187,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                         else {
                             self.status_bar.msg = format!("At max 255 cursors");
                         }
-                    }
+                    },
                     Char('B') => {
                         // Delete cursor
                         if self.cursors.len() > 1 {
@@ -198,7 +197,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                         else {
                             self.status_bar.msg = format!("No other cursors!");
                         }
-                    }
+                    },
                     Char('t') => {
                         let ch = self.get_char();
 
@@ -208,7 +207,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             self.goto((p, y));
                             mov = true;
                         }
-                    }
+                    },
                     Char('f') => {
                         let ch = self.get_char();
 
@@ -218,13 +217,13 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             self.goto((p, y));
                             mov = true;
                         }
-                    }
+                    },
                     Char(';') => {
                         self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt);
-                    }
+                    },
                     Char(' ') => {
                         self.next_cursor();
-                    }
+                    },
                     Char('z') => {
                         let Inst(param, cmd) = self.get_inst();
                         match param {
@@ -239,26 +238,26 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             }
                         }
                         self.redraw_task = RedrawTask::Full;
-                    }
+                    },
                     Char('Z') => {
                         self.scroll_y = self.y() - 3;
                         self.redraw_task = RedrawTask::Full;
-                    }
+                    },
                     Char('~') => {
                         self.invert_chars(n);
-                    }
+                    },
                     Char(c) => {
                         self.status_bar.msg = format!("Unknown command: {}", c);
                         self.redraw_task = RedrawTask::StatusBar;
-                    }
+                    },
                     _ => {
                         self.status_bar.msg = format!("Unknown command");
                         self.redraw_task = RedrawTask::StatusBar;
-                    }
+                    },
                 },
                 Primitive(Insert(opt)) => {
                     self.insert(cmd.key, opt);
-                }
+                },
                 Primitive(Prompt) => {
                     match cmd.key {
                         Char('\n') => {
@@ -267,15 +266,15 @@ impl<'a, B: Buffer<'a>> Editor<B> {
 
                             self.invoke(cmd);
                             self.prompt = String::new();
-                        }
+                        },
                         Backspace => {
                             self.prompt.pop();
-                        }
+                        },
                         Char(c) => self.prompt.push(c),
-                        _ => {}
+                        _ => {},
                     }
                     self.redraw_task = RedrawTask::StatusBar;
-                }
+                },
             }
         }
         if mov {

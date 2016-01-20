@@ -83,7 +83,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                         match self.cursor().mode {
                             Mode::Primitive(_) => {
                                 key = k;
-                            }
+                            },
                             Mode::Command(_) => {
                                 n = match c {
                                     '0' ... '9' => {
@@ -96,8 +96,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                                         n
                                     }
                                 };
-                            }
-
+                            },
                         }
                     }
                     match key {
