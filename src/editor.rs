@@ -38,14 +38,14 @@ pub struct Editor<B> {
 }
 
 impl<'a, B: Buffer<'a>> Editor<B> {
-    /// Create new default state editor
-    pub fn init() {
+    /// Create a new default `Editor`
+    pub fn new() -> Self {
 
         #[cfg(feature = "orbital")]
         let window = Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
 
         #[cfg(feature = "orbital")]
-        let mut editor = Editor {
+        let e = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
             buffer: B::new(),
@@ -60,7 +60,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
         };
 
         #[cfg(not(feature = "orbital"))]
-        let mut editor = Editor {
+        let e = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
             buffer: B::new(),
@@ -72,6 +72,14 @@ impl<'a, B: Buffer<'a>> Editor<B> {
             key_state: KeyState::new(),
             redraw_task: RedrawTask::Null,
         };
+
+        e
+    }
+
+    /// Create new default state editor
+    pub fn init() {
+
+        let editor = Self::new();
 
         debugln!(editor, "Starting Sodium");
 

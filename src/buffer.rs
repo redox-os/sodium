@@ -150,7 +150,6 @@ impl<'a> Line<'a> for String {
     }
 }
 
-// TODO Take slices instead of Self::Line!
 /// A buffer structure
 pub trait Buffer<'a> : 'a {
     type Line: 'a + Line<'a>;
