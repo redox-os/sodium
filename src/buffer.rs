@@ -21,6 +21,11 @@ pub trait Slice<'a> : 'a + ToString
 
     /// New empty
     fn new_empty() -> &'a Self;
+
+    /// To line
+    fn to_line<T: Line<'a, Slice = Self>>(&self) -> T {
+        T::from_slice(self)
+    }
 }
 
 impl<'a> Slice<'a> for str {
@@ -82,7 +87,16 @@ pub trait Line<'a> : 'a + ToString + Add<&'a str, Output = Self> + From<&'a str>
     fn clear(&mut self);
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
-    fn get_indent(&self) -> &Self::Slice;
+    fn get_indent(&self) -> &Self::Slice {
+        let mut len = 0;
+        for c in self.chars() {
+            match c {
+                '\t' | ' ' => len += 1,
+                _          => break,
+            }
+        }
+        &self.as_slice()[..len]
+    }
 }
 
 
@@ -136,17 +150,6 @@ impl<'a> Line<'a> for String {
     fn clear(&mut self) {
         self.clear();
     }
-
-    fn get_indent(&self) -> &str {
-        let mut len = 0;
-        for c in self.chars() {
-            match c {
-                '\t' | ' ' => len += 1,
-                _          => break,
-            }
-        }
-        &self[..len]
-    }
 }
 
 // TODO Take slices instead of Self::Line!
@@ -189,7 +192,33 @@ pub trait Buffer<'a> : 'a {
     fn lines<'b: 'a>(&'b self) -> Self::LineIter;
 
     /// Insert a newline at a given point (yields the indentation of the previous line)
-    fn insert_newline(&mut self, x: usize, y: usize, autoindent: bool) -> usize;
+    fn insert_newline<'b: 'a>(&'b mut self, x: usize, y: usize, autoindent: bool) -> usize {
+        let first_part;
+        let second_part;
+
+        let slice = self.get_line(y).as_slice();
+
+        // TODO Is this efficient?
+        // TODO Make RangeTo work
+        // (instead of `0..`)
+        first_part  = &slice[x..]; // Fuck you, borrowck
+        second_part = &slice[x..];
+
+        *self.get_line_mut(y) = first_part.as_str().into();
+
+        let mut nl = if autoindent {
+            self.get_line(y).get_indent()
+        } else {
+            <<Self as Buffer<'a>>::Line as Line<'a>>::Slice::new_empty()
+        };
+        let begin = nl.len();
+
+        nl.to_line::<Self::Line>().push_slice(second_part);
+
+        self.insert_line(y, nl);
+
+        begin
+    }
 }
 
 
@@ -353,34 +382,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
             buffer: self,
             line: 0,
         }
-    }
-
-    fn insert_newline(&mut self, x: usize, y: usize, autoindent: bool) -> usize {
-        let first_part;
-        let second_part;
-
-        {
-            let slice = self.get_line(y).as_slice();
-
-            // TODO Is this efficient?
-            // TODO Make RangeTo work
-            // (instead of `0..`)
-            first_part  = slice[..x].to_owned();
-            second_part = slice[x..].to_owned();
-        }
-
-        *self.get_line_mut(y) = first_part.as_str().into();
-
-        let nl = if autoindent {
-            self.get_line(y).get_indent()
-        } else {
-            ""
-        }.to_string();
-        let begin = nl.len();
-
-        self.insert_line(y, &(nl + &second_part));
-
-        begin
     }
 }
 
