@@ -5,14 +5,12 @@ use std::string::Drain;
 use collections::range::RangeArgument;
 
 pub trait Slice<'a> : 'a + ToString
-                      + Index<Range<usize>, Output = Self>
-                      + Index<RangeFull, Output = Self>
                       + Index<RangeTo<usize>, Output = Self>
-                      + Index<RangeFrom<usize>, Output = Self>
-                      + IndexMut<Range<usize>, Output = Self>
-                      + IndexMut<RangeFull, Output = Self>
                       + IndexMut<RangeTo<usize>, Output = Self>
-                      + IndexMut<RangeFrom<usize>, Output = Self> {
+                      + Index<RangeFrom<usize>, Output = Self>
+                      + IndexMut<RangeFrom<usize>, Output = Self>
+                      + Index<Range<usize>, Output = Self>
+                      + IndexMut<Range<usize>, Output = Self> {
     /// Get the length of the slice
     fn len(&self) -> usize;
 
@@ -201,8 +199,9 @@ pub trait Buffer<'a> : 'a {
         // TODO Is this efficient?
         // TODO Make RangeTo work
         // (instead of `0..`)
-        first_part  = &slice[x..]; // Fuck you, borrowck
-        second_part = &slice[x..];
+        // TODO why the hell don't half ranges works
+        first_part  = &slice[0..x]; // Fuck you, borrowck
+        second_part = &slice[x..slice.len()]; // fuuuu
 
         *self.get_line_mut(y) = first_part.as_str().into();
 
