@@ -162,81 +162,83 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     pub fn redraw<'b: 'a>(&'b mut self) {
         // I was here -- bug
 
-        // TODO: Only draw when relevant for the window
-        let (mut pos_x, pos_y) = self.pos();
-        // Redraw window
-        self.window.set(Color::rgb(25, 25, 25));
+        { // TODO Unnecessary?
+            // TODO: Only draw when relevant for the window
+            let (mut pos_x, pos_y) = self.pos();
+            // Redraw window
+            self.window.set(Color::rgb(25, 25, 25));
 
-        let w = self.window.width();
+            let w = self.window.width();
 
-        if self.options.line_marker {
-            self.window.rect(0,
-                             (pos_y - self.scroll_y) as i32 * 16,
-                             w,
+            if self.options.line_marker {
+                self.window.rect(0,
+                                 (pos_y - self.scroll_y) as i32 * 16,
+                                 w,
+                                 16,
+                                 Color::rgb(45, 45, 45));
+            }
+
+            self.window.rect(8 * (pos_x - self.scroll_x) as i32,
+                             16 * (pos_y - self.scroll_y) as i32,
+                             8,
                              16,
-                             Color::rgb(45, 45, 45));
-        }
+                             Color::WHITE);
 
-        self.window.rect(8 * (pos_x - self.scroll_x) as i32,
-                         16 * (pos_y - self.scroll_y) as i32,
-                         8,
-                         16,
-                         Color::WHITE);
-
-        let mut string = false;
+            let mut string = false;
 
 
-        for (y, row) in self.buffer.lines().enumerate() {
-            for (x, c) in row.chars().enumerate() {
-                // TODO: Move outta here
-                let color = if self.options.highlight {
-                    match c {
-                        '\'' | '"' => {
-                            string = !string;
-                            (226, 225, 167) //(167, 222, 156)
-                        },
-                        _ if string => (226, 225, 167), //(167, 222, 156)
-                        '!' |
-                        '@' |
-                        '#' |
-                        '$' |
-                        '%' |
-                        '^' |
-                        '&' |
-                        '|' |
-                        '*' |
-                        '+' |
-                        '-' |
-                        '/' |
-                        ':' |
-                        '=' |
-                        '<' |
-                        '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
-                        '.' | ',' => (241, 213, 226),
-                        '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
-                        '0' ... '9' => (209, 209, 177),
-                        _ => (255, 255, 255),
+            for (y, row) in self.buffer.lines().enumerate() {
+                for (x, c) in row.chars().enumerate() {
+                    // TODO: Move outta here
+                    let color = if self.options.highlight {
+                        match c {
+                            '\'' | '"' => {
+                                string = !string;
+                                (226, 225, 167) //(167, 222, 156)
+                            },
+                            _ if string => (226, 225, 167), //(167, 222, 156)
+                            '!' |
+                            '@' |
+                            '#' |
+                            '$' |
+                            '%' |
+                            '^' |
+                            '&' |
+                            '|' |
+                            '*' |
+                            '+' |
+                            '-' |
+                            '/' |
+                            ':' |
+                            '=' |
+                            '<' |
+                            '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
+                            '.' | ',' => (241, 213, 226),
+                            '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
+                            '0' ... '9' => (209, 209, 177),
+                            _ => (255, 255, 255),
+                        }
+                    } else {
+                        (255, 255, 255)
+                    };
+
+                    let c = if c == '\t' {
+                        ' '
+                    } else {
+                        c
+                    };
+
+                    if pos_x == x && pos_y == y {
+                        self.window.char(8 * (x - self.scroll_x) as i32,
+                                         16 * (y - self.scroll_y) as i32,
+                                         c,
+                                         Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
+                    } else {
+                        self.window.char(8 * (x - self.scroll_x) as i32,
+                                         16 * (y - self.scroll_y) as i32,
+                                         c,
+                                         Color::rgb(color.0, color.1, color.2));
                     }
-                } else {
-                    (255, 255, 255)
-                };
-
-                let c = if c == '\t' {
-                    ' '
-                } else {
-                    c
-                };
-
-                if pos_x == x && pos_y == y {
-                    self.window.char(8 * (x - self.scroll_x) as i32,
-                                     16 * (y - self.scroll_y) as i32,
-                                     c,
-                                     Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
-                } else {
-                    self.window.char(8 * (x - self.scroll_x) as i32,
-                                     16 * (y - self.scroll_y) as i32,
-                                     c,
-                                     Color::rgb(color.0, color.1, color.2));
                 }
             }
         }

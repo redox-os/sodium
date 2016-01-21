@@ -79,7 +79,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     /// Create new default state editor
     pub fn init() {
 
-        let editor = Self::new();
+        let mut editor = Self::new();
 
         debugln!(editor, "Starting Sodium");
 
