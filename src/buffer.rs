@@ -152,7 +152,7 @@ impl<'a> Line<'a> for String {
 
 /// A buffer structure
 pub trait Buffer<'a> : 'a {
-    type Line: 'a + Line<'a>;
+    type Line: Line<'a>;
     type LineIter: Iterator<Item = &'a Self::Line>;
 
     /// Create a new empty split buffer

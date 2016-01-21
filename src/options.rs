@@ -12,7 +12,7 @@ impl Options {
             highlight: true,
             autoindent: true,
             line_marker: true,
-            debug: true, // TODO: Let this be `true` only in debug compilation cfg
+            debug: false,
         }
     }
 
