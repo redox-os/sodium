@@ -1,5 +1,5 @@
 #[cfg(feature = "orbital")]
-use orbital::{
+use orbclient::{
     KeyEvent,
     K_BKSP,
     K_LEFT,

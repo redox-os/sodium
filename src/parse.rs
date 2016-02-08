@@ -4,7 +4,7 @@ use redraw::RedrawTask;
 use mode::Mode;
 
 #[cfg(feature = "orbital")]
-use orbital::{EventOption, Event};
+use orbclient::{EventOption, Event};
 
 #[derive(Copy, Clone)]
 /// An instruction, i.e. a command and a numeral parameter

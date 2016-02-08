@@ -1,7 +1,7 @@
 #![feature(stmt_expr_attributes)]
 
 #[cfg(feature = "orbital")]
-extern crate orbital;
+extern crate orbclient;
 
 #[macro_use]
 pub mod debug;

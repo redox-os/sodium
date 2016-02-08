@@ -1,6 +1,6 @@
 use key::Key;
 #[cfg(feature = "orbital")]
-use orbital::KeyEvent;
+use orbclient::KeyEvent;
 
 #[cfg(feature = "ansi")]
 use std::io::Stdin;
@@ -26,7 +26,7 @@ impl KeyState {
     /// Feed the keystate
     #[cfg(feature = "orbital")]
     pub fn feed(&mut self, k: KeyEvent) -> Option<Key> {
-        use orbital::{
+        use orbclient::{
             K_ALT,
             K_CTRL,
             K_LEFT_SHIFT,

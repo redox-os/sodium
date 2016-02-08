@@ -6,7 +6,7 @@ use mode::CommandMode;
 use buffer::Buffer;
 
 #[cfg(feature = "orbital")]
-use orbital::Color;
+use orbclient::Color;
 
 #[cfg(feature = "ansi")]
 mod terminal {
