@@ -179,7 +179,7 @@ impl Editor {
                          16 * (pos_y - self.scroll_y) as i32,
                          8,
                          16,
-                         Color::WHITE);
+                         Color::rgb(255, 255, 255));
 
         let mut string = false;
 
@@ -274,7 +274,7 @@ impl Editor {
         status_bar(self, sb_msg, 3, 4);
 
         for (n, c) in self.prompt.chars().enumerate() {
-            self.window.char(n as i32 * 8, h as i32 - 16 - 1, c, Color::WHITE);
+            self.window.char(n as i32 * 8, h as i32 - 16 - 1, c, Color::rgb(255, 255, 255));
         }
 
         self.window.sync();
@@ -307,7 +307,7 @@ fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
                                }
                            },
                            c,
-                           Color::WHITE);
+                           Color::rgb(255, 255, 255));
     }
 }
 
