@@ -5,7 +5,7 @@ use mode::Mode;
 use buffer::Buffer;
 
 #[cfg(feature = "orbital")]
-use orbital::{EventOption, Event};
+use orbclient::{EventOption, Event};
 
 #[derive(Copy, Clone)]
 /// An instruction, i.e. a command and a numeral parameter
@@ -44,7 +44,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
         #[cfg(feature = "orbital")]
         loop {
             match self.window
-                      .poll()
+                      .events().next()
                       .unwrap_or(Event::new())
                       .to_option() {
                 EventOption::Key(k) => {
@@ -71,7 +71,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
         // self.status_bar.cmd = String::new();
         #[cfg(feature = "orbital")]
         loop {
-             match self.window.poll()
+             match self.window.events().next()
                        .unwrap_or(Event::new())
                        .to_option() {
                 EventOption::Key(key_event) => {

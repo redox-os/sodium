@@ -8,7 +8,7 @@ use buffer::{Buffer, SplitBuffer};
 use parse::Inst;
 
 #[cfg(feature = "orbital")]
-use orbital::Window;
+use orbclient::Window;
 
 /// The current state of the editor, including the file, the cursor, the scrolling info, etc.
 pub struct Editor<B> {

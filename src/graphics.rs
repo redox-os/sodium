@@ -6,7 +6,7 @@ use mode::CommandMode;
 use buffer::{Buffer, Line};
 
 #[cfg(feature = "orbital")]
-use orbital::Color;
+use orbclient::Color;
 
 #[cfg(feature = "ansi")]
 mod terminal {
@@ -162,9 +162,10 @@ impl<'a, B: Buffer<'a>> Editor<B> {
     pub fn redraw<'b: 'a>(&'b mut self) {
         // I was here -- bug
 
+        let (mut pos_x, pos_y) = self.pos();
+
         { // TODO Unnecessary?
             // TODO: Only draw when relevant for the window
-            let (mut pos_x, pos_y) = self.pos();
             // Redraw window
             self.window.set(Color::rgb(25, 25, 25));
 
@@ -191,20 +192,20 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                          16,
                          Color::rgb(255, 255, 255));
 
-            let mut string = false;
+        let mut string = false;
 
 
-            for (y, row) in self.buffer.lines().enumerate() {
-                for (x, c) in row.chars().enumerate() {
-                    // TODO: Move outta here
-                    let color = if self.options.highlight {
-                        match c {
-                            '\'' | '"' => {
-                                string = !string;
-                                (226, 225, 167) //(167, 222, 156)
-                            },
-                            _ if string => (226, 225, 167), //(167, 222, 156)
-                            '!' |
+        for (y, row) in self.buffer.lines().enumerate() {
+            for (x, c) in row.chars().enumerate() {
+                // TODO: Move outta here
+                let color = if self.options.highlight {
+                    match c {
+                        '\'' | '"' => {
+                            string = !string;
+                            (226, 225, 167) //(167, 222, 156)
+                        },
+                        _ if string => (226, 225, 167), //(167, 222, 156)
+                        '!' |
                             '@' |
                             '#' |
                             '$' |
@@ -220,32 +221,31 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                             '=' |
                             '<' |
                             '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
-                            '.' | ',' => (241, 213, 226),
-                            '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
-                            '0' ... '9' => (209, 209, 177),
-                            _ => (255, 255, 255),
-                        }
-                    } else {
-                        (255, 255, 255)
-                    };
-
-                    let c = if c == '\t' {
-                        ' '
-                    } else {
-                        c
-                    };
-
-                    if pos_x == x && pos_y == y {
-                        self.window.char(8 * (x - self.scroll_x) as i32,
-                                         16 * (y - self.scroll_y) as i32,
-                                         c,
-                                         Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
-                    } else {
-                        self.window.char(8 * (x - self.scroll_x) as i32,
-                                         16 * (y - self.scroll_y) as i32,
-                                         c,
-                                         Color::rgb(color.0, color.1, color.2));
+                        '.' | ',' => (241, 213, 226),
+                        '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
+                        '0' ... '9' => (209, 209, 177),
+                        _ => (255, 255, 255),
                     }
+                } else {
+                    (255, 255, 255)
+                };
+
+                let c = if c == '\t' {
+                    ' '
+                } else {
+                    c
+                };
+
+                if pos_x == x && pos_y == y {
+                    self.window.char(8 * (x - self.scroll_x) as i32,
+                    16 * (y - self.scroll_y) as i32,
+                    c,
+                    Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
+                } else {
+                    self.window.char(8 * (x - self.scroll_x) as i32,
+                    16 * (y - self.scroll_y) as i32,
+                    c,
+                    Color::rgb(color.0, color.1, color.2));
                 }
             }
         }
@@ -285,7 +285,7 @@ impl<'a, B: Buffer<'a>> Editor<B> {
         status_bar(self, sb_msg, 3, 4);
 
         for (n, c) in self.prompt.chars().enumerate() {
-            self.window.char(n as i32 * 8, h as i32 - 16 - 1, c, Color::WHITE);
+            self.window.char(n as i32 * 8, h as i32 - 16 - 1, c, Color::rgb(255, 255, 255));
         }
 
         self.window.sync();
@@ -318,7 +318,7 @@ fn status_bar<'a, B: Buffer<'a>>(editor: &mut Editor<B>, text: String, a: u32, b
                                }
                            },
                            c,
-                           Color::WHITE);
+                           Color::rgb(255, 255, 255));
     }
 }
 

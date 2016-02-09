@@ -3,9 +3,7 @@
 #![feature(type_ascription)]
 
 #[cfg(feature = "orbital")]
-extern crate orbital;
-
-extern crate collections;
+extern crate orbclient;
 
 extern crate collections;
 
