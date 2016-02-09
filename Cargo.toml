@@ -7,6 +7,7 @@ Sodium: A modern vi-like editor
 """
 
 [dependencies]
+orbclient = "0.1"
 
 [features]
 orbital = []
