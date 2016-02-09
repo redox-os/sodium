@@ -7,6 +7,8 @@ extern crate orbital;
 
 extern crate collections;
 
+extern crate collections;
+
 #[macro_use]
 pub mod macros;
 

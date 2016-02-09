@@ -182,7 +182,14 @@ impl<'a, B: Buffer<'a>> Editor<B> {
                              16 * (pos_y - self.scroll_y) as i32,
                              8,
                              16,
-                             Color::WHITE);
+                             Color::rgb(45, 45, 45));
+        }
+
+        self.window.rect(8 * (pos_x - self.scroll_x) as i32,
+                         16 * (pos_y - self.scroll_y) as i32,
+                         8,
+                         16,
+                         Color::rgb(255, 255, 255));
 
             let mut string = false;
 
