@@ -43,7 +43,7 @@ impl Editor {
         #[cfg(feature = "orbital")]
         loop {
             match self.window
-                      .poll()
+                      .events().next()
                       .unwrap_or(Event::new())
                       .to_option() {
                 EventOption::Key(k) => {
@@ -70,7 +70,7 @@ impl Editor {
         // self.status_bar.cmd = String::new();
         #[cfg(feature = "orbital")]
         loop {
-             match self.window.poll()
+             match self.window.events().next()
                        .unwrap_or(Event::new())
                        .to_option() {
                 EventOption::Key(key_event) => {
