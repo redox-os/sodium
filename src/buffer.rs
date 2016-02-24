@@ -75,14 +75,6 @@ pub struct SplitBuffer {
 }
 
 impl SplitBuffer {
-    fn cur_line(&self) -> &String {
-        self.before.last().expect("Unexpected condition (the first part of the split buffer is empty)")
-    }
-
-    fn cur_line_mut(&mut self) -> &mut String {
-        self.before.last_mut().expect("Unexpected condition (the first part of the split buffer is empty)")
-    }
-
     fn up(&mut self) {
         self.after.push(self.before.pop().expect("Popped last element"));
     }
@@ -94,11 +86,6 @@ impl SplitBuffer {
     fn y(&self) -> usize {
         self.before.len()
     }
-
-    fn pop_line(&mut self) -> String {
-        self.before.pop().expect("Unexpected condition (Popped the last line)")
-    }
-
 }
 
 impl<'a> Buffer<'a> for SplitBuffer {

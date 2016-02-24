@@ -1,6 +1,5 @@
 use editor::Editor;
 use buffer::Buffer;
-use std::collections::VecDeque;
 
 impl Editor {
     /// Remove from a given motion (row based), i.e. if the motion given is to another line, all

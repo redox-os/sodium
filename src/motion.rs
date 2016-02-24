@@ -14,7 +14,6 @@ impl Editor {
     pub fn to_motion(&mut self, Inst(n, cmd): Inst) -> Option<(usize, usize)> {
         use key::Key::*;
 
-        let x = self.x();
         let y = self.y();
 
         match cmd.key {

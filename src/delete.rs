@@ -7,7 +7,7 @@ impl Editor {
     /// Delete a character
     #[inline]
     pub fn delete(&mut self) {
-        let &Cursor{ x, y, ..} = self.cursor();
+        let &Cursor{ x, y, .. } = self.cursor();
         if x == self.buffer[y].len() {
             if y + 1 < self.buffer.len() {
                 let s = self.buffer.remove_line(y + 1);

@@ -1,5 +1,5 @@
 use editor::Editor;
-use mode::{Mode, CommandMode, PrimitiveMode};
+use mode::{Mode, CommandMode};
 
 #[derive(Clone)]
 /// A cursor, i.e. a state defining a mode, and a position. The cursor does not define the content

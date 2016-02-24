@@ -1,11 +1,7 @@
 use editor::Editor;
-use mode::{Mode, PrimitiveMode, CommandMode};
 use redraw::RedrawTask;
 use key::Key;
 use buffer::Buffer;
-
-use std::collections::VecDeque;
-use std::iter::FromIterator;
 
 #[derive(Clone, PartialEq, Copy)]
 /// The type of the insert mode

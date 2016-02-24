@@ -1,4 +1,5 @@
 #![feature(stmt_expr_attributes)]
+#![deny(warnings)]
 
 #[cfg(feature = "orbital")]
 extern crate orbclient;

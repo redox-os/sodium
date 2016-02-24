@@ -6,8 +6,6 @@ use insert::{InsertOptions, InsertMode};
 use redraw::RedrawTask;
 use buffer::Buffer;
 
-use std::iter::FromIterator;
-
 // TODO: Move the command definitions outta here
 impl Editor {
     /// Execute an instruction

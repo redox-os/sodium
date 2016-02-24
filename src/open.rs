@@ -14,7 +14,7 @@ impl Editor {
         self.status_bar.file = path.to_string();
         if let Some(mut file) = File::open(path).ok() {
             let mut con = String::new();
-            file.read_to_string(&mut con);
+            let _ = file.read_to_string(&mut con);
 
             self.buffer = SplitBuffer::from_str(&con);
             self.hint();

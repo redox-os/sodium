@@ -2,7 +2,6 @@ use editor::Editor;
 use redraw::RedrawTask;
 use mode::Mode;
 use mode::PrimitiveMode;
-use mode::CommandMode;
 use buffer::Buffer;
 
 #[cfg(feature = "orbital")]
@@ -161,7 +160,7 @@ impl Editor {
     /// Redraw the window
     pub fn redraw(&mut self) {
         // TODO: Only draw when relevant for the window
-        let (mut pos_x, pos_y) = self.pos();
+        let (pos_x, pos_y) = self.pos();
         // Redraw window
         self.window.set(Color::rgb(25, 25, 25));
 
