@@ -143,8 +143,13 @@ impl Editor {
                     Char('r') => {
                         let (x, y) = self.pos();
                         let c = self.get_char();
-                        self.buffer[y].remove(x);
+                        // If there is nothing in the current buffer
+                        // ignore the command
+                        if self.buffer[y].len() > 0 {
+                            self.buffer[y].remove(x);
+                        }
                         self.buffer[y].insert(x, c);
+
                     }
                     Char('R') => {
                         self.cursor_mut().mode =
