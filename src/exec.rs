@@ -149,7 +149,6 @@ impl Editor {
                             self.buffer[y].remove(x);
                         }
                         self.buffer[y].insert(x, c);
-
                     }
                     Char('R') => {
                         self.cursor_mut().mode =
