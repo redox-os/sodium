@@ -48,10 +48,10 @@ pub trait Buffer<'a> {
     /// Give a hint on where the operations are most frequent (i.e. where the cursor is). Y value.
     fn focus_hint_y(&mut self, y: usize);
 
-    /// Get the number of lines in the buffer
+    /// Get the number of lines in the buffer.
     fn len(&self) -> usize;
 
-    /// Get an iterator over the lines in the buffer
+    /// Get an iterator over the lines in the buffer.
     fn lines(&'a self) -> Self::LineIter;
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
@@ -85,6 +85,13 @@ impl SplitBuffer {
 
     fn y(&self) -> usize {
         self.before.len()
+    }
+}
+
+// TODO remove
+impl SplitBuffer {
+    pub fn to_string(&self) -> String {
+        self.lines().map(|x| x.to_owned() + "\n").collect()
     }
 }
 

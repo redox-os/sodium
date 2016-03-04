@@ -1,5 +1,5 @@
 use editor::Editor;
-use open::OpenStatus;
+use file::FileStatus;
 
 use std::process::exit;
 
@@ -38,8 +38,16 @@ impl Editor {
             },
             "o" | "open" => {
                 self.status_bar.msg = match self.open(sec_cmd) {
-                    OpenStatus::NotFound => format!("File {} could not be opened", sec_cmd),
-                    OpenStatus::Ok => format!("File {} opened", sec_cmd),
+                    FileStatus::NotFound => format!("File {} could not be opened", sec_cmd),
+                    FileStatus::Ok => format!("File {} opened", sec_cmd),
+                    _ => unreachable!(),
+                }
+            },
+            "w" | "write" => {
+                self.status_bar.msg = match self.write(sec_cmd) {
+                    FileStatus::NotFound => format!("File {} could not be opened", sec_cmd),
+                    FileStatus::Ok => format!("File {} written", sec_cmd),
+                    FileStatus::Other => format!("Couldn't write {}", sec_cmd),
                 }
             },
             "help" => {
