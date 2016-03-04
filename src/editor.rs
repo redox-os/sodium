@@ -1,14 +1,16 @@
+use buffer::{Buffer, SplitBuffer};
 use cursor::Cursor;
 use graphics::StatusBar;
-use options::Options;
 use key::{Key, Cmd};
 use key_state::KeyState;
-use redraw::RedrawTask;
-use buffer::{Buffer, SplitBuffer};
+use options::Options;
 use parse::Inst;
+use redraw::RedrawTask;
 
 #[cfg(feature = "orbital")]
 use orbclient::Window;
+
+use std::env::args;
 
 /// The current state of the editor, including the file, the cursor, the scrolling info, etc.
 pub struct Editor {
@@ -72,6 +74,10 @@ impl Editor {
             key_state: KeyState::new(),
             redraw_task: RedrawTask::Null,
         };
+
+        if let Some(x) = args().skip(1).next() {
+            editor.open(&x);
+        }
 
         debugln!(editor, "Starting Sodium");
 

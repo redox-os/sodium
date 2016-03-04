@@ -1,7 +1,7 @@
-use editor::Editor;
-use redraw::RedrawTask;
 use buffer::Buffer;
 use cursor::Cursor;
+use editor::Editor;
+use redraw::RedrawTask;
 
 impl Editor {
     /// Delete a character

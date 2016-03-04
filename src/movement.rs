@@ -1,5 +1,5 @@
-use editor::Editor;
 use buffer::Buffer;
+use editor::Editor;
 
 impl Editor {
     /// Goto a given position. Does not automatically bound.

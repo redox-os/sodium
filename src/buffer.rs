@@ -1,5 +1,5 @@
-use std::ops::{Index, IndexMut};
 use std::cmp::min;
+use std::ops::{Index, IndexMut};
 use std::str::Chars;
 
 pub trait Line<'a> {

@@ -1,7 +1,7 @@
-use key::{Cmd, Key};
 use editor::Editor;
-use redraw::RedrawTask;
+use key::{Cmd, Key};
 use mode::Mode;
+use redraw::RedrawTask;
 
 #[cfg(feature = "orbital")]
 use orbclient::{EventOption, Event};
