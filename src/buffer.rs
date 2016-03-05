@@ -110,7 +110,7 @@ impl<'a> Buffer<'a> for SplitBuffer {
     /// Convert a string to a split buffer
     fn from_str(s: &str) -> Self {
         SplitBuffer {
-            before: s.lines().map(str::to_string).collect(),
+            before: s.lines().map(ToOwned::to_owned).collect(),
             after: Vec::new(),
         }
     }

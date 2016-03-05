@@ -263,8 +263,7 @@ impl Editor {
                          18,
                          Color::rgba(74, 74, 74, 255));
 
-        let sb_mode = self.status_bar.mode.clone();
-        status_bar(self, sb_mode, 0, 4);
+        status_bar(self, self.status_bar.mode.to_owned(), 0, 4);
         let sb_file = self.status_bar.file.clone();
         status_bar(self, sb_file, 1, 4);
         let sb_cmd = self.status_bar.cmd.clone();
@@ -280,6 +279,7 @@ impl Editor {
     }
 }
 
+// TODO take &str instead
 #[cfg(feature = "orbital")]
 fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
 
@@ -313,7 +313,7 @@ fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
 /// The statubar (showing various info about the current state of the editor)
 pub struct StatusBar {
     /// The current mode
-    pub mode: String,
+    pub mode: &'static str,
     /// The cureent char
     pub file: String,
     /// The current command
@@ -326,7 +326,7 @@ impl StatusBar {
     /// Create new status bar
     pub fn new() -> Self {
         StatusBar {
-            mode: "Normal".to_string(),
+            mode: "Normal",
             file: String::new(),
             cmd: String::new(),
             msg: "Welcome to Sodium!".to_string(),
