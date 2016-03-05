@@ -122,10 +122,11 @@ Following commands are valid:
 - set <option> : Set <option>
 - unset <option> : Unset <option>
 - toggle <option> : Toggle <option>
-- get <option> : Get the state of 
-                 <option>
+- get <option> : Get the state of <option>
 - o <filename> : Open <filename>
 - help : Open this guide.
+- w <filename> : Write the buffer to <filename>
+- q : Quit Sodium.
 
 Following option exists:
 
