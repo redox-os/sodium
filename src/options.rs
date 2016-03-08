@@ -1,7 +1,12 @@
+/// Editor options.
 pub struct Options {
+    /// Autoindent on line breaks?
     pub autoindent: bool,
+    /// Debug mode.
     pub debug: bool,
+    /// Highlight.
     pub highlight: bool,
+    /// Line marker (dimmed background of the current line).
     pub line_marker: bool,
 }
 
@@ -68,5 +73,4 @@ impl Options {
             None => Err(()),
         }
     }
-
 }

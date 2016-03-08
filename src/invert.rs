@@ -1,6 +1,7 @@
 use editor::Editor;
 
 impl Editor {
+    /// Invert n characters next to the cursor in the buffer.
     pub fn invert_chars(&mut self, n: usize) {
         for _ in 0..n {
             let (x, y) = self.pos();
@@ -19,6 +20,8 @@ impl Editor {
     }
 }
 
+/// "Invert" a character, meaning that it gets swapped with it's counterpart, if no counterpart
+/// exists, swap the case of the character.
 pub fn invert(c: char) -> char {
     match c {
         '<' => '>',

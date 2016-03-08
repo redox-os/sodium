@@ -4,7 +4,7 @@ use editor::Editor;
 use redraw::RedrawTask;
 
 impl Editor {
-    /// Delete a character
+    /// Delete a character.
     #[inline]
     pub fn delete(&mut self) {
         let &Cursor{ x, y, .. } = self.cursor();
@@ -22,6 +22,7 @@ impl Editor {
         self.hint();
     }
 
+    /// Backspace.
     #[inline]
     pub fn backspace(&mut self) {
         let previous = self.previous(1);

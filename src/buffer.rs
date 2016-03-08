@@ -3,8 +3,10 @@ use std::ops::{Index, IndexMut};
 use std::str::Chars;
 
 pub trait Line<'a> {
+    /// The underlying iterator.
     type Iter: Iterator<Item = char> + 'a;
 
+    /// Iterator over characters.
     fn chars_iter(&'a self) -> Self::Iter;
 }
 
@@ -18,7 +20,9 @@ impl<'a, T: AsRef<str>> Line<'a> for T {
 
 /// A buffer structure
 pub trait Buffer<'a> {
+    /// The line type of the buffer.
     type Line: 'a + Line<'a>;
+    /// The line iterator.
     type LineIter: Iterator<Item = &'a Self::Line>;
 
     /// Create a new empty split buffer
@@ -90,6 +94,7 @@ impl SplitBuffer {
 
 // TODO remove
 impl SplitBuffer {
+    /// Convert the buffer to a string.
     pub fn to_string(&self) -> String {
         self.lines().map(|x| x.to_owned() + "\n").collect()
     }
@@ -99,7 +104,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
     type Line = String;
     type LineIter = SplitBufIter<'a>;
 
-    /// Create a new empty split buffer
     fn new() -> Self {
         SplitBuffer {
             before: vec![String::new()],
@@ -107,7 +111,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Convert a string to a split buffer
     fn from_str(s: &str) -> Self {
         SplitBuffer {
             before: s.lines().map(ToOwned::to_owned).collect(),
@@ -115,7 +118,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Get the nth line in the buffer by option reference
     fn get_line(&self, n: usize) -> Option<&String> {
         if n < self.before.len() {
             Some(&self.before[n])
@@ -127,7 +129,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Get the nth line in the buffer by optional mutable reference
     fn get_line_mut(&mut self, n: usize) -> Option<&mut String> {
         if n < self.before.len() {
             Some(&mut self.before[n])
@@ -139,7 +140,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Remove the nth line and return it. Panics on out of bound.
     fn remove_line(&mut self, n: usize) -> String {
         if n < self.before.len() {
             self.before.remove(n)
@@ -151,7 +151,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Insert line at n. Panics on out of bound.
     fn insert_line(&mut self, n: usize, line: String) {
         if n < self.before.len() {
             self.before.insert(n, line);
@@ -163,7 +162,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Convert a vector of lines to a split buffer
     fn from_lines(ln: &[String]) -> SplitBuffer {
         SplitBuffer {
             before: ln.to_owned(),
@@ -171,9 +169,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Move the center (i.e. efficient point/split) of the split buffer
-    ///
-    /// Panics on out of bound.
     fn focus_hint_y(&mut self, y: usize) {
         if y < self.y() {
             for _ in 0..min(self.y() - y, self.before.len()) {
@@ -190,12 +185,10 @@ impl<'a> Buffer<'a> for SplitBuffer {
 
     fn focus_hint_x(&mut self, _: usize) {}
 
-    /// Get the number of lines in the buffer
     fn len(&self) -> usize {
         self.before.len() + self.after.len()
     }
 
-    /// Get an iterator over the lines in the buffer
     fn lines(&'a self) -> SplitBufIter<'a> {
         SplitBufIter {
             buffer: self,
@@ -203,7 +196,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         }
     }
 
-    /// Get the leading whitespaces of the nth line. Used for autoindenting.
     fn get_indent(&self, n: usize) -> &str {
         if let Some(ln) = self.get_line(n) {
             let mut len = 0;

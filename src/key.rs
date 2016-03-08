@@ -13,21 +13,33 @@ use orbclient::{
 #[derive(Copy, Clone, PartialEq)]
 /// A key
 pub enum Key {
+    /// Printable character.
     Char(char),
     // TODO: Space modifier?
+    /// Backspace.
     Backspace,
+    /// Escape.
     Escape,
+    /// Left arrow key.
     Left,
+    /// Right arrow key.
     Right,
+    /// Up arrow key.
     Up,
+    /// Down arrow key.
     Down,
+    /// Tab.
     Tab,
+    /// Null/unknown key.
     Null,
+    /// Quit (close the window).
     Quit,
+    /// Unknown key.
     Unknown(u8),
 }
 
 impl Key {
+    /// Convern an Orbital key event to a `Key`.
     #[cfg(feature = "orbital")]
     pub fn from_event(k: KeyEvent) -> Key {
         match k.character {
@@ -49,6 +61,8 @@ impl Key {
         }
     }
 
+    /// Convert a `Key` to its corresponding character. If no corresponding character exists, use
+    /// the null character.
     pub fn to_char(self) -> char {
         match self {
             Key::Char(c) => c,
@@ -58,7 +72,8 @@ impl Key {
 }
 
 #[derive(Copy, Clone, PartialEq)]
-/// A command, i.e. a key toghether with information on the modifiers.
+/// A command, i.e. a key together with information on the modifiers.
 pub struct Cmd {
+    /// The key associated with the command.
     pub key: Key,
 }

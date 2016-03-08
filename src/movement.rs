@@ -175,6 +175,4 @@ impl Editor {
 
         None
     }
-
-
 }
