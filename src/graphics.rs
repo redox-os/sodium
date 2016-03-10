@@ -149,16 +149,16 @@ fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
                   .enumerate() {
 
         editor.window.char(((w * a) / b) as i32 + (n as i32 * 8),
-                           h as i32 - 16 - 1 -
-                           {
-                               if mode == Mode::Primitive(PrimitiveMode::Prompt) {
-                                   16 + 1 + 1
-                               } else {
-                                   0
-                               }
-                           },
-                           c,
-                           Color::rgb(255, 255, 255));
+                            h as i32 - 16 - 1 -
+                            {
+                                if mode == Mode::Primitive(PrimitiveMode::Prompt) {
+                                    16 + 1 + 1
+                                } else {
+                                    0
+                                }
+                            },
+                            c,
+                            Color::rgb(255, 255, 255));
     }
 }
 
