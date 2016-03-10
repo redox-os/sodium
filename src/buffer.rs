@@ -2,6 +2,7 @@ use std::cmp::min;
 use std::ops::{Index, IndexMut};
 use std::str::Chars;
 
+/// A line in a buffer.
 pub trait Line<'a> {
     /// The underlying iterator.
     type Iter: Iterator<Item = char> + 'a;

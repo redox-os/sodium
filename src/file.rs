@@ -3,9 +3,13 @@ use editor::Editor;
 use std::fs::File;
 use std::io::{Read, Write};
 
+/// The status of a file IO operation.
 pub enum FileStatus {
+    /// Oll fino.
     Ok,
+    /// File not found.
     NotFound,
+    /// Other error.
     Other,
 }
 

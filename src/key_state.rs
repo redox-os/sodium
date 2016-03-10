@@ -9,8 +9,11 @@ use std::io::prelude::*;
 
 /// Key state
 pub struct KeyState {
+    /// Ctrl modifier.
     pub ctrl: bool,
+    /// Alt modifier.
     pub alt: bool,
+    /// Shift modifier.
     pub shift: bool,
 }
 

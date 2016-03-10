@@ -97,6 +97,7 @@ impl Editor {
         }
     }
 
+    /// Hint the buffer about the cursor position.
     pub fn hint(&mut self) {
         let x = self.cursor().x;
         let y = self.cursor().y;
