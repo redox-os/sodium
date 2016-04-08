@@ -72,7 +72,7 @@ impl Editor {
             prompt: String::new(),
             options: Options::new(),
             key_state: KeyState::new(),
-            redraw_task: RedrawTask::Null,
+            redraw_task: RedrawTask::None,
         };
 
         if let Some(x) = args().skip(1).next() {
