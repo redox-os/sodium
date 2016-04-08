@@ -114,13 +114,7 @@ impl Editor {
                          18,
                          Color::rgba(74, 74, 74, 255));
 
-        status_bar(self, self.status_bar.mode.to_owned(), 0, 4);
-        let sb_file = self.status_bar.file.clone();
-        status_bar(self, sb_file, 1, 4);
-        let sb_cmd = self.status_bar.cmd.clone();
-        status_bar(self, sb_cmd, 2, 4);
-        let sb_msg = self.status_bar.msg.clone();
-        status_bar(self, sb_msg, 3, 4);
+        self.draw_status_bar();
 
         for (n, c) in self.prompt.chars().enumerate() {
             self.window.char(n as i32 * 8, h as i32 - 16 - 1, c, Color::rgb(255, 255, 255));
@@ -128,36 +122,43 @@ impl Editor {
 
         self.window.sync();
     }
-}
 
-// TODO take &str instead
-#[cfg(feature = "orbital")]
-fn status_bar(editor: &mut Editor, text: String, a: u32, b: u32) {
+    #[cfg(feature = "orbital")]
+    fn draw_status_bar(&mut self) {
+        let h = self.window.height();
+        let w = self.window.width();
 
-    let h = editor.window.height();
-    let w = editor.window.width();
-    // let y = editor.y();
-    let mode = editor.cursor().mode;
+        let mode = self.cursor().mode;
 
-    for (n, c) in (if text.len() as u32 > w / (8 * b) {
-                      text.chars().take((w / (8 * b) - 5) as usize).chain(vec!['.'; 3]).collect::<Vec<_>>()
-                  } else {
-                      text.chars().collect()
-                  })
-                  .into_iter()
-                  .enumerate() {
+        let items = [
+            (self.status_bar.mode, 0, 4),
+            (&self.status_bar.file, 1, 4),
+            (&self.status_bar.cmd, 2, 4),
+            (&self.status_bar.msg, 3, 4)
+        ];
 
-        editor.window.char(((w * a) / b) as i32 + (n as i32 * 8),
-                            h as i32 - 16 - 1 -
-                            {
-                                if mode == Mode::Primitive(PrimitiveMode::Prompt) {
-                                    16 + 1 + 1
-                                } else {
-                                    0
-                                }
-                            },
-                            c,
-                            Color::rgb(255, 255, 255));
+        for &(text, a, b) in items.iter() {
+            for (n, c) in (if text.len() as u32 > w / (8 * b) {
+                              text.chars().take((w / (8 * b) - 5) as usize).chain(vec!['.'; 3]).collect::<Vec<_>>()
+                          } else {
+                              text.chars().collect()
+                          })
+                          .into_iter()
+                          .enumerate() {
+
+                self.window.char(((w * a) / b) as i32 + (n as i32 * 8),
+                                    h as i32 - 16 - 1 -
+                                    {
+                                        if mode == Mode::Primitive(PrimitiveMode::Prompt) {
+                                            16 + 1 + 1
+                                        } else {
+                                            0
+                                        }
+                                    },
+                                    c,
+                                    Color::rgb(255, 255, 255));
+            }
+        }
     }
 }
 
