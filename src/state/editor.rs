@@ -37,6 +37,8 @@ pub struct Editor {
     pub key_state: KeyState,
     /// Redraw
     pub redraw_task: RedrawTask,
+    /// The previous instruction
+    pub previous_instruction: Option<Inst>,
 }
 
 impl Editor {
@@ -59,6 +61,7 @@ impl Editor {
             options: Options::new(),
             key_state: KeyState::new(),
             redraw_task: RedrawTask::None,
+            previous_instruction: None,
         };
 
         #[cfg(not(feature = "orbital"))]
@@ -73,6 +76,7 @@ impl Editor {
             options: Options::new(),
             key_state: KeyState::new(),
             redraw_task: RedrawTask::None,
+            previous_instruction: None,
         };
 
         if let Some(x) = args().skip(1).next() {
