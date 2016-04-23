@@ -8,8 +8,8 @@ impl Editor {
             let current = self.current();
 
             if let Some(cur) = current {
-                self.buffer[y].remove(x);
-                self.buffer[y].insert(x, invert(cur));
+                self.current_buffer_mut()[y].remove(x);
+                self.current_buffer_mut()[y].insert(x, invert(cur));
             }
             if let Some(m) = self.next(1) {
                 self.goto(m);

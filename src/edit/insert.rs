@@ -26,33 +26,33 @@ impl Editor {
         let (mut x, mut y) = self.pos();
         match (mode, k) {
             (InsertMode::Insert, Key::Char('\n')) => {
-                let first_part  = self.buffer[y][..x].to_owned();
-                let second_part = self.buffer[y][x..].to_owned();
+                let first_part  = self.current_buffer()[y][..x].to_owned();
+                let second_part = self.current_buffer()[y][x..].to_owned();
 
-                self.buffer[y] = first_part;
+                self.current_buffer_mut()[y] = first_part;
 
                 let nl = if self.options.autoindent {
-                    self.buffer.get_indent(y).to_owned()
+                    self.current_buffer().get_indent(y).to_owned()
                 } else {
                     String::new()
                 };
                 let begin = nl.len();
 
-                self.buffer.insert_line(y, nl + &second_part);
+                self.current_buffer_mut().insert_line(y, nl + &second_part);
 
                 self.redraw_task = RedrawTask::LinesAfter(y);
                 self.goto((begin, y + 1));
             },
             (InsertMode::Insert, Key::Backspace) => self.backspace(),
             (InsertMode::Insert, Key::Char(c)) => {
-                self.buffer[y].insert(x, c);
+                self.current_buffer_mut()[y].insert(x, c);
 
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
                 let right = self.right(1, false);
                 self.goto(right);
             },
             (InsertMode::Replace, Key::Char(c)) => {
-                if x == self.buffer[y].len() {
+                if x == self.current_buffer()[y].len() {
                     let next = self.next(1);
                     if let Some(p) = next {
                         self.goto(p);
@@ -61,15 +61,15 @@ impl Editor {
                     }
                 }
 
-                if self.buffer.len() != y {
-                    if self.buffer[y].len() == x {
+                if self.current_buffer_mut().len() != y {
+                    if self.current_buffer()[y].len() == x {
                         let next = self.next(1);
                         if let Some(p) = next {
                             self.goto(p);
                         }
                     } else {
-                        self.buffer[y].remove(x);
-                        self.buffer[y].insert(x, c);
+                        self.current_buffer_mut()[y].remove(x);
+                        self.current_buffer_mut()[y].insert(x, c);
                     }
                 }
                 let next = self.next(1);

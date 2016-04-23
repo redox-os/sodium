@@ -15,7 +15,7 @@ impl Editor {
             } else {
                 (self.x(), x)
             };
-            for _ in self.buffer[y].drain(a..b) {}
+            for _ in self.current_buffer_mut()[y].drain(a..b) {}
         } else {
             let (_, y) = self.bound((x as usize, y as usize), true);
             // Full line mode
@@ -27,10 +27,10 @@ impl Editor {
 
             // TODO: Make this more idiomatic (drain)
             for _ in a..(b + 1) {
-                if self.buffer.len() > 1 {
-                    self.buffer.remove_line(a);
+                if self.current_buffer().len() > 1 {
+                    self.current_buffer_mut().remove_line(a);
                 } else {
-                    self.buffer[0] = String::new();
+                    self.current_buffer_mut()[0] = String::new();
                 }
             }
         }

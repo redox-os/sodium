@@ -29,7 +29,7 @@ impl Editor {
     #[inline]
     pub fn current(&self) -> Option<char> {
         let (x, y) = self.pos();
-        match self.buffer[y].chars().nth(x) {
+        match self.current_buffer()[y].chars().nth(x) {
             Some(c) => Some(c),
             None => None,
         }

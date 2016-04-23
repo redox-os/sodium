@@ -34,7 +34,7 @@ impl Editor {
         let mut string = false;
 
 
-        for (y, row) in self.buffer.lines().enumerate() {
+        for (y, row) in (&mut self.buffers[self.current_buffer_index]).lines().enumerate() {
             for (x, c) in row.chars().enumerate() {
                 // TODO: Move outta here
                 let color = if self.options.highlight {

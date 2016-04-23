@@ -53,12 +53,12 @@ impl Editor {
             (Command(Normal), Char('o')) => {
                 let y = self.y();
                 let ind = if self.options.autoindent {
-                    self.buffer.get_indent(y).to_owned()
+                    self.current_buffer().get_indent(y).to_owned()
                 } else {
                     String::new()
                 };
                 let last = ind.len();
-                self.buffer.insert_line(y, ind.into());
+                self.current_buffer_mut().insert_line(y, ind.into());
                 self.goto((last, y + 1));
                 self.cursor_mut().mode =
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
@@ -106,7 +106,7 @@ impl Editor {
                 self.goto(bounded);
             }
             (Command(Normal), Char('L')) => {
-                let ln_end = (self.buffer[self.y()].len(), self.y());
+                let ln_end = (self.current_buffer()[self.y()].len(), self.y());
                 self.goto(ln_end);
                 mov = true;
             }
@@ -119,10 +119,10 @@ impl Editor {
                 let c = self.get_char();
                 // If there is nothing in the current buffer
                 // ignore the command
-                if self.buffer[y].len() > 0 {
-                    self.buffer[y].remove(x);
+                if self.current_buffer()[y].len() > 0 {
+                    self.current_buffer_mut()[y].remove(x);
                 }
-                self.buffer[y].insert(x, c);
+                self.current_buffer_mut()[y].insert(x, c);
             }
             (Command(Normal), Char('R')) => {
                 self.cursor_mut().mode =
@@ -137,7 +137,7 @@ impl Editor {
                 }
             }
             (Command(Normal), Char('G')) => {
-                let last = self.buffer.len() - 1;
+                let last = self.current_buffer().len() - 1;
                 self.goto((0, last));
                 mov = true;
             }

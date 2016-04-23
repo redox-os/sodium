@@ -8,14 +8,14 @@ impl Editor {
     #[inline]
     pub fn delete(&mut self) {
         let &Cursor{ x, y, .. } = self.cursor();
-        if x == self.buffer[y].len() {
-            if y + 1 < self.buffer.len() {
-                let s = self.buffer.remove_line(y + 1);
-                self.buffer[y].push_str(&s);
+        if x == self.current_buffer()[y].len() {
+            if y + 1 < self.current_buffer().len() {
+                let s = self.current_buffer_mut().remove_line(y + 1);
+                self.current_buffer_mut()[y].push_str(&s);
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
             }
-        } else if x < self.buffer[y].len() {
-            self.buffer[y].remove(x);
+        } else if x < self.current_buffer()[y].len() {
+            self.current_buffer_mut()[y].remove(x);
             self.redraw_task = RedrawTask::LinesAfter(y);
         }
 

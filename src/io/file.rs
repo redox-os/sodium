@@ -21,7 +21,8 @@ impl Editor {
             let mut con = String::new();
             let _ = file.read_to_string(&mut con);
 
-            self.buffer = SplitBuffer::from_str(&con);
+            self.buffers.push(SplitBuffer::from_str(&con));
+            self.current_buffer_index = self.buffers.len() - 1;
             self.hint();
             FileStatus::Ok
         } else {
@@ -33,7 +34,7 @@ impl Editor {
     pub fn write(&mut self, path: &str) -> FileStatus {
         self.status_bar.file = path.to_owned();
         if let Some(mut file) = File::create(path).ok() {
-            if file.write(self.buffer.to_string().as_bytes()).is_ok() {
+            if file.write(self.current_buffer().to_string().as_bytes()).is_ok() {
                 FileStatus::Ok
             } else {
                 FileStatus::Other

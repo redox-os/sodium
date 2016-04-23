@@ -18,8 +18,10 @@ pub struct Editor {
     pub current_cursor: u8,
     /// The cursors
     pub cursors: Vec<Cursor>,
-    /// The buffer (document)
-    pub buffer: SplitBuffer,
+    /// The buffers (documents)
+    pub buffers: Vec<SplitBuffer>,
+    /// The current buffer index
+    pub current_buffer_index: usize,
     /// The x coordinate of the scroll
     pub scroll_x: usize,
     /// The y coordinate of the scroll
@@ -52,7 +54,8 @@ impl Editor {
         let mut editor = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
-            buffer: SplitBuffer::new(),
+            buffers: vec![SplitBuffer::new()],
+            current_buffer_index: 0,
             scroll_x: 0,
             scroll_y: 0,
             window: *window, // ORBITAL SPECIFIC!
@@ -68,7 +71,8 @@ impl Editor {
         let mut editor = Editor {
             current_cursor: 0,
             cursors: vec![Cursor::new()],
-            buffer: SplitBuffer::new(),
+            buffers: vec![SplitBuffer::new()],
+            current_buffer_index: 0,
             scroll_x: 0,
             scroll_y: 0,
             status_bar: StatusBar::new(),
@@ -106,7 +110,19 @@ impl Editor {
         let x = self.cursor().x;
         let y = self.cursor().y;
 
-        self.buffer.focus_hint_y(y);
-        self.buffer.focus_hint_x(x);
+        self.current_buffer_mut().focus_hint_y(y);
+        self.current_buffer_mut().focus_hint_x(x);
+    }
+
+    #[inline]
+    /// Get a reference to the currently open buffer.
+    pub fn current_buffer(&self) -> &SplitBuffer {
+        &self.buffers[self.current_buffer_index]
+    }
+
+    #[inline]
+    /// Get a mutable reference to the currently open buffer.
+    pub fn current_buffer_mut(&mut self) -> &mut SplitBuffer {
+        &mut self.buffers[self.current_buffer_index]
     }
 }
