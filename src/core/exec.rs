@@ -220,6 +220,14 @@ impl Editor {
             (Command(Normal), Char('~')) => {
                 self.invert_chars(n);
             }
+            (Command(Normal), Char('.')) => {
+                if let Some(inst) = self.previous_instruction {
+                    self.exec(inst);
+                } else {
+                    self.status_bar.msg = "No previous command".into();
+                    self.redraw_task = RedrawTask::StatusBar;
+                }
+            }
             (Command(Normal), Char(c)) => {
                 self.status_bar.msg = format!("Unknown command: {}", c);
                 self.redraw_task = RedrawTask::StatusBar;
@@ -248,6 +256,10 @@ impl Editor {
         }
         if mov {
             self.redraw_task = RedrawTask::Cursor(bef, self.pos());
+        }
+
+        if !(self.cursor().mode == Command(Normal) && cmd.key == Char('.')) {
+            self.previous_instruction = Some(Inst(para, cmd));
         }
     }
 }

@@ -101,6 +101,7 @@ Editing:
                   ( -> )
                   / -> \
 - ; : Go to prompt mode
+- . : Repeat the previous command
 
 
 # Insert
