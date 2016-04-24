@@ -1,6 +1,6 @@
 use io::file::FileStatus;
 use io::redraw::RedrawTask;
-use state::editor::Editor;
+use state::editor::{BufferInfo, Editor};
 use edit::buffer::{Buffer, SplitBuffer};
 
 use std::process::exit;
@@ -73,8 +73,8 @@ impl Editor {
                 }
             },
             "ls" => {
-                fn print_buffer(i: usize, b: &SplitBuffer) -> String {
-                    let title = b.get_title().unwrap_or("<No Title>");
+                fn print_buffer(i: usize, b: &BufferInfo) -> String {
+                    let title = b.title.as_ref().map(|s| s.as_str()).unwrap_or("<No Title>");
 
                     format!("b{}\t\t\t{}", i, title)
                 }
@@ -82,8 +82,11 @@ impl Editor {
                 let buffer_descriptions : Vec<_> =
                     self.buffers.iter().enumerate().map(|(i, b)| print_buffer(i, b)).collect();
 
-                self.buffers.push(SplitBuffer::from_str(&buffer_descriptions.join("\n"), "<Buffers>"));
-                self.current_buffer_index = self.buffers.len() - 1;
+                let mut new_buffer : BufferInfo = SplitBuffer::from_str(&buffer_descriptions.join("\n")).into();
+                new_buffer.title = Some("<Buffers>".into());
+
+                let new_buffer_index = self.buffers.new_buffer(new_buffer);
+                self.buffers.switch_to(new_buffer_index);
                 self.redraw_task = RedrawTask::Full;
             },
             "help" => {
@@ -99,7 +102,7 @@ impl Editor {
                             if n >= self.buffers.len() {
                                 self.status_bar.msg = format!("Invalid buffer #{}", n);
                             } else {
-                                self.current_buffer_index = n;
+                                self.buffers.switch_to(n);
                                 self.redraw_task = RedrawTask::Full;
                                 self.status_bar.msg = format!("Switched to buffer #{}", n);
                             }

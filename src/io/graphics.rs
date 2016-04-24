@@ -11,6 +11,11 @@ impl Editor {
     /// Redraw the window
     pub fn redraw(&mut self) {
         // TODO: Only draw when relevant for the window
+        let (scroll_x, scroll_y) = {
+            let current_buffer = self.buffers.current_buffer_info();
+
+            (current_buffer.scroll_x, current_buffer.scroll_y)
+        };
         let (pos_x, pos_y) = self.pos();
         // Redraw window
         self.window.set(Color::rgb(25, 25, 25));
@@ -19,14 +24,14 @@ impl Editor {
 
         if self.options.line_marker {
             self.window.rect(0,
-                             (pos_y - self.scroll_y) as i32 * 16,
+                             (pos_y - scroll_y) as i32 * 16,
                              w,
                              16,
                              Color::rgb(45, 45, 45));
         }
 
-        self.window.rect(8 * (pos_x - self.scroll_x) as i32,
-                         16 * (pos_y - self.scroll_y) as i32,
+        self.window.rect(8 * (pos_x - scroll_x) as i32,
+                         16 * (pos_y - scroll_y) as i32,
                          8,
                          16,
                          Color::rgb(255, 255, 255));
@@ -34,7 +39,7 @@ impl Editor {
         let mut string = false;
 
 
-        for (y, row) in (&mut self.buffers[self.current_buffer_index]).lines().enumerate() {
+        for (y, row) in self.buffers.current_buffer().lines().enumerate() {
             for (x, c) in row.chars().enumerate() {
                 // TODO: Move outta here
                 let color = if self.options.highlight {
@@ -76,13 +81,13 @@ impl Editor {
                 };
 
                 if pos_x == x && pos_y == y {
-                    self.window.char(8 * (x - self.scroll_x) as i32,
-                                     16 * (y - self.scroll_y) as i32,
+                    self.window.char(8 * (x - scroll_x) as i32,
+                                     16 * (y - scroll_y) as i32,
                                      c,
                                      Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
                 } else {
-                    self.window.char(8 * (x - self.scroll_x) as i32,
-                                     16 * (y - self.scroll_y) as i32,
+                    self.window.char(8 * (x - scroll_x) as i32,
+                                     16 * (y - scroll_y) as i32,
                                      c,
                                      Color::rgb(color.0, color.1, color.2));
                 }
@@ -130,9 +135,12 @@ impl Editor {
 
         let mode = self.cursor().mode;
 
+        let current_title = 
+            self.buffers.current_buffer_info().title.as_ref().map(|s| s.as_str()).unwrap_or("");
+
         let items = [
             (self.status_bar.mode, 0, 4),
-            (&self.status_bar.file, 1, 4),
+            (current_title, 1, 4),
             (&self.status_bar.cmd, 2, 4),
             (&self.status_bar.msg, 3, 4)
         ];
@@ -166,8 +174,6 @@ impl Editor {
 pub struct StatusBar {
     /// The current mode
     pub mode: &'static str,
-    /// The cureent char
-    pub file: String,
     /// The current command
     pub cmd: String,
     /// A message (such as an error or other info to the user)
@@ -179,7 +185,6 @@ impl StatusBar {
     pub fn new() -> Self {
         StatusBar {
             mode: "Normal",
-            file: String::new(),
             cmd: String::new(),
             msg: "Welcome to Sodium!".to_string(),
         }

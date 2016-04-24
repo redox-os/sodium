@@ -26,22 +26,22 @@ impl Editor {
     pub fn after(&self, n: usize, (x, y): (usize, usize)) -> Option<(usize, usize)> {
 
         // TODO: Make this more idiomatic {
-        if x + n < self.current_buffer()[y].len() {
+        if x + n < self.buffers.current_buffer()[y].len() {
 
             Some((x + n, y))
         } else {
-            if y + 1 >= self.current_buffer().len() {
+            if y + 1 >= self.buffers.current_buffer().len() {
                 None
             } else {
-                let mut mv = n + x - self.current_buffer()[y].len();
+                let mut mv = n + x - self.buffers.current_buffer()[y].len();
                 let mut ry = y + 1;
 
                 loop {
-                    if mv < self.current_buffer()[ry].len() {
+                    if mv < self.buffers.current_buffer()[ry].len() {
                         return Some((mv, ry));
                     } else {
-                        if ry + 1 < self.current_buffer().len() {
-                            mv -= self.current_buffer()[ry].len();
+                        if ry + 1 < self.buffers.current_buffer().len() {
+                            mv -= self.buffers.current_buffer()[ry].len();
                             ry += 1;
                         } else {
                             return None;
@@ -68,11 +68,11 @@ impl Editor {
                 let mut ry = y - 1;
 
                 loop {
-                    if mv <= self.current_buffer()[ry].len() {
-                        return Some((self.current_buffer()[ry].len() - mv, ry));
+                    if mv <= self.buffers.current_buffer()[ry].len() {
+                        return Some((self.buffers.current_buffer()[ry].len() - mv, ry));
                     } else {
-                        if ry > 0 && mv >= self.current_buffer()[ry].len() {
-                            mv -= self.current_buffer()[ry].len();
+                        if ry > 0 && mv >= self.buffers.current_buffer()[ry].len() {
+                            mv -= self.buffers.current_buffer()[ry].len();
                             ry -= 1;
                         } else if ry == 0 {
                             return None;
@@ -142,7 +142,7 @@ impl Editor {
         let mut dn = 0;
         let x      = self.x();
 
-        for ch in self.current_buffer()[self.y()].chars().skip(x) {
+        for ch in self.buffers.current_buffer()[self.y()].chars().skip(x) {
             if dn == n {
                 if ch == c {
                     dn += 1;
@@ -162,7 +162,7 @@ impl Editor {
         let x      = self.x();
         let y      = self.y();
 
-        for ch in self.current_buffer()[y].chars().rev().skip(self.current_buffer()[y].len() - x) {
+        for ch in self.buffers.current_buffer()[y].chars().rev().skip(self.buffers.current_buffer()[y].len() - x) {
             if dn == n {
                 if ch == c {
                     dn += 1;

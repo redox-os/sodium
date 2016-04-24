@@ -1,3 +1,4 @@
+use std::slice::Iter;
 use edit::buffer::{Buffer, SplitBuffer};
 use state::cursor::Cursor;
 use io::graphics::StatusBar;
@@ -12,20 +13,110 @@ use orbclient::Window;
 
 use std::env::args;
 
-/// The current state of the editor, including the file, the cursor, the scrolling info, etc.
-pub struct Editor {
+/// A SplitBuffer and related state
+pub struct BufferInfo {
+    /// The document
+    pub raw_buffer: SplitBuffer,
     /// The current cursor
     pub current_cursor: u8,
     /// The cursors
     pub cursors: Vec<Cursor>,
-    /// The buffers (documents)
-    pub buffers: Vec<SplitBuffer>,
-    /// The current buffer index
-    pub current_buffer_index: usize,
     /// The x coordinate of the scroll
     pub scroll_x: usize,
     /// The y coordinate of the scroll
     pub scroll_y: usize,
+    /// The title of the document
+    pub title: Option<String>,
+}
+
+impl BufferInfo {
+    /// Create a new BufferInfo with default values.
+    fn new() -> BufferInfo {
+        BufferInfo {
+            raw_buffer: SplitBuffer::new(),
+            current_cursor: 0,
+            cursors: vec![Cursor::new()],
+            scroll_x: 0,
+            scroll_y: 0,
+            title: None,
+        }
+    }
+}
+
+impl From<SplitBuffer> for BufferInfo {
+    fn from(b: SplitBuffer) -> BufferInfo {
+        let mut info = BufferInfo::new();
+        info.raw_buffer = b;
+
+        info
+    }
+}
+
+/// Provides access to buffer manipulation functions.
+pub struct BufferManager {
+    buffers: Vec<BufferInfo>,
+    current_buffer_index: usize,
+}
+
+impl BufferManager {
+    /// Create a new BufferManager with default values.
+    pub fn new() -> BufferManager {
+        BufferManager {
+            buffers: vec![BufferInfo::new()],
+            current_buffer_index: 0,
+        }
+    }
+
+    /// Adds the specified buffer to the set of buffers and returns
+    /// its index.
+    pub fn new_buffer(&mut self, buffer: BufferInfo) -> usize {
+        self.buffers.push(buffer);
+
+        self.buffers.len() -1
+    }
+
+    /// Returns an iterator over the buffers.
+    pub fn iter(&self) -> Iter<BufferInfo> {
+        self.buffers.iter()
+    }
+
+    /// Gets the number of buffers.
+    pub fn len(&self) -> usize {
+        self.buffers.len()
+    }
+
+    /// Get a reference to the currently open buffer.
+    pub fn current_buffer(&self) -> &SplitBuffer {
+        &self.current_buffer_info().raw_buffer
+    }
+
+    /// Get a mutable reference to the currently open buffer.
+    pub fn current_buffer_mut(&mut self) -> &mut SplitBuffer {
+        &mut self.current_buffer_info_mut().raw_buffer
+    }
+
+    /// Get a reference to the currently open buffer information.
+    pub fn current_buffer_info(&self) -> &BufferInfo {
+        &self.buffers[self.current_buffer_index]
+    }
+
+    /// Get a mutable reference to the currently open buffer information.
+    pub fn current_buffer_info_mut(&mut self) -> &mut BufferInfo {
+        &mut self.buffers[self.current_buffer_index]
+    }
+
+    /// Switch the current buffer to the specified buffer
+    pub fn switch_to(&mut self, n: usize) {
+        assert!(n < self.buffers.len(), "Buffer index out of bounds");
+
+        self.current_buffer_index = n;
+    }
+}
+
+/// The current state of the editor, including the file, the cursor, the scrolling info, etc.
+pub struct Editor {
+    /// The buffers and related state
+    pub buffers: BufferManager,
     /// The window
     #[cfg(feature = "orbital")]
     pub window: Window,
@@ -52,12 +143,7 @@ impl Editor {
 
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
-            current_cursor: 0,
-            cursors: vec![Cursor::new()],
-            buffers: vec![SplitBuffer::new()],
-            current_buffer_index: 0,
-            scroll_x: 0,
-            scroll_y: 0,
+            buffers: BufferManager::new(),
             window: *window, // ORBITAL SPECIFIC!
             status_bar: StatusBar::new(),
             prompt: String::new(),
@@ -69,12 +155,7 @@ impl Editor {
 
         #[cfg(not(feature = "orbital"))]
         let mut editor = Editor {
-            current_cursor: 0,
-            cursors: vec![Cursor::new()],
-            buffers: vec![SplitBuffer::new()],
-            current_buffer_index: 0,
-            scroll_x: 0,
-            scroll_y: 0,
+            buffers: BufferManager::new(),
             status_bar: StatusBar::new(),
             prompt: String::new(),
             options: Options::new(),
@@ -110,19 +191,7 @@ impl Editor {
         let x = self.cursor().x;
         let y = self.cursor().y;
 
-        self.current_buffer_mut().focus_hint_y(y);
-        self.current_buffer_mut().focus_hint_x(x);
-    }
-
-    #[inline]
-    /// Get a reference to the currently open buffer.
-    pub fn current_buffer(&self) -> &SplitBuffer {
-        &self.buffers[self.current_buffer_index]
-    }
-
-    #[inline]
-    /// Get a mutable reference to the currently open buffer.
-    pub fn current_buffer_mut(&mut self) -> &mut SplitBuffer {
-        &mut self.buffers[self.current_buffer_index]
+        self.buffers.current_buffer_mut().focus_hint_y(y);
+        self.buffers.current_buffer_mut().focus_hint_x(x);
     }
 }

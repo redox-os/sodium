@@ -30,7 +30,7 @@ pub trait Buffer<'a> {
     fn new() -> Self;
 
     /// Convert a string to a split buffer
-    fn from_str(s: &str, title: &str) -> Self;
+    fn from_str(s: &str) -> Self;
 
     /// Get the nth line in the buffer by option reference
     fn get_line(&self, n: usize) -> Option<&Self::Line>;
@@ -61,9 +61,6 @@ pub trait Buffer<'a> {
 
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
     fn get_indent(&self, n: usize) -> &str;
-
-    /// Get the title of the buffer
-    fn get_title(&self) -> Option<&str>;
 }
 
 
@@ -78,7 +75,6 @@ pub trait Buffer<'a> {
 pub struct SplitBuffer {
     before: Vec<String>,
     after: Vec<String>,
-    title: Option<String>,
     #[cfg(debug)]
     _hinted_since_edit: bool,
 }
@@ -113,15 +109,13 @@ impl<'a> Buffer<'a> for SplitBuffer {
         SplitBuffer {
             before: vec![String::new()],
             after: Vec::new(),
-            title: None,
         }
     }
 
-    fn from_str(s: &str, title: &str) -> Self {
+    fn from_str(s: &str) -> Self {
         SplitBuffer {
             before: s.lines().map(ToOwned::to_owned).collect(),
             after: Vec::new(),
-            title: Some(title.to_owned()),
         }
     }
 
@@ -173,7 +167,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         SplitBuffer {
             before: ln.to_owned(),
             after: Vec::new(),
-            title: None,
         }
     }
 
@@ -217,10 +210,6 @@ impl<'a> Buffer<'a> for SplitBuffer {
         } else {
             ""
         }
-    }
-
-    fn get_title(&self) -> Option<&str> {
-        self.title.as_ref().map(|s| s.as_str())
     }
 }
 

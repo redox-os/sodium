@@ -29,7 +29,7 @@ impl Editor {
     #[inline]
     pub fn current(&self) -> Option<char> {
         let (x, y) = self.pos();
-        match self.current_buffer()[y].chars().nth(x) {
+        match self.buffers.current_buffer()[y].chars().nth(x) {
             Some(c) => Some(c),
             None => None,
         }
@@ -38,29 +38,33 @@ impl Editor {
     /// Get the current cursor
     #[inline]
     pub fn cursor(&self) -> &Cursor {
-        self.cursors.get(self.current_cursor as usize).unwrap()
+        let buffer = self.buffers.current_buffer_info();
+        buffer.cursors.get(buffer.current_cursor as usize).unwrap()
     }
 
     /// Get the current cursor mutably
     #[inline]
     pub fn cursor_mut(&mut self) -> &mut Cursor {
-        self.cursors.get_mut(self.current_cursor as usize).unwrap()
+        let buffer = self.buffers.current_buffer_info_mut();
+        buffer.cursors.get_mut(buffer.current_cursor as usize).unwrap()
     }
 
     /// Go to next cursor
     #[inline]
     pub fn next_cursor(&mut self) {
-        self.current_cursor = (self.current_cursor.wrapping_add(1)) % (self.cursors.len() as u8);
+        let buffer = self.buffers.current_buffer_info_mut();
+        buffer.current_cursor = (buffer.current_cursor.wrapping_add(1)) % (buffer.cursors.len() as u8);
     }
 
     /// Go to previous cursor
     #[inline]
     pub fn prev_cursor(&mut self) {
-        if self.current_cursor != 0 {
-            self.current_cursor -= 1;
+        let buffer = self.buffers.current_buffer_info_mut();
+        if buffer.current_cursor != 0 {
+            buffer.current_cursor -= 1;
         }
         else {
-            self.current_cursor = self.cursors.len() as u8;
+            buffer.current_cursor = buffer.cursors.len() as u8;
         }
     }
 }

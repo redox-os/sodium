@@ -22,8 +22,8 @@ impl Editor {
             Char('j') => Some(self.down(n.d())),
             Char('k') => Some(self.up(n.d())),
             Char('g') => Some((0, n.or(1) - 1)),
-            Char('G') => Some((0, self.current_buffer().len() - 1)),
-            Char('L') => Some((self.current_buffer()[y].len() - 1, y)),
+            Char('G') => Some((0, self.buffers.current_buffer().len() - 1)),
+            Char('L') => Some((self.buffers.current_buffer()[y].len() - 1, y)),
             Char('H') => Some((0, y)),
             Char('t') => {
 
@@ -71,8 +71,8 @@ impl Editor {
             Char('j') => Some(self.down_unbounded(n.d())),
             Char('k') => Some(self.up_unbounded(n.d())),
             Char('g') => Some((0, n.or(1) as isize - 1)),
-            Char('G') => Some((0, self.current_buffer().len() as isize - 1)),
-            Char('L') => Some(to_signed_pos((x, self.current_buffer()[y].len()))),
+            Char('G') => Some((0, self.buffers.current_buffer().len() as isize - 1)),
+            Char('L') => Some(to_signed_pos((x, self.buffers.current_buffer()[y].len()))),
             Char('H') => Some((0, y as isize)),
             Char('t') => {
 

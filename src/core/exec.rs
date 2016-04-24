@@ -53,12 +53,12 @@ impl Editor {
             (Command(Normal), Char('o')) => {
                 let y = self.y();
                 let ind = if self.options.autoindent {
-                    self.current_buffer().get_indent(y).to_owned()
+                    self.buffers.current_buffer().get_indent(y).to_owned()
                 } else {
                     String::new()
                 };
                 let last = ind.len();
-                self.current_buffer_mut().insert_line(y, ind.into());
+                self.buffers.current_buffer_mut().insert_line(y, ind.into());
                 self.goto((last, y + 1));
                 self.cursor_mut().mode =
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
@@ -106,7 +106,7 @@ impl Editor {
                 self.goto(bounded);
             }
             (Command(Normal), Char('L')) => {
-                let ln_end = (self.current_buffer()[self.y()].len(), self.y());
+                let ln_end = (self.buffers.current_buffer()[self.y()].len(), self.y());
                 self.goto(ln_end);
                 mov = true;
             }
@@ -117,12 +117,13 @@ impl Editor {
             (Command(Normal), Char('r')) => {
                 let (x, y) = self.pos();
                 let c = self.get_char();
+                let current_buffer = self.buffers.current_buffer_info_mut();
                 // If there is nothing in the current buffer
                 // ignore the command
-                if self.current_buffer()[y].len() > 0 {
-                    self.current_buffer_mut()[y].remove(x);
+                if current_buffer.raw_buffer[y].len() > 0 {
+                    current_buffer.raw_buffer[y].remove(x);
                 }
-                self.current_buffer_mut()[y].insert(x, c);
+                current_buffer.raw_buffer[y].insert(x, c);
             }
             (Command(Normal), Char('R')) => {
                 self.cursor_mut().mode =
@@ -137,7 +138,7 @@ impl Editor {
                 }
             }
             (Command(Normal), Char('G')) => {
-                let last = self.current_buffer().len() - 1;
+                let last = self.buffers.current_buffer().len() - 1;
                 self.goto((0, last));
                 mov = true;
             }
@@ -156,9 +157,10 @@ impl Editor {
             }
             (Command(Normal), Char('b')) => {
                 // Branch cursor
-                if self.cursors.len() < 255 {
+                if self.buffers.current_buffer_info().cursors.len() < 255 {
                     let cursor = self.cursor().clone();
-                    self.cursors.insert(self.current_cursor as usize, cursor);
+                    let current_cursor_index = self.buffers.current_buffer_info().current_cursor as usize;
+                    self.buffers.current_buffer_info_mut().cursors.insert(current_cursor_index, cursor);
                     self.next_cursor();
                 }
                 else {
@@ -167,8 +169,9 @@ impl Editor {
             }
             (Command(Normal), Char('B')) => {
                 // Delete cursor
-                if self.cursors.len() > 1 {
-                    self.cursors.remove(self.current_cursor as usize);
+                if self.buffers.current_buffer_info().cursors.len() > 1 {
+                    let current_cursor_index = self.buffers.current_buffer_info().current_cursor;
+                    self.buffers.current_buffer_info_mut().cursors.remove(current_cursor_index as usize);
                     self.prev_cursor();
                 }
                 else {
@@ -203,18 +206,18 @@ impl Editor {
                 match param {
                     Parameter::Null => {
                         if let Some(m) = self.to_motion(Inst(param, cmd)) {
-                            self.scroll_y = m.1;
+                            self.buffers.current_buffer_info_mut().scroll_y = m.1;
                             self.goto(m);
                         }
                     }
                     Parameter::Int(n) => {
-                        self.scroll_y = n;
+                        self.buffers.current_buffer_info_mut().scroll_y = n;
                     }
                 }
                 self.redraw_task = RedrawTask::Full;
             }
             (Command(Normal), Char('Z')) => {
-                self.scroll_y = self.y() - 3;
+                self.buffers.current_buffer_info_mut().scroll_y = self.y() - 3;
                 self.redraw_task = RedrawTask::Full;
             }
             (Command(Normal), Char('~')) => {
