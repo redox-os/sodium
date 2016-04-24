@@ -1,6 +1,7 @@
 use io::file::FileStatus;
 use io::redraw::RedrawTask;
 use state::editor::Editor;
+use edit::buffer::{Buffer, SplitBuffer};
 
 use std::process::exit;
 
@@ -70,6 +71,20 @@ impl Editor {
                     FileStatus::Ok => format!("File {} written", sec_cmd),
                     FileStatus::Other => format!("Couldn't write {}", sec_cmd),
                 }
+            },
+            "ls" => {
+                fn print_buffer(i: usize, b: &SplitBuffer) -> String {
+                    let title = b.get_title().unwrap_or("<No Title>");
+
+                    format!("b{}\t\t\t{}", i, title)
+                }
+
+                let buffer_descriptions : Vec<_> =
+                    self.buffers.iter().enumerate().map(|(i, b)| print_buffer(i, b)).collect();
+
+                self.buffers.push(SplitBuffer::from_str(&buffer_descriptions.join("\n"), "<Buffers>"));
+                self.current_buffer_index = self.buffers.len() - 1;
+                self.redraw_task = RedrawTask::Full;
             },
             "help" => {
                 self.open("/apps/sodium/help.txt");

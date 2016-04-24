@@ -21,7 +21,7 @@ impl Editor {
             let mut con = String::new();
             let _ = file.read_to_string(&mut con);
 
-            self.buffers.push(SplitBuffer::from_str(&con));
+            self.buffers.push(SplitBuffer::from_str(&con, path));
             self.current_buffer_index = self.buffers.len() - 1;
             self.hint();
             FileStatus::Ok
