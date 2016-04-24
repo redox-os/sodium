@@ -1,7 +1,28 @@
 use io::file::FileStatus;
+use io::redraw::RedrawTask;
 use state::editor::Editor;
 
 use std::process::exit;
+
+enum BufferCommand {
+    SwitchToBuffer(usize),
+}
+
+fn try_get_buffer_command(c: &str) -> Option<BufferCommand> {
+    if !c.starts_with("b") {
+        return None;
+    }
+
+    let rest : String = c.chars().skip(1).collect();
+
+    //TODO more buffer commands
+
+    if let Ok(number) = rest.parse::<usize>() {
+        Some(BufferCommand::SwitchToBuffer(number))
+    } else {
+        None
+    }
+}
 
 impl Editor {
     /// Invoke a command in the prompt
@@ -57,7 +78,21 @@ impl Editor {
                 exit(0);
             },
             c => {
-                self.status_bar.msg = format!("Unknown command: {}", c);
+                if let Some(buffer_command) = try_get_buffer_command(c) {
+                    match buffer_command {
+                        BufferCommand::SwitchToBuffer(n) => {
+                            if n >= self.buffers.len() {
+                                self.status_bar.msg = format!("Invalid buffer #{}", n);
+                            } else {
+                                self.current_buffer_index = n;
+                                self.redraw_task = RedrawTask::Full;
+                                self.status_bar.msg = format!("Switched to buffer #{}", n);
+                            }
+                        },
+                    }
+                } else {
+                    self.status_bar.msg = format!("Unknown command: {}", c);
+                }
             }
         }
 
