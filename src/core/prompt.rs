@@ -92,7 +92,7 @@ impl Editor {
                 if let Some(buffer_command) = try_get_buffer_command(c) {
                     match buffer_command {
                         BufferCommand::SwitchToBuffer(n) => {
-                            if n >= self.buffers.len() {
+                            if !self.buffers.is_buffer_index_valid(n) {
                                 self.status_bar.msg = format!("Invalid buffer #{}", n);
                             } else {
                                 self.buffers.switch_to(n);

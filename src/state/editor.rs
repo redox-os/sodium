@@ -142,6 +142,11 @@ impl BufferManager {
             self.current_buffer_index  -= 1;
         }
     }
+
+    /// Validates that the specifed buffer index is valid
+    pub fn is_buffer_index_valid(&self, n: usize) -> bool {
+        n < self.buffers.iter().filter(|b| !b.is_transient).count()
+    }
 }
 
 /// The current state of the editor, including the file, the cursor, the scrolling info, etc.
