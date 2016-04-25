@@ -27,6 +27,9 @@ pub struct BufferInfo {
     pub scroll_y: usize,
     /// The title of the document
     pub title: Option<String>,
+    /// True if the buffer is transient and should be deleted when
+    /// it is no longer the current buffer.
+    pub is_transient: bool,
 }
 
 impl BufferInfo {
@@ -39,6 +42,7 @@ impl BufferInfo {
             scroll_x: 0,
             scroll_y: 0,
             title: None,
+            is_transient: false,
         }
     }
 }
@@ -109,7 +113,34 @@ impl BufferManager {
     pub fn switch_to(&mut self, n: usize) {
         assert!(n < self.buffers.len(), "Buffer index out of bounds");
 
+        // if the current view is transient, delete it
+        let mut n = n;
+        if self.current_buffer_info().is_transient {
+            let index = self.current_buffer_index;
+            self.delete_buffer(index);
+
+            // if the current view is less than the view to switch to
+            // then we need to account for the view we just removed
+            if index <= n {
+                n -= 1;
+            }
+        }
+
         self.current_buffer_index = n;
+    }
+
+    /// Delete the specified buffer
+    pub fn delete_buffer(&mut self, n: usize) {
+        assert!(n < self.buffers.len(), "Buffer index out of bounds");
+
+        self.buffers.remove(n);
+
+        if self.buffers.len() == 0 {
+            self.buffers.push(BufferInfo::new());
+            self.current_buffer_index = 0;
+        } else if self.current_buffer_index <= n {
+            self.current_buffer_index  -= 1;
+        }
     }
 }
 

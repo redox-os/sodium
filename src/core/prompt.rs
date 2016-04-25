@@ -1,6 +1,6 @@
 use io::file::FileStatus;
 use io::redraw::RedrawTask;
-use state::editor::{BufferInfo, Editor};
+use state::editor::{BufferInfo, BufferManager, Editor};
 use edit::buffer::{Buffer, SplitBuffer};
 
 use std::process::exit;
@@ -73,17 +73,10 @@ impl Editor {
                 }
             },
             "ls" => {
-                fn print_buffer(i: usize, b: &BufferInfo) -> String {
-                    let title = b.title.as_ref().map(|s| s.as_str()).unwrap_or("<No Title>");
-
-                    format!("b{}\t\t\t{}", i, title)
-                }
-
-                let buffer_descriptions : Vec<_> =
-                    self.buffers.iter().enumerate().map(|(i, b)| print_buffer(i, b)).collect();
-
-                let mut new_buffer : BufferInfo = SplitBuffer::from_str(&buffer_descriptions.join("\n")).into();
+                let description = get_buffers_description(&self.buffers);
+                let mut new_buffer : BufferInfo = SplitBuffer::from_str(&description).into();
                 new_buffer.title = Some("<Buffers>".into());
+                new_buffer.is_transient = true; //delete the buffer when the user switches away
 
                 let new_buffer_index = self.buffers.new_buffer(new_buffer);
                 self.buffers.switch_to(new_buffer_index);
@@ -116,4 +109,24 @@ impl Editor {
 
         self.hint();
     }
+}
+
+fn get_buffers_description(buffers: &BufferManager) -> String {
+    fn print_buffer(i: usize, b: &BufferInfo) -> String {
+        let title = b.title.as_ref().map(|s| s.as_str()).unwrap_or("<No Title>");
+
+        format!("b{}\t\t\t{}", i, title)
+    }
+
+    let descriptions =
+        buffers
+            .iter()
+            // don't include transient buffers like the one
+            // this is going to be shown in
+            .filter(|b| !b.is_transient)
+            .enumerate()
+            .map(|(i, b)| print_buffer(i, b))
+            .collect::<Vec<_>>();
+
+    descriptions.join("\n")
 }
