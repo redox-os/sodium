@@ -126,7 +126,8 @@ fn get_buffers_description(buffers: &BufferManager) -> String {
             .filter(|b| !b.is_transient)
             .enumerate()
             .map(|(i, b)| print_buffer(i, b))
-            .collect::<Vec<_>>();
+            .collect::<Vec<_>>()
+            .join("\n");
 
-    descriptions.join("\n")
+    format!("Buffers\n=====================================\n\n{}", descriptions)
 }
