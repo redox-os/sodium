@@ -3,7 +3,7 @@ use io::parse::{Inst, Parameter};
 use state::mode::{Mode, CommandMode, PrimitiveMode};
 use edit::insert::{InsertOptions, InsertMode};
 use io::redraw::RedrawTask;
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 
 // TODO: Move the command definitions outta here
 impl Editor {

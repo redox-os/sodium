@@ -1,5 +1,5 @@
 use caret::position::to_signed_pos;
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 use io::parse::Inst;
 use state::editor::Editor;
 

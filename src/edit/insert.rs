@@ -1,4 +1,4 @@
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 use io::key::Key;
 use io::redraw::RedrawTask;
 use state::editor::Editor;

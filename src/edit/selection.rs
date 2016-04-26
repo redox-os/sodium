@@ -1,4 +1,4 @@
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 use state::editor::Editor;
 
 impl Editor {

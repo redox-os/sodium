@@ -1,4 +1,4 @@
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 use io::redraw::RedrawTask;
 use state::editor::Editor;
 use state::mode::{Mode, PrimitiveMode};

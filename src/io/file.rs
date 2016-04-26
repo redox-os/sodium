@@ -1,5 +1,5 @@
-use edit::buffer::{Buffer, SplitBuffer};
-use state::editor::{BufferInfo, Editor};
+use edit::buffer::{TextBuffer, SplitBuffer};
+use state::editor::{Buffer, Editor};
 use std::fs::File;
 use std::io::{Read, Write};
 
@@ -20,7 +20,7 @@ impl Editor {
             let mut con = String::new();
             let _ = file.read_to_string(&mut con);
 
-            let mut new_buffer : BufferInfo = SplitBuffer::from_str(&con).into();
+            let mut new_buffer: Buffer = SplitBuffer::from_str(&con).into();
             new_buffer.title = Some(path.into());
 
             let new_buffer_index = self.buffers.new_buffer(new_buffer);

@@ -1,5 +1,5 @@
 use std::slice::Iter;
-use edit::buffer::{Buffer, SplitBuffer};
+use edit::buffer::{TextBuffer, SplitBuffer};
 use state::cursor::Cursor;
 use io::graphics::StatusBar;
 use io::key::{Key, Cmd};
@@ -14,7 +14,7 @@ use orbclient::Window;
 use std::env::args;
 
 /// A SplitBuffer and related state
-pub struct BufferInfo {
+pub struct Buffer {
     /// The document
     pub raw_buffer: SplitBuffer,
     /// The current cursor
@@ -32,10 +32,10 @@ pub struct BufferInfo {
     pub is_transient: bool,
 }
 
-impl BufferInfo {
-    /// Create a new BufferInfo with default values.
-    fn new() -> BufferInfo {
-        BufferInfo {
+impl Buffer {
+    /// Create a new Buffer with default values.
+    fn new() -> Buffer {
+        Buffer {
             raw_buffer: SplitBuffer::new(),
             current_cursor: 0,
             cursors: vec![Cursor::new()],
@@ -47,9 +47,9 @@ impl BufferInfo {
     }
 }
 
-impl From<SplitBuffer> for BufferInfo {
-    fn from(b: SplitBuffer) -> BufferInfo {
-        let mut info = BufferInfo::new();
+impl From<SplitBuffer> for Buffer {
+    fn from(b: SplitBuffer) -> Buffer {
+        let mut info = Buffer::new();
         info.raw_buffer = b;
 
         info
@@ -58,7 +58,7 @@ impl From<SplitBuffer> for BufferInfo {
 
 /// Provides access to buffer manipulation functions.
 pub struct BufferManager {
-    buffers: Vec<BufferInfo>,
+    buffers: Vec<Buffer>,
     current_buffer_index: usize,
 }
 
@@ -66,21 +66,21 @@ impl BufferManager {
     /// Create a new BufferManager with default values.
     pub fn new() -> BufferManager {
         BufferManager {
-            buffers: vec![BufferInfo::new()],
+            buffers: vec![Buffer::new()],
             current_buffer_index: 0,
         }
     }
 
     /// Adds the specified buffer to the set of buffers and returns
     /// its index.
-    pub fn new_buffer(&mut self, buffer: BufferInfo) -> usize {
+    pub fn new_buffer(&mut self, buffer: Buffer) -> usize {
         self.buffers.push(buffer);
 
         self.buffers.len() - 1
     }
 
     /// Returns an iterator over the buffers.
-    pub fn iter(&self) -> Iter<BufferInfo> {
+    pub fn iter(&self) -> Iter<Buffer> {
         self.buffers.iter()
     }
 
@@ -100,12 +100,12 @@ impl BufferManager {
     }
 
     /// Get a reference to the currently open buffer information.
-    pub fn current_buffer_info(&self) -> &BufferInfo {
+    pub fn current_buffer_info(&self) -> &Buffer {
         &self.buffers[self.current_buffer_index]
     }
 
     /// Get a mutable reference to the currently open buffer information.
-    pub fn current_buffer_info_mut(&mut self) -> &mut BufferInfo {
+    pub fn current_buffer_info_mut(&mut self) -> &mut Buffer {
         &mut self.buffers[self.current_buffer_index]
     }
 
@@ -136,7 +136,7 @@ impl BufferManager {
         self.buffers.remove(n);
 
         if self.buffers.len() == 0 {
-            self.buffers.push(BufferInfo::new());
+            self.buffers.push(Buffer::new());
             self.current_buffer_index = 0;
         } else if self.current_buffer_index <= n {
             self.current_buffer_index  -= 1;

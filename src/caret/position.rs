@@ -1,4 +1,4 @@
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 use state::editor::Editor;
 
 /// Convert a usize tuple to isize

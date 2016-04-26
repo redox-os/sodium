@@ -1,7 +1,7 @@
 use io::file::FileStatus;
 use io::redraw::RedrawTask;
-use state::editor::{BufferInfo, BufferManager, Editor};
-use edit::buffer::{Buffer, SplitBuffer};
+use state::editor::{Buffer, BufferManager, Editor};
+use edit::buffer::{TextBuffer, SplitBuffer};
 
 use std::process::exit;
 
@@ -54,7 +54,7 @@ impl Editor {
             },
             "ls" => {
                 let description = get_buffers_description(&self.buffers);
-                let mut new_buffer: BufferInfo = SplitBuffer::from_str(&description).into();
+                let mut new_buffer: Buffer = SplitBuffer::from_str(&description).into();
                 new_buffer.title = Some("<Buffers>".into());
                 new_buffer.is_transient = true; // delete the buffer when the user switches away
 
@@ -94,7 +94,7 @@ impl Editor {
 }
 
 fn get_buffers_description(buffers: &BufferManager) -> String {
-    fn print_buffer(i: usize, b: &BufferInfo) -> String {
+    fn print_buffer(i: usize, b: &Buffer) -> String {
         let title = b.title.as_ref().map(|s| s.as_str()).unwrap_or("<No Title>");
 
         format!("b{}\t\t\t{}", i, title)
