@@ -62,6 +62,11 @@ impl Editor {
                 self.buffers.switch_to(new_buffer_index);
                 self.redraw_task = RedrawTask::Full;
             },
+            "bd" => {
+                let ix = self.buffers.current_buffer_index();
+                self.buffers.delete_buffer(ix);
+                self.redraw_task = RedrawTask::Full;
+            },
             "help" => {
                 self.open("/apps/sodium/help.txt");
             },

@@ -89,6 +89,11 @@ impl BufferManager {
         self.buffers.len()
     }
 
+    /// Gets the index of the current buffer.
+    pub fn current_buffer_index(&self) -> usize {
+        self.current_buffer_index
+    }
+
     /// Get a reference to the currently open buffer.
     pub fn current_buffer(&self) -> &SplitBuffer {
         &self.current_buffer_info().raw_buffer
