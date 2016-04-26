@@ -1,5 +1,7 @@
 use io::file::FileStatus;
-use state::editor::Editor;
+use io::redraw::RedrawTask;
+use state::editor::{Buffer, BufferManager, Editor};
+use edit::buffer::{TextBuffer, SplitBuffer};
 
 use std::process::exit;
 
@@ -50,6 +52,21 @@ impl Editor {
                     FileStatus::Other => format!("Couldn't write {}", sec_cmd),
                 }
             },
+            "ls" => {
+                let description = get_buffers_description(&self.buffers);
+                let mut new_buffer: Buffer = SplitBuffer::from_str(&description).into();
+                new_buffer.title = Some("<Buffers>".into());
+                new_buffer.is_transient = true; // delete the buffer when the user switches away
+
+                let new_buffer_index = self.buffers.new_buffer(new_buffer);
+                self.buffers.switch_to(new_buffer_index);
+                self.redraw_task = RedrawTask::Full;
+            },
+            "bd" => {
+                let ix = self.buffers.current_buffer_index();
+                self.buffers.delete_buffer(ix);
+                self.redraw_task = RedrawTask::Full;
+            },
             "help" => {
                 self.open("/apps/sodium/help.txt");
             },
@@ -57,10 +74,47 @@ impl Editor {
                 exit(0);
             },
             c => {
-                self.status_bar.msg = format!("Unknown command: {}", c);
+                if c.starts_with("b") {
+                    let rest: String = c.chars().skip(1).collect();
+
+                    if let Ok(number) = rest.parse::<usize>() {
+                        if !self.buffers.is_buffer_index_valid(number) {
+                            self.status_bar.msg = format!("Invalid buffer #{}", number);
+                        } else {
+                            self.buffers.switch_to(number);
+                            self.redraw_task = RedrawTask::Full;
+                            self.status_bar.msg = format!("Switched to buffer #{}", number);
+                        }
+                    } else {
+                        self.status_bar.msg = format!("Unknown command: {}", c);
+                    }
+                } else {
+                    self.status_bar.msg = format!("Unknown command: {}", c);
+                }
             }
         }
 
         self.hint();
     }
+}
+
+fn get_buffers_description(buffers: &BufferManager) -> String {
+    fn print_buffer(i: usize, b: &Buffer) -> String {
+        let title = b.title.as_ref().map(|s| s.as_str()).unwrap_or("<No Title>");
+
+        format!("b{}\t\t\t{}", i, title)
+    }
+
+    let descriptions =
+        buffers
+            .iter()
+            // don't include transient buffers like the one
+            // this is going to be shown in
+            .filter(|b| !b.is_transient)
+            .enumerate()
+            .map(|(i, b)| print_buffer(i, b))
+            .collect::<Vec<_>>()
+            .join("\n");
+
+    format!("Buffers\n=====================================\n\n{}", descriptions)
 }

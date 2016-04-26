@@ -20,7 +20,7 @@ impl<'a, T: AsRef<str>> Line<'a> for T {
 }
 
 /// A buffer structure
-pub trait Buffer<'a> {
+pub trait TextBuffer<'a> {
     /// The line type of the buffer.
     type Line: 'a + Line<'a>;
     /// The line iterator.
@@ -101,7 +101,7 @@ impl SplitBuffer {
     }
 }
 
-impl<'a> Buffer<'a> for SplitBuffer {
+impl<'a> TextBuffer<'a> for SplitBuffer {
     type Line = String;
     type LineIter = SplitBufIter<'a>;
 

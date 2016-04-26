@@ -1,4 +1,4 @@
-use edit::buffer::Buffer;
+use edit::buffer::TextBuffer;
 use state::editor::Editor;
 
 /// Convert a usize tuple to isize
@@ -31,13 +31,13 @@ impl Editor {
     pub fn bound(&self, (x, mut y): (usize, usize), tight: bool) -> (usize, usize) {
 
 
-        y = if y >= self.buffer.len() {
-            self.buffer.len() - 1
+        y = if y >= self.buffers.current_buffer().len() {
+            self.buffers.current_buffer().len() - 1
         } else {
             y
         };
 
-        let ln = self.buffer[y].len() + if tight {0} else {1};
+        let ln = self.buffers.current_buffer()[y].len() + if tight {0} else {1};
         if x >= ln {
             if ln == 0 {
                 (0, y)
@@ -61,8 +61,8 @@ impl Editor {
     pub fn bound_ver(&self, (x, mut y): (usize, usize)) -> (usize, usize) {
 
         // Is this premature optimization? Yes, yes it is!
-        y = if y > self.buffer.len() - 1 {
-            self.buffer.len() - 1
+        y = if y > self.buffers.current_buffer().len() - 1 {
+            self.buffers.current_buffer().len() - 1
         } else {
             y
         };

@@ -124,9 +124,12 @@ Following commands are valid:
 - unset <option> : Unset <option>
 - toggle <option> : Toggle <option>
 - get <option> : Get the state of <option>
-- o <filename> : Open <filename>
+- o <filename> : Open <filename> in a new buffer
 - help : Open this guide.
 - w <filename> : Write the buffer to <filename>
+- ls : List the available buffers
+- b<numeral> : Switch to buffer <numeral>
+- bd : Delete the current buffer
 - q : Quit Sodium.
 
 Following option exists:

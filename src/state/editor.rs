@@ -1,4 +1,5 @@
-use edit::buffer::{Buffer, SplitBuffer};
+use std::slice::Iter;
+use edit::buffer::{TextBuffer, SplitBuffer};
 use state::cursor::Cursor;
 use io::graphics::StatusBar;
 use io::key::{Key, Cmd};
@@ -12,18 +13,151 @@ use orbclient::Window;
 
 use std::env::args;
 
-/// The current state of the editor, including the file, the cursor, the scrolling info, etc.
-pub struct Editor {
+/// A SplitBuffer and related state
+pub struct Buffer {
+    /// The document
+    pub raw_buffer: SplitBuffer,
     /// The current cursor
     pub current_cursor: u8,
     /// The cursors
     pub cursors: Vec<Cursor>,
-    /// The buffer (document)
-    pub buffer: SplitBuffer,
     /// The x coordinate of the scroll
     pub scroll_x: usize,
     /// The y coordinate of the scroll
     pub scroll_y: usize,
+    /// The title of the document
+    pub title: Option<String>,
+    /// True if the buffer is transient and should be deleted when
+    /// it is no longer the current buffer.
+    pub is_transient: bool,
+}
+
+impl Buffer {
+    /// Create a new Buffer with default values.
+    fn new() -> Buffer {
+        Buffer {
+            raw_buffer: SplitBuffer::new(),
+            current_cursor: 0,
+            cursors: vec![Cursor::new()],
+            scroll_x: 0,
+            scroll_y: 0,
+            title: None,
+            is_transient: false,
+        }
+    }
+}
+
+impl From<SplitBuffer> for Buffer {
+    fn from(b: SplitBuffer) -> Buffer {
+        let mut info = Buffer::new();
+        info.raw_buffer = b;
+
+        info
+    }
+}
+
+/// Provides access to buffer manipulation functions.
+pub struct BufferManager {
+    buffers: Vec<Buffer>,
+    current_buffer_index: usize,
+}
+
+impl BufferManager {
+    /// Create a new BufferManager with default values.
+    pub fn new() -> BufferManager {
+        BufferManager {
+            buffers: vec![Buffer::new()],
+            current_buffer_index: 0,
+        }
+    }
+
+    /// Adds the specified buffer to the set of buffers and returns
+    /// its index.
+    pub fn new_buffer(&mut self, buffer: Buffer) -> usize {
+        self.buffers.push(buffer);
+
+        self.buffers.len() - 1
+    }
+
+    /// Returns an iterator over the buffers.
+    pub fn iter(&self) -> Iter<Buffer> {
+        self.buffers.iter()
+    }
+
+    /// Gets the number of buffers.
+    pub fn len(&self) -> usize {
+        self.buffers.len()
+    }
+
+    /// Gets the index of the current buffer.
+    pub fn current_buffer_index(&self) -> usize {
+        self.current_buffer_index
+    }
+
+    /// Get a reference to the currently open buffer.
+    pub fn current_buffer(&self) -> &SplitBuffer {
+        &self.current_buffer_info().raw_buffer
+    }
+
+    /// Get a mutable reference to the currently open buffer.
+    pub fn current_buffer_mut(&mut self) -> &mut SplitBuffer {
+        &mut self.current_buffer_info_mut().raw_buffer
+    }
+
+    /// Get a reference to the currently open buffer information.
+    pub fn current_buffer_info(&self) -> &Buffer {
+        &self.buffers[self.current_buffer_index]
+    }
+
+    /// Get a mutable reference to the currently open buffer information.
+    pub fn current_buffer_info_mut(&mut self) -> &mut Buffer {
+        &mut self.buffers[self.current_buffer_index]
+    }
+
+    /// Switch the current buffer to the specified buffer
+    pub fn switch_to(&mut self, n: usize) {
+        debug_assert!(n < self.buffers.len(), "Buffer index out of bounds");
+
+        // if the current view is transient, delete it
+        let mut n = n;
+        if self.current_buffer_info().is_transient {
+            let index = self.current_buffer_index;
+            self.delete_buffer(index);
+
+            // if the current view is less than the view to switch to
+            // then we need to account for the view we just removed
+            if index <= n {
+                n -= 1;
+            }
+        }
+
+        self.current_buffer_index = n;
+    }
+
+    /// Delete the specified buffer
+    pub fn delete_buffer(&mut self, n: usize) {
+        assert!(n < self.buffers.len(), "Buffer index out of bounds");
+
+        self.buffers.remove(n);
+
+        if self.buffers.len() == 0 {
+            self.buffers.push(Buffer::new());
+            self.current_buffer_index = 0;
+        } else if self.current_buffer_index <= n {
+            self.current_buffer_index  -= 1;
+        }
+    }
+
+    /// Validates that the specifed buffer index is valid
+    pub fn is_buffer_index_valid(&self, n: usize) -> bool {
+        n < self.buffers.iter().filter(|b| !b.is_transient).count()
+    }
+}
+
+/// The current state of the editor, including the file, the cursor, the scrolling info, etc.
+pub struct Editor {
+    /// The buffers and related state
+    pub buffers: BufferManager,
     /// The window
     #[cfg(feature = "orbital")]
     pub window: Window,
@@ -50,11 +184,7 @@ impl Editor {
 
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
-            current_cursor: 0,
-            cursors: vec![Cursor::new()],
-            buffer: SplitBuffer::new(),
-            scroll_x: 0,
-            scroll_y: 0,
+            buffers: BufferManager::new(),
             window: *window, // ORBITAL SPECIFIC!
             status_bar: StatusBar::new(),
             prompt: String::new(),
@@ -66,11 +196,7 @@ impl Editor {
 
         #[cfg(not(feature = "orbital"))]
         let mut editor = Editor {
-            current_cursor: 0,
-            cursors: vec![Cursor::new()],
-            buffer: SplitBuffer::new(),
-            scroll_x: 0,
-            scroll_y: 0,
+            buffers: BufferManager::new(),
             status_bar: StatusBar::new(),
             prompt: String::new(),
             options: Options::new(),
@@ -106,7 +232,7 @@ impl Editor {
         let x = self.cursor().x;
         let y = self.cursor().y;
 
-        self.buffer.focus_hint_y(y);
-        self.buffer.focus_hint_x(x);
+        self.buffers.current_buffer_mut().focus_hint_y(y);
+        self.buffers.current_buffer_mut().focus_hint_x(x);
     }
 }
