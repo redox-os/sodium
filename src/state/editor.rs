@@ -76,7 +76,7 @@ impl BufferManager {
     pub fn new_buffer(&mut self, buffer: BufferInfo) -> usize {
         self.buffers.push(buffer);
 
-        self.buffers.len() -1
+        self.buffers.len() - 1
     }
 
     /// Returns an iterator over the buffers.
@@ -111,7 +111,7 @@ impl BufferManager {
 
     /// Switch the current buffer to the specified buffer
     pub fn switch_to(&mut self, n: usize) {
-        assert!(n < self.buffers.len(), "Buffer index out of bounds");
+        debug_assert!(n < self.buffers.len(), "Buffer index out of bounds");
 
         // if the current view is transient, delete it
         let mut n = n;

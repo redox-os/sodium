@@ -5,26 +5,6 @@ use edit::buffer::{Buffer, SplitBuffer};
 
 use std::process::exit;
 
-enum BufferCommand {
-    SwitchToBuffer(usize),
-}
-
-fn try_get_buffer_command(c: &str) -> Option<BufferCommand> {
-    if !c.starts_with("b") {
-        return None;
-    }
-
-    let rest : String = c.chars().skip(1).collect();
-
-    //TODO more buffer commands
-
-    if let Ok(number) = rest.parse::<usize>() {
-        Some(BufferCommand::SwitchToBuffer(number))
-    } else {
-        None
-    }
-}
-
 impl Editor {
     /// Invoke a command in the prompt
     pub fn invoke(&mut self, cmd: String) {
@@ -74,9 +54,9 @@ impl Editor {
             },
             "ls" => {
                 let description = get_buffers_description(&self.buffers);
-                let mut new_buffer : BufferInfo = SplitBuffer::from_str(&description).into();
+                let mut new_buffer: BufferInfo = SplitBuffer::from_str(&description).into();
                 new_buffer.title = Some("<Buffers>".into());
-                new_buffer.is_transient = true; //delete the buffer when the user switches away
+                new_buffer.is_transient = true; // delete the buffer when the user switches away
 
                 let new_buffer_index = self.buffers.new_buffer(new_buffer);
                 self.buffers.switch_to(new_buffer_index);
@@ -89,17 +69,19 @@ impl Editor {
                 exit(0);
             },
             c => {
-                if let Some(buffer_command) = try_get_buffer_command(c) {
-                    match buffer_command {
-                        BufferCommand::SwitchToBuffer(n) => {
-                            if !self.buffers.is_buffer_index_valid(n) {
-                                self.status_bar.msg = format!("Invalid buffer #{}", n);
-                            } else {
-                                self.buffers.switch_to(n);
-                                self.redraw_task = RedrawTask::Full;
-                                self.status_bar.msg = format!("Switched to buffer #{}", n);
-                            }
-                        },
+                if c.starts_with("b") {
+                    let rest: String = c.chars().skip(1).collect();
+
+                    if let Ok(number) = rest.parse::<usize>() {
+                        if !self.buffers.is_buffer_index_valid(number) {
+                            self.status_bar.msg = format!("Invalid buffer #{}", number);
+                        } else {
+                            self.buffers.switch_to(number);
+                            self.redraw_task = RedrawTask::Full;
+                            self.status_bar.msg = format!("Switched to buffer #{}", number);
+                        }
+                    } else {
+                        self.status_bar.msg = format!("Unknown command: {}", c);
                     }
                 } else {
                     self.status_bar.msg = format!("Unknown command: {}", c);
