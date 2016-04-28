@@ -67,7 +67,7 @@ impl Editor {
                 self.buffers.delete_buffer(ix);
                 self.redraw_task = RedrawTask::Full;
             },
-            "help" => {
+            "h" | "help" => {
                 self.open("/apps/sodium/help.txt");
             },
             "q" | "quit" => {
