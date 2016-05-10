@@ -5,54 +5,134 @@ use edit::buffer::{TextBuffer, SplitBuffer};
 
 use std::process::exit;
 
-impl Editor {
-    /// Invoke a command in the prompt
-    pub fn invoke(&mut self, cmd: String) {
-        let mut split = cmd.split(' ');
+/// Prompt mode commands.
+pub enum PromptCommand<'a> {
+    /// Set an option.
+    Set {
+        /// The option to set.
+        option: &'a str
+    },
+    /// Unset an option.
+    Unset {
+        /// The option to unset.
+        option: &'a str
+    },
+    /// Toggle an option.
+    Toggle {
+        /// The option to toggle.
+        option: &'a str
+    },
+    /// Get whether an option is set or not.
+    Get {
+        /// The option to get.
+        option: &'a str
+    },
+    /// Open the specified file in a new buffer.
+    Open {
+        /// The path to open.
+        path: &'a str
+    },
+    /// Write the current buffer to the specified path.
+    Write {
+        /// The path to write to.
+        path: &'a str
+    },
+    /// List the available buffers.
+    ListBuffers,
+    /// Delete the current buffer.
+    DeleteBuffer,
+    /// Switch to the nth buffer.
+    SwitchToBuffer {
+        /// The index of the buffer to switch to.
+        buffer_index: usize
+    },
+    /// Display help in a new buffer.
+    Help,
+    /// Exit Sodium.
+    Quit,
+}
+
+impl<'a> PromptCommand<'a> {
+    /// Parse a string to get a PromptCommand. If the parse fails,
+    /// None is returned.
+    pub fn parse(s: &'a str) -> Option<PromptCommand<'a>> {
+        use self::PromptCommand::*;
+
+        let mut split = s.split(' ');
         let base_cmd = split.nth(0).unwrap_or("");
         let sec_cmd = split.nth(0).unwrap_or("");
 
-        match base_cmd {
-            "set" => {
-                self.status_bar.msg = match self.options.set(sec_cmd) {
-                    Ok(()) => format!("Option set: {}", sec_cmd),
-                    Err(()) => format!("Option does not exist: {}", sec_cmd),
+        Some(match base_cmd {
+            "set" => Set { option: sec_cmd },
+            "unset" => Unset { option: sec_cmd },
+            "toggle" | "tog" => Toggle { option: sec_cmd },
+            "get" => Get { option: sec_cmd },
+            "o" | "open" => Open { path: sec_cmd },
+            "w" | "write" => Write { path: sec_cmd },
+            "ls" => ListBuffers,
+            "bd" => DeleteBuffer,
+            "h" | "help" => Help,
+            "q" | "quit" => Quit,
+            bn if bn.starts_with("b") => {
+                let rest: String = bn.chars().skip(1).collect();
+
+                if let Ok(number) = rest.parse::<usize>() {
+                    SwitchToBuffer { buffer_index: number }
+                } else {
+                    return None;
                 }
             },
-            "unset" => {
-                self.status_bar.msg = match self.options.unset(sec_cmd) {
-                    Ok(()) => format!("Option unset: {}", sec_cmd),
-                    Err(()) => format!("Option does not exist: {}", sec_cmd),
+            _ => return None
+        })
+    }
+}
+
+impl Editor {
+    /// Invoke a command in the prompt
+    pub fn invoke<'a>(&mut self, cmd: PromptCommand<'a>) {
+        use self::PromptCommand::*;
+
+        match cmd {
+            Set { option } => {
+                self.status_bar.msg = match self.options.set(option) {
+                    Ok(()) => format!("Option set: {}", option),
+                    Err(()) => format!("Option does not exist: {}", option),
                 }
             },
-            "toggle" | "tog" => {
-                self.status_bar.msg = match self.options.toggle(sec_cmd) {
-                    Ok(()) => format!("Option toggled: {}", sec_cmd),
-                    Err(()) => format!("Option does not exist: {}", sec_cmd),
+            Unset { option } => {
+                self.status_bar.msg = match self.options.unset(option) {
+                    Ok(()) => format!("Option unset: {}", option),
+                    Err(()) => format!("Option does not exist: {}", option),
                 }
             },
-            "get" => {
-                self.status_bar.msg = match self.options.get(sec_cmd) {
-                    Some(true) => format!("Option set: {}", sec_cmd),
-                    Some(false) => format!("Option unset: {}", sec_cmd),
-                    None => format!("Option does not exist: {}", sec_cmd),
+            Toggle { option } => {
+                self.status_bar.msg = match self.options.toggle(option) {
+                    Ok(()) => format!("Option toggled: {}", option),
+                    Err(()) => format!("Option does not exist: {}", option),
                 }
             },
-            "o" | "open" => {
-                self.status_bar.msg = match self.open(sec_cmd) {
-                    FileStatus::NotFound => format!("File {} could not be opened", sec_cmd),
-                    FileStatus::Ok => format!("File {} opened", sec_cmd),
+            Get { option } => {
+                self.status_bar.msg = match self.options.get(option) {
+                    Some(true) => format!("Option set: {}", option),
+                    Some(false) => format!("Option unset: {}", option),
+                    None => format!("Option does not exist: {}", option),
+                }
+            },
+            Open { path } => {
+                self.status_bar.msg = match self.open(path) {
+                    FileStatus::NotFound => format!("File {} could not be opened", path),
+                    FileStatus::Ok => format!("File {} opened", path),
                     _ => unreachable!(),
                 }
             },
-            "w" | "write" => {
-                self.status_bar.msg = match self.write(sec_cmd) {
-                    FileStatus::NotFound => format!("File {} could not be opened", sec_cmd),
-                    FileStatus::Ok => format!("File {} written", sec_cmd),
-                    FileStatus::Other => format!("Couldn't write {}", sec_cmd),
+            Write { path } => {
+                self.status_bar.msg = match self.write(path) {
+                    FileStatus::NotFound => format!("File {} could not be opened", path),
+                    FileStatus::Ok => format!("File {} written", path),
+                    FileStatus::Other => format!("Couldn't write {}", path),
                 }
             },
-            "ls" => {
+            ListBuffers => {
                 let description = get_buffers_description(&self.buffers);
                 let mut new_buffer: Buffer = SplitBuffer::from_str(&description).into();
                 new_buffer.title = Some("<Buffers>".into());
@@ -62,36 +142,26 @@ impl Editor {
                 self.buffers.switch_to(new_buffer_index);
                 self.redraw_task = RedrawTask::Full;
             },
-            "bd" => {
+            SwitchToBuffer { buffer_index: ix } => {
+                if !self.buffers.is_buffer_index_valid(ix) {
+                    self.status_bar.msg = format!("Invalid buffer #{}", ix);
+                } else {
+                    self.buffers.switch_to(ix);
+                    self.redraw_task = RedrawTask::Full;
+                    self.status_bar.msg = format!("Switched to buffer #{}", ix);
+                }
+            },
+            DeleteBuffer => {
                 let ix = self.buffers.current_buffer_index();
                 self.buffers.delete_buffer(ix);
                 self.redraw_task = RedrawTask::Full;
             },
-            "h" | "help" => {
+            Help => {
                 self.open("/apps/sodium/help.txt");
             },
-            "q" | "quit" => {
+            Quit => {
                 exit(0);
             },
-            c => {
-                if c.starts_with("b") {
-                    let rest: String = c.chars().skip(1).collect();
-
-                    if let Ok(number) = rest.parse::<usize>() {
-                        if !self.buffers.is_buffer_index_valid(number) {
-                            self.status_bar.msg = format!("Invalid buffer #{}", number);
-                        } else {
-                            self.buffers.switch_to(number);
-                            self.redraw_task = RedrawTask::Full;
-                            self.status_bar.msg = format!("Switched to buffer #{}", number);
-                        }
-                    } else {
-                        self.status_bar.msg = format!("Unknown command: {}", c);
-                    }
-                } else {
-                    self.status_bar.msg = format!("Unknown command: {}", c);
-                }
-            }
         }
 
         self.hint();
