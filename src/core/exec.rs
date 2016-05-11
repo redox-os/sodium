@@ -4,6 +4,7 @@ use state::mode::{Mode, CommandMode, PrimitiveMode};
 use edit::insert::{InsertOptions, InsertMode};
 use io::redraw::RedrawTask;
 use edit::buffer::TextBuffer;
+use core::prompt::PromptCommand;
 
 // TODO: Move the command definitions outta here
 impl Editor {
@@ -238,11 +239,13 @@ impl Editor {
             (Primitive(Insert(opt)), k) => self.insert(k, opt),
             (Primitive(Prompt), Char('\n')) => {
                 self.cursor_mut().mode = Command(Normal);
-                let cmd = self.prompt.clone();
-
-                self.invoke(cmd);
-                self.prompt = String::new();
-                self.redraw_task = RedrawTask::StatusBar;
+                if let Some(cmd) = PromptCommand::parse(&self.prompt.clone()) {;
+                    self.invoke(cmd);
+                    self.prompt = String::new();
+                    self.redraw_task = RedrawTask::StatusBar;
+                } else {
+                    self.status_bar.msg = format!("Unknown command: {}", self.prompt);
+                }
             },
             (Primitive(Prompt), Backspace) => {
                 self.prompt.pop();
