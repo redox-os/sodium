@@ -4,7 +4,7 @@ use state::editor::Editor;
 use state::mode::Mode;
 
 #[cfg(feature = "orbital")]
-use orbclient::{EventOption, Event};
+use orbclient::EventOption;
 
 #[derive(Copy, Clone)]
 /// An instruction, i.e. a command and a numeral parameter
@@ -42,18 +42,17 @@ impl Editor {
     pub fn get_char(&mut self) -> char {
         #[cfg(feature = "orbital")]
         loop {
-            match self.window
-                      .events().next()
-                      .unwrap_or(Event::new())
-                      .to_option() {
-                EventOption::Key(k) => {
-                    if let Some(Key::Char(c)) = self.key_state.feed(k) {
-                        self.status_bar.cmd.push(c);
-                        self.redraw_task = RedrawTask::StatusBar;
-                        return c;
-                    }
-                },
-                _ => {},
+            for event in  self.window.events() {
+                match event.to_option(){
+                    EventOption::Key(k) => {
+                        if let Some(Key::Char(c)) = self.key_state.feed(k) {
+                            self.status_bar.cmd.push(c);
+                            self.redraw_task = RedrawTask::StatusBar;
+                            return c;
+                        }
+                    },
+                    _ => {},
+                }
             }
         }
     }
@@ -70,53 +69,53 @@ impl Editor {
         // self.status_bar.cmd = String::new();
         #[cfg(feature = "orbital")]
         loop {
-             match self.window.events().next()
-                       .unwrap_or(Event::new())
-                       .to_option() {
-                EventOption::Key(key_event) => {
-                    if let Some(k) = self.key_state.feed(key_event) {
-                        let c = k.to_char();
-                        self.status_bar.cmd.push(c);
-                        self.redraw_status_bar();
+            for event in self.window.events() {
+                match event.to_option() {
+                    EventOption::Key(key_event) => {
+                        if let Some(k) = self.key_state.feed(key_event) {
+                            let c = k.to_char();
+                            self.status_bar.cmd.push(c);
+                            self.redraw_status_bar();
 
-                        match self.cursor().mode {
-                            Mode::Primitive(_) => {
-                                key = k;
+                            match self.cursor().mode {
+                                Mode::Primitive(_) => {
+                                    key = k;
+                                }
+                                Mode::Command(_) => {
+                                    n = match c {
+                                        '0' ... '9' => {
+                                            unset = false;
+                                            n * 10 + ((c as u8) - b'0') as usize
+                                        }
+                                        _ => {
+
+                                            key = k;
+                                            n
+                                        }
+                                    };
+                                }
+
                             }
-                            Mode::Command(_) => {
-                                n = match c {
-                                    '0' ... '9' => {
-                                        unset = false;
-                                        n * 10 + ((c as u8) - b'0') as usize
-                                    }
-                                    _ => {
-
-                                        key = k;
-                                        n
-                                    }
-                                };
-                            }
-
                         }
-                    }
-                    match key {
-                        Key::Null => {},
-                        _ => {
-                            return Inst(
-                                if unset {
-                                    Parameter::Null
-                                } else {
-                                    Parameter::Int(n)
-                                },
-                                Cmd { key: key }
-                            );
-                        },
-                    }
-                },
-                EventOption::Quit(_) => {
-                    return Inst(Parameter::Null, Cmd { key: Key::Quit });
-                },
-                _ => {},
+                        match key {
+                            Key::Null => {},
+                            _ => {
+                                return Inst(
+                                    if unset {
+                                        Parameter::Null
+                                    } else {
+                                        Parameter::Int(n)
+                                    },
+                                    Cmd { key: key }
+                                );
+                            },
+                        }
+                    },
+                    EventOption::Quit(_) => {
+                        return Inst(Parameter::Null, Cmd { key: Key::Quit });
+                    },
+                    _ => {},
+                }
             }
         }
 
