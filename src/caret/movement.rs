@@ -140,7 +140,7 @@ impl Editor {
     /// Get n'th next ocurrence of a given charecter (relatively to the cursor)
     pub fn next_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let mut x      = self.x();
+        let mut x  = self.x();
 
         for (i, ch) in self.buffers.current_buffer()[self.y()].chars().skip(x).enumerate() {
             if ch == c {
