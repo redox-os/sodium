@@ -144,10 +144,12 @@ impl Editor {
 
         for (i, ch) in self.buffers.current_buffer()[self.y()].chars().skip(x).enumerate() {
             if ch == c {
-                dn += 1;
-                if dn == n {
-                    x += i;
-                    return Some(x);
+                if i > 0 {
+                    dn += 1;
+                    if dn == n {
+                        x += i;
+                        return Some(x);
+                    }
                 }
             }
         }
