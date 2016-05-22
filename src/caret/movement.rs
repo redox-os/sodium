@@ -158,16 +158,15 @@ impl Editor {
     /// Get n'th previous ocurrence of a given charecter (relatively to the cursor)
     pub fn previous_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let x      = self.x();
+        let mut x  = self.x();
         let y      = self.y();
 
-        for ch in self.buffers.current_buffer()[y].chars().rev().skip(self.buffers.current_buffer()[y].len() - x) {
-            if dn == n {
-                if ch == c {
-                    dn += 1;
-                    if dn == n {
-                        return Some(x);
-                    }
+        for (i, ch) in self.buffers.current_buffer()[y].chars().rev().skip(self.buffers.current_buffer()[y].len() - x).enumerate() {
+            if ch == c {
+                dn += 1;
+                if dn == n {
+                    x -= i + 1;
+                    return Some(x);
                 }
             }
         }
