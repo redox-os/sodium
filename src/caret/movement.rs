@@ -175,4 +175,24 @@ impl Editor {
 
         None
     }
+
+    /// Get next WORD forward
+    /// "A WORD consists of a sequence of non-blank characters, separated with
+    /// whitespace.  An empty line is also considered to be a WORD."
+    pub fn _next_word_forward(&self, n: usize) -> Option<usize> {
+        let mut dn = 0;
+        let mut x  = self.x();
+
+        for (i, ch) in self.buffers.current_buffer()[self.y()].chars().skip(x).enumerate() {
+            if ch.is_whitespace() {
+                dn += 1;
+                if dn == n {
+                    x += i + 1;
+                    return Some(x);
+                }
+            }
+        }
+
+        None
+    }
 }
