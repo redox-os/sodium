@@ -185,7 +185,7 @@ impl Editor {
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
             buffers: BufferManager::new(),
-            window: *window, // ORBITAL SPECIFIC!
+            window: window,
             status_bar: StatusBar::new(),
             prompt: String::new(),
             options: Options::new(),
