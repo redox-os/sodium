@@ -26,7 +26,7 @@ impl Options {
         match name {
             "autoindent" | "ai" => Some(&mut self.autoindent),
             "debug" | "debug_mode" => Some(&mut self.debug),
-            "hightlight" | "hl" => Some(&mut self.highlight),
+            "highlight" | "hl" => Some(&mut self.highlight),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(&mut self.line_marker),
             _ => None,
         }
@@ -37,7 +37,7 @@ impl Options {
         match name {
             "autoindent" | "ai" => Some(self.autoindent),
             "debug" | "debug_mode" => Some(self.debug),
-            "hightlight" | "hl" => Some(self.highlight),
+            "highlight" | "hl" => Some(self.highlight),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(self.line_marker),
             _ => None,
         }
