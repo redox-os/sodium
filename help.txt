@@ -161,10 +161,10 @@ not dependent to any mode.
 <numeral> means repeat unless otherwise
 stated.
 
-- <numeral>h : Go right
+- <numeral>h : Go left
 - <numeral>j : Go down
 - <numeral>k : Go up
-- <numeral>l : Go left
+- <numeral>l : Go right
 - <numeral>J : Go 15 down
 - <numeral>K : Go 15 up
 - <numeral>H : Go to the start of
