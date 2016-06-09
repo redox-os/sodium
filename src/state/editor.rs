@@ -248,31 +248,32 @@ impl Editor {
                     break;
                 }
                 _ => {
-                    let mut arg_chars = arg.chars();
-                    if arg_chars.next() == Some('-') {
-                        for ch in arg_chars {
-                            match ch {
-                                'R' => {
-                                    unimplemented!();
-                                    /*
-                                    match editor.options.set("readonly") {
-                                        Ok(_) => debugln!(editor, "Set readonly mode"),
-                                        Err(_) => println!("Could not set readonly mode") 
+                    {
+                        let mut arg_chars = arg.chars();
+                        if arg_chars.next() == Some('-') {
+                            for ch in arg_chars {
+                                match ch {
+                                    'R' => {
+                                        match editor.options.set("readonly") {
+                                            Ok(_) => debugln!(editor, "Set readonly mode"),
+                                            Err(_) => println!("Could not set readonly mode") 
+                                        }
+                                    },
+                                    'h' => {
+                                        println!("{}", HELP);
+                                        return;
+                                    },
+                                    _ => {
+                                        unimplemented!();
                                     }
-                                    */
-                                },
-                                'h' => {
-                                    println!("{}", HELP);
-                                    return;
-                                },
-                                _ => {
-                                    unimplemented!();
                                 }
                             }
+
+                            continue;
                         }
                     }
 
-                    files.push(arg.clone());
+                    files.push(arg);
                 }
             }
         }

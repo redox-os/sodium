@@ -126,10 +126,16 @@ impl Editor {
                 }
             },
             Write { path } => {
-                self.status_bar.msg = match self.write(path) {
-                    FileStatus::NotFound => format!("File {} could not be opened", path),
-                    FileStatus::Ok => format!("File {} written", path),
-                    FileStatus::Other => format!("Couldn't write {}", path),
+                if self.options.get("readonly") == Some(true) {
+                    // TODO: add override (w!)
+                    self.status_bar.msg = format!("File {} is opened in readonly mode", path)
+                }
+                else {
+                    self.status_bar.msg = match self.write(path) {
+                        FileStatus::NotFound => format!("File {} could not be opened", path),
+                        FileStatus::Ok => format!("File {} written", path),
+                        FileStatus::Other => format!("Couldn't write {}", path),
+                    }
                 }
             },
             ListBuffers => {

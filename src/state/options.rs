@@ -20,7 +20,7 @@ impl Options {
             debug: true, // TODO: Let this be `true` only in debug compilation cfg
             highlight: true,
             line_marker: true,
-            readonly: true, // TODO: actually implement read-only mode
+            readonly: false,
         }
     }
 
