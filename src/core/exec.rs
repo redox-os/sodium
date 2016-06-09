@@ -199,6 +199,14 @@ impl Editor {
                     mov = true;
                 }
             }
+            (Command(Normal), Char('W')) => {
+                let pos = self._next_word_forward(n);
+                if let Some(p) = pos {
+                    let y = self.y();
+                    self.goto((p, y));
+                    mov = true;
+                }
+            }
             (Command(Normal), Char(';')) =>
                 self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt),
             (Command(Normal), Char(' ')) => self.next_cursor(),
