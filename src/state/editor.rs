@@ -13,8 +13,7 @@ use orbclient::Window;
 
 use std::env::args;
 
-// TODO: write proper help message
-const HELP: &'static str = "Don't panic!";
+const HELP: &'static str = include_str!("../../help.txt");
 
 /// A SplitBuffer and related state
 pub struct Buffer {
