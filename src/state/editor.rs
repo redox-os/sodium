@@ -221,10 +221,13 @@ impl Editor {
                     return;
                 }
                 "-R" => {
+                    unimplemented!();
+                    /*
                     match editor.options.set("readonly") {
                         Ok(_) => debugln!(editor, "Set readonly mode"),
                         Err(_) => println!("Could not set readonly mode") 
                     }
+                    */
                 }
                 _ => {
                     files.push(arg);
