@@ -13,6 +13,9 @@ use orbclient::Window;
 
 use std::env::args;
 
+// TODO: write proper help message
+const HELP: &'static str = "Don't panic!";
+
 /// A SplitBuffer and related state
 pub struct Buffer {
     /// The document
@@ -205,9 +208,34 @@ impl Editor {
             previous_instruction: None,
         };
 
-        if let Some(x) = args().skip(1).next() {
-            editor.open(&x);
+        let mut files: Vec<String> = Vec::new();
+
+        for arg in args().skip(1) {
+            match arg.as_str() {
+                "--version" => {
+                    println!("Sodium {}", option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"));
+                    return;
+                },
+                "--help" | "-h" => {
+                    println!("{}", HELP);
+                    return;
+                }
+                "-R" => {
+                    match editor.options.set("readonly") {
+                        Ok(_) => debugln!(editor, "Set readonly mode"),
+                        Err(_) => println!("Could not set readonly mode") 
+                    }
+                }
+                _ => {
+                    files.push(arg);
+                }
+            }
         }
+
+        if files.len() > 0 {
+            // TODO: open multiple files into separate buffers
+            editor.open(&files[0]);
+        } 
 
         debugln!(editor, "Starting Sodium");
 

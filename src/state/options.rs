@@ -8,6 +8,8 @@ pub struct Options {
     pub highlight: bool,
     /// Line marker (dimmed background of the current line).
     pub line_marker: bool,
+    /// enables read-only mode
+    pub readonly: bool,
 }
 
 impl Options {
@@ -18,6 +20,7 @@ impl Options {
             debug: true, // TODO: Let this be `true` only in debug compilation cfg
             highlight: true,
             line_marker: true,
+            readonly: true, // TODO: actually implement read-only mode
         }
     }
 
@@ -28,6 +31,7 @@ impl Options {
             "debug" | "debug_mode" => Some(&mut self.debug),
             "highlight" | "hl" => Some(&mut self.highlight),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(&mut self.line_marker),
+            "readonly" | "ro" => Some(&mut self.readonly),
             _ => None,
         }
     }
@@ -39,6 +43,7 @@ impl Options {
             "debug" | "debug_mode" => Some(self.debug),
             "highlight" | "hl" => Some(self.highlight),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(self.line_marker),
+            "readonly" | "ro" => Some(self.readonly),
             _ => None,
         }
     }
