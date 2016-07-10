@@ -7,4 +7,4 @@ accept=*.rs
 accept=*.txt
 accept=*.list
 author=Ticki
-description=A editor inspired by Vim
+description=An editor inspired by Vim
