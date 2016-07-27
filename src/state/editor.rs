@@ -208,27 +208,71 @@ impl Editor {
         };
 
         let mut files: Vec<String> = Vec::new();
+        
+        let mut args_iter = args().skip(1).peekable();
+        loop {
+            let arg = match args_iter.next() {
+                Some(x) => x,
+                None => break
+            };
 
-        for arg in args().skip(1) {
             match arg.as_str() {
                 "--version" => {
                     println!("Sodium {}", option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"));
                     return;
                 },
-                "--help" | "-h" => {
+                "--help" => {
                     println!("{}", HELP);
                     return;
-                }
-                "-R" => {
+                },
+                "-u" => {
                     unimplemented!();
                     /*
-                    match editor.options.set("readonly") {
-                        Ok(_) => debugln!(editor, "Set readonly mode"),
-                        Err(_) => println!("Could not set readonly mode") 
+                    match args_iter.peek() {
+                        Some(config) => {
+                            // this is the config file to use for this session
+                            println!("{}", config);
+                        },
+                        None => {
+                            panic!("No config file specified.");
+                        }
                     }
+                    args_iter.next();
                     */
                 }
+                "--" => {
+                    // everything from here on out is a file
+                    for file in args_iter {
+                        files.push(file);
+                    }
+                    break;
+                }
                 _ => {
+                    {
+                        let mut arg_chars = arg.chars();
+                        if arg_chars.next() == Some('-') {
+                            for ch in arg_chars {
+                                match ch {
+                                    'R' => {
+                                        match editor.options.set("readonly") {
+                                            Ok(_) => debugln!(editor, "Set readonly mode"),
+                                            Err(_) => println!("Could not set readonly mode") 
+                                        }
+                                    },
+                                    'h' => {
+                                        println!("{}", HELP);
+                                        return;
+                                    },
+                                    _ => {
+                                        unimplemented!();
+                                    }
+                                }
+                            }
+
+                            continue;
+                        }
+                    }
+
                     files.push(arg);
                 }
             }
