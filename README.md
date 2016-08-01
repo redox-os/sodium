@@ -1,5 +1,5 @@
 
-<img src="https://raw.githubusercontent.com/redox-os/redox/master/img/Sodium_logo.png" height="200" />
+<img src="https://github.com/redox-os/assets/raw/master/Sodium_logo.png" height="200" />
 
 ## Sodium: Vim 2.0
 
