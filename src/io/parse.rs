@@ -1,6 +1,8 @@
 use io::key::{Cmd, Key};
+#[cfg(feature = "orbital")]
 use io::redraw::RedrawTask;
 use state::editor::Editor;
+#[cfg(feature = "orbital")]
 use state::mode::Mode;
 
 #[cfg(feature = "orbital")]
@@ -42,82 +44,86 @@ impl Editor {
     pub fn get_char(&mut self) -> char {
         #[cfg(feature = "orbital")]
         loop {
-            for event in  self.window.events() {
-                match event.to_option(){
+            for event in self.window.events() {
+                match event.to_option() {
                     EventOption::Key(k) => {
                         if let Some(Key::Char(c)) = self.key_state.feed(k) {
                             self.status_bar.cmd.push(c);
                             self.redraw_task = RedrawTask::StatusBar;
                             return c;
                         }
-                    },
-                    _ => {},
+                    }
+                    _ => {}
                 }
             }
         }
+        #[cfg(not(feature = "orbital"))]
+        '\0'
     }
 
     /// Get the next instruction, i.e. the next input of a command together with a numeral
     /// parameter.
     pub fn get_inst(&mut self) -> Inst {
-        let mut n = 0;
-        let mut unset = true;
-
-        let mut key = Key::Null;
-        self.status_bar.cmd = String::new();
-
-        // self.status_bar.cmd = String::new();
         #[cfg(feature = "orbital")]
-        loop {
-            for event in self.window.events() {
-                match event.to_option() {
-                    EventOption::Key(key_event) => {
-                        if let Some(k) = self.key_state.feed(key_event) {
-                            let c = k.to_char();
-                            self.status_bar.cmd.push(c);
-                            self.redraw_status_bar();
+        {
+            let mut n = 0;
+            let mut unset = true;
 
-                            match self.cursor().mode {
-                                Mode::Primitive(_) => {
-                                    key = k;
+            let mut key = Key::Null;
+            self.status_bar.cmd = String::new();
+
+            // self.status_bar.cmd = String::new();
+            loop {
+                for event in self.window.events() {
+                    match event.to_option() {
+                        EventOption::Key(key_event) => {
+                            if let Some(k) = self.key_state.feed(key_event) {
+                                let c = k.to_char();
+                                self.status_bar.cmd.push(c);
+                                self.redraw_status_bar();
+
+                                match self.cursor().mode {
+                                    Mode::Primitive(_) => {
+                                        key = k;
+                                    }
+                                    Mode::Command(_) => {
+                                        n = match c {
+                                            '0'...'9' => {
+                                                unset = false;
+                                                n * 10 + ((c as u8) - b'0') as usize
+                                            }
+                                            _ => {
+
+                                                key = k;
+                                                n
+                                            }
+                                        };
+                                    }
+
                                 }
-                                Mode::Command(_) => {
-                                    n = match c {
-                                        '0' ... '9' => {
-                                            unset = false;
-                                            n * 10 + ((c as u8) - b'0') as usize
-                                        }
-                                        _ => {
-
-                                            key = k;
-                                            n
-                                        }
-                                    };
+                            }
+                            match key {
+                                Key::Null => {}
+                                _ => {
+                                    return Inst(if unset {
+                                                    Parameter::Null
+                                                } else {
+                                                    Parameter::Int(n)
+                                                },
+                                                Cmd { key: key });
                                 }
-
                             }
                         }
-                        match key {
-                            Key::Null => {},
-                            _ => {
-                                return Inst(
-                                    if unset {
-                                        Parameter::Null
-                                    } else {
-                                        Parameter::Int(n)
-                                    },
-                                    Cmd { key: key }
-                                );
-                            },
+                        EventOption::Quit(_) => {
+                            return Inst(Parameter::Null, Cmd { key: Key::Quit });
                         }
-                    },
-                    EventOption::Quit(_) => {
-                        return Inst(Parameter::Null, Cmd { key: Key::Quit });
-                    },
-                    _ => {},
+                        _ => {}
+                    }
                 }
             }
         }
+        #[cfg(not(feature = "orbital"))]
+        Inst(Parameter::Null, Cmd { key: Key::Null })
 
     }
 }
