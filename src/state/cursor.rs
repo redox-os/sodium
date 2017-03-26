@@ -53,7 +53,8 @@ impl Editor {
     #[inline]
     pub fn next_cursor(&mut self) {
         let buffer = self.buffers.current_buffer_info_mut();
-        buffer.current_cursor = (buffer.current_cursor.wrapping_add(1)) % (buffer.cursors.len() as u8);
+        buffer.current_cursor = (buffer.current_cursor.wrapping_add(1)) %
+                                (buffer.cursors.len() as u8);
     }
 
     /// Go to previous cursor
@@ -62,9 +63,8 @@ impl Editor {
         let buffer = self.buffers.current_buffer_info_mut();
         if buffer.current_cursor != 0 {
             buffer.current_cursor -= 1;
-        }
-        else {
-            buffer.current_cursor = buffer.cursors.len() as u8;
+        } else {
+            buffer.current_cursor = (buffer.cursors.len() - 1) as u8;
         }
     }
 }
