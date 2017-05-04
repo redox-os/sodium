@@ -1,6 +1,9 @@
+#[cfg(feature = "orbital")]
 use edit::buffer::TextBuffer;
+#[cfg(feature = "orbital")]
 use io::redraw::RedrawTask;
 use state::editor::Editor;
+#[cfg(feature = "orbital")]
 use state::mode::{Mode, PrimitiveMode};
 
 #[cfg(feature = "orbital")]
@@ -39,7 +42,10 @@ impl Editor {
         let mut string = false;
 
 
-        for (y, row) in self.buffers.current_buffer().lines().enumerate() {
+        for (y, row) in self.buffers
+                .current_buffer()
+                .lines()
+                .enumerate() {
             for (x, c) in row.chars().enumerate() {
                 // TODO: Move outta here
                 let color = if self.options.highlight {
@@ -49,36 +55,18 @@ impl Editor {
                             (226, 225, 167) //(167, 222, 156)
                         }
                         _ if string => (226, 225, 167), //(167, 222, 156)
-                        '!' |
-                        '@' |
-                        '#' |
-                        '$' |
-                        '%' |
-                        '^' |
-                        '&' |
-                        '|' |
-                        '*' |
-                        '+' |
-                        '-' |
-                        '/' |
-                        ':' |
-                        '=' |
-                        '<' |
-                        '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
+                        '!' | '@' | '#' | '$' | '%' | '^' | '&' | '|' | '*' | '+' | '-' | '/' |
+                        ':' | '=' | '<' | '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
                         '.' | ',' => (241, 213, 226),
                         '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
-                        '0' ... '9' => (209, 209, 177),
+                        '0'...'9' => (209, 209, 177),
                         _ => (255, 255, 255),
                     }
                 } else {
                     (255, 255, 255)
                 };
 
-                let c = if c == '\t' {
-                    ' '
-                } else {
-                    c
-                };
+                let c = if c == '\t' { ' ' } else { c };
 
                 if pos_x == x && pos_y == y {
                     self.window.char(8 * (x - scroll_x) as i32,
@@ -122,7 +110,10 @@ impl Editor {
         self.draw_status_bar();
 
         for (n, c) in self.prompt.chars().enumerate() {
-            self.window.char(n as i32 * 8, h as i32 - 16 - 1, c, Color::rgb(255, 255, 255));
+            self.window.char(n as i32 * 8,
+                             h as i32 - 16 - 1,
+                             c,
+                             Color::rgb(255, 255, 255));
         }
 
         self.window.sync();
@@ -135,39 +126,52 @@ impl Editor {
 
         let mode = self.cursor().mode;
 
-        let current_title = 
-            self.buffers.current_buffer_info().title.as_ref().map(|s| s.as_str()).unwrap_or("");
+        let current_title = self.buffers
+            .current_buffer_info()
+            .title
+            .as_ref()
+            .map(|s| s.as_str())
+            .unwrap_or("");
 
-        let items = [
-            (self.status_bar.mode, 0, 4),
-            (current_title, 1, 4),
-            (&self.status_bar.cmd, 2, 4),
-            (&self.status_bar.msg, 3, 4)
-        ];
+        let items = [(self.status_bar.mode, 0, 4),
+                     (current_title, 1, 4),
+                     (&self.status_bar.cmd, 2, 4),
+                     (&self.status_bar.msg, 3, 4)];
 
         for &(text, a, b) in items.iter() {
             for (n, c) in (if text.len() as u32 > w / (8 * b) {
-                              text.chars().take((w / (8 * b) - 5) as usize).chain(vec!['.'; 3]).collect::<Vec<_>>()
-                          } else {
-                              text.chars().collect()
-                          })
-                          .into_iter()
-                          .enumerate() {
+                         text.chars()
+                             .take((w / (8 * b) - 5) as usize)
+                             .chain(vec!['.'; 3])
+                             .collect::<Vec<_>>()
+                     } else {
+                         text.chars().collect()
+                     })
+                    .into_iter()
+                    .enumerate() {
 
                 self.window.char(((w * a) / b) as i32 + (n as i32 * 8),
-                                    h as i32 - 16 - 1 -
-                                    {
-                                        if mode == Mode::Primitive(PrimitiveMode::Prompt) {
-                                            16 + 1 + 1
-                                        } else {
-                                            0
-                                        }
-                                    },
-                                    c,
-                                    Color::rgb(255, 255, 255));
+                                 h as i32 - 16 - 1 -
+                                 {
+                                     if mode == Mode::Primitive(PrimitiveMode::Prompt) {
+                                         16 + 1 + 1
+                                     } else {
+                                         0
+                                     }
+                                 },
+                                 c,
+                                 Color::rgb(255, 255, 255));
             }
         }
     }
+}
+
+#[cfg(not(feature = "orbital"))]
+impl Editor {
+    /// Redraw the window
+    pub fn redraw(&mut self) {}
+    /// Redraw the status bar
+    pub fn redraw_status_bar(&mut self) {}
 }
 
 /// The statubar (showing various info about the current state of the editor)

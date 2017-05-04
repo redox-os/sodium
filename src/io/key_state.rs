@@ -1,3 +1,4 @@
+#[cfg(feature = "orbital")]
 use io::key::Key;
 #[cfg(feature = "orbital")]
 use orbclient::KeyEvent;
@@ -30,12 +31,7 @@ impl KeyState {
     /// Feed the keystate with a new key input.
     #[cfg(feature = "orbital")]
     pub fn feed(&mut self, k: KeyEvent) -> Option<Key> {
-        use orbclient::{
-            K_ALT,
-            K_CTRL,
-            K_LEFT_SHIFT,
-            K_RIGHT_SHIFT
-        };
+        use orbclient::{K_ALT, K_CTRL, K_LEFT_SHIFT, K_RIGHT_SHIFT};
 
         let c = k.character;
         match c {
