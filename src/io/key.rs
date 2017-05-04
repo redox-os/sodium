@@ -42,22 +42,22 @@ impl Key {
     /// Convern an Orbital key event to a `Key`.
     #[cfg(feature = "orbital")]
     pub fn from_event(k: KeyEvent) -> Key {
-        match k.character {
-            '\0' => match k.scancode {
-                s if k.pressed => match s {
-                    K_BKSP => Key::Backspace,
-                    K_LEFT => Key::Left,
-                    K_RIGHT => Key::Right,
-                    K_UP => Key::Up,
-                    K_DOWN => Key::Down,
-                    K_TAB => Key::Tab,
-                    K_ESC => Key::Escape,
-                    _ => Key::Unknown(s),
-
-                },
-                _ => Key::Null,
-            },
-            c => Key::Char(c),
+        if k.pressed {
+            match k.scancode {
+                K_BKSP => Key::Backspace,
+                K_LEFT => Key::Left,
+                K_RIGHT => Key::Right,
+                K_UP => Key::Up,
+                K_DOWN => Key::Down,
+                K_TAB => Key::Tab,
+                K_ESC => Key::Escape,
+                s => match k.character {
+                    '\0' => Key::Unknown(s),
+                    c => Key::Char(c),
+                }
+            }
+        } else {
+            Key::Null
         }
     }
 

@@ -24,6 +24,11 @@ impl Editor {
                 self.prompt = String::new();
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
             }
+            (Primitive(Insert(_)), Escape) => {
+                let left = self.left(1);
+                self.goto(left);
+                self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
+            },
             (Primitive(Insert(_)), Char(' ')) if self.key_state.shift => {
                 let left = self.left(1);
                 self.goto(left);

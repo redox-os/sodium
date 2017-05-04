@@ -7,7 +7,7 @@ use state::editor::Editor;
 use state::mode::{Mode, PrimitiveMode};
 
 #[cfg(feature = "orbital")]
-use orbclient::Color;
+use orbclient::{Color, Renderer};
 
 #[cfg(feature = "orbital")]
 impl Editor {
