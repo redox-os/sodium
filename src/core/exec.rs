@@ -23,38 +23,44 @@ impl Editor {
             (Primitive(Prompt), Char(' ')) if self.key_state.shift => {
                 self.prompt = String::new();
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
-            },
+            }
             (Primitive(Insert(_)), Char(' ')) if self.key_state.shift => {
                 let left = self.left(1);
                 self.goto(left);
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
-            },
-            (_, Char(' ')) if self.key_state.shift =>
-                self.cursor_mut().mode = Mode::Command(CommandMode::Normal),
+            }
+            (_, Char(' ')) if self.key_state.shift => {
+                self.cursor_mut().mode = Mode::Command(CommandMode::Normal)
+            }
             (_, Char(' ')) if self.key_state.alt => self.next_cursor(),
-            _ if self.key_state.alt => if let Some(m) = self.to_motion(Inst(para, cmd)) {
-                self.goto(m);
-            },
+            _ if self.key_state.alt => {
+                if let Some(m) = self.to_motion(Inst(para, cmd)) {
+                    self.goto(m);
+                }
+            }
             (Command(Normal), Char('i')) => {
                 self.cursor_mut().mode =
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                        mode: InsertMode::Insert,
-                    }));
+                                                              mode: InsertMode::Insert,
+                                                          }));
 
             }
             (Command(Normal), Char('a')) => {
                 let pos = self.right(1, false);
-                self.goto( pos );
+                self.goto(pos);
                 self.cursor_mut().mode =
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                        mode: InsertMode::Insert,
-                    }));
+                                                              mode: InsertMode::Insert,
+                                                          }));
 
             }
             (Command(Normal), Char('o')) => {
                 let y = self.y();
                 let ind = if self.options.autoindent {
-                    self.buffers.current_buffer().get_indent(y).to_owned()
+                    self.buffers
+                        .current_buffer()
+                        .get_indent(y)
+                        .to_owned()
                 } else {
                     String::new()
                 };
@@ -63,8 +69,8 @@ impl Editor {
                 self.goto((last, y + 1));
                 self.cursor_mut().mode =
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                        mode: InsertMode::Insert,
-                    }));
+                                                              mode: InsertMode::Insert,
+                                                          }));
             }
             (Command(Normal), Char('h')) => {
                 let left = self.left(n);
@@ -129,8 +135,8 @@ impl Editor {
             (Command(Normal), Char('R')) => {
                 self.cursor_mut().mode =
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                        mode: InsertMode::Replace,
-                    }));
+                                                              mode: InsertMode::Replace,
+                                                          }));
             }
             (Command(Normal), Char('d')) => {
                 let ins = self.get_inst();
@@ -145,7 +151,7 @@ impl Editor {
             }
             (Command(Normal), Char('g')) => {
                 if let Parameter::Int(n) = para {
-                    self.goto((0, n - 1));
+                    self.goto((0, n.wrapping_sub(1)));
                     mov = true;
                 } else {
                     let inst = self.get_inst();
@@ -158,24 +164,35 @@ impl Editor {
             }
             (Command(Normal), Char('b')) => {
                 // Branch cursor
-                if self.buffers.current_buffer_info().cursors.len() < 255 {
+                if self.buffers
+                       .current_buffer_info()
+                       .cursors
+                       .len() < 255 {
                     let cursor = self.cursor().clone();
-                    let current_cursor_index = self.buffers.current_buffer_info().current_cursor as usize;
-                    self.buffers.current_buffer_info_mut().cursors.insert(current_cursor_index, cursor);
+                    let current_cursor_index = self.buffers.current_buffer_info().current_cursor as
+                                               usize;
+                    self.buffers
+                        .current_buffer_info_mut()
+                        .cursors
+                        .insert(current_cursor_index, cursor);
                     self.next_cursor();
-                }
-                else {
+                } else {
                     self.status_bar.msg = format!("At max 255 cursors");
                 }
             }
             (Command(Normal), Char('B')) => {
                 // Delete cursor
-                if self.buffers.current_buffer_info().cursors.len() > 1 {
+                if self.buffers
+                       .current_buffer_info()
+                       .cursors
+                       .len() > 1 {
                     let current_cursor_index = self.buffers.current_buffer_info().current_cursor;
-                    self.buffers.current_buffer_info_mut().cursors.remove(current_cursor_index as usize);
+                    self.buffers
+                        .current_buffer_info_mut()
+                        .cursors
+                        .remove(current_cursor_index as usize);
                     self.prev_cursor();
-                }
-                else {
+                } else {
                     self.status_bar.msg = format!("No other cursors!");
                 }
             }
@@ -207,8 +224,9 @@ impl Editor {
                     mov = true;
                 }
             }
-            (Command(Normal), Char(';')) =>
-                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt),
+            (Command(Normal), Char(';')) => {
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt)
+            }
             (Command(Normal), Char(' ')) => self.next_cursor(),
             (Command(Normal), Char('z')) => {
                 let Inst(param, cmd) = self.get_inst();
@@ -254,19 +272,19 @@ impl Editor {
                 } else {
                     self.status_bar.msg = format!("Unknown command: {}", self.prompt);
                 }
-            },
+            }
             (Primitive(Prompt), Backspace) => {
                 self.prompt.pop();
                 self.redraw_task = RedrawTask::StatusBar;
-            },
+            }
             (Primitive(Prompt), Char(c)) => {
                 self.prompt.push(c);
                 self.redraw_task = RedrawTask::StatusBar;
-            },
+            }
             _ => {
                 self.status_bar.msg = format!("Unknown command");
                 self.redraw_task = RedrawTask::StatusBar;
-            },
+            }
         }
         if mov {
             self.redraw_task = RedrawTask::Cursor(bef, self.pos());
