@@ -155,8 +155,8 @@ impl<'a> TextBuffer<'a> for SplitBuffer {
     fn insert_line(&mut self, n: usize, line: String) {
         if n < self.before.len() {
             self.before.insert(n, line);
-        } else if n < self.len() {
-            let n = self.len() - 1 - n;
+        } else if n <= self.len() {
+            let n = self.len() - n;
             self.after.insert(n, line);
         } else {
             panic!("Out of bound");
