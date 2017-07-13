@@ -38,7 +38,7 @@ impl Editor {
                 };
                 let begin = nl.len();
 
-                self.buffers.current_buffer_mut().insert_line(y, nl + &second_part);
+                self.buffers.current_buffer_mut().insert_line(y + 1, nl + &second_part);
 
                 self.redraw_task = RedrawTask::LinesAfter(y);
                 self.goto((begin, y + 1));
