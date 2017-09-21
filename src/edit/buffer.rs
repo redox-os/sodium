@@ -146,7 +146,11 @@ impl<'a> TextBuffer<'a> for SplitBuffer {
             self.before.remove(n)
         } else if n < self.len() {
             let n = self.len() - 1 - n;
-            self.after.remove(n)
+            let ret = self.after.remove(n);
+            if n == 0 {
+                self.up();
+            }
+            ret
         } else {
             panic!("Out of bound");
         }
