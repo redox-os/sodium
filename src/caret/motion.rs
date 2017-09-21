@@ -62,7 +62,6 @@ impl Editor {
     pub fn to_motion_unbounded(&mut self, Inst(n, cmd): Inst) -> Option<(isize, isize)> {
         use io::key::Key::*;
 
-        let x = self.x();
         let y = self.y();
 
         match cmd.key {
@@ -71,8 +70,8 @@ impl Editor {
             Char('j') => Some(self.down_unbounded(n.d())),
             Char('k') => Some(self.up_unbounded(n.d())),
             Char('g') => Some((0, n.or(1) as isize - 1)),
-            Char('G') => Some((0, self.buffers.current_buffer().len() as isize - 1)),
-            Char('L') => Some(to_signed_pos((x, self.buffers.current_buffer()[y].len()))),
+            Char('G') => Some((self.buffers.current_buffer()[y].len() as isize, self.buffers.current_buffer().len() as isize - 1)),
+            Char('L') => Some(to_signed_pos((self.buffers.current_buffer()[y].len(), y))),
             Char('H') => Some((0, y as isize)),
             Char('t') => {
 
