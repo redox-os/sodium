@@ -50,6 +50,14 @@ impl Editor {
                                                           }));
 
             }
+            (Command(Normal), Char('I')) => {
+                self.cursor_mut().x = 0;
+                self.cursor_mut().mode =
+                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                                                              mode: InsertMode::Insert,
+                                                          }));
+
+            }
             (Command(Normal), Char('a')) => {
                 let pos = self.right(1, false);
                 self.goto(pos);
@@ -57,7 +65,15 @@ impl Editor {
                     Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                                                               mode: InsertMode::Insert,
                                                           }));
-
+            }
+            (Command(Normal), Char('A')) => {
+                let pos = (self.buffers.current_buffer()[self.y()].len(), self.y());
+                //let pos = self.right(1, false);
+                self.goto(pos);
+                self.cursor_mut().mode =
+                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                                                              mode: InsertMode::Insert,
+                                                          }));
             }
             (Command(Normal), Char('o')) => {
                 let y = self.y();
@@ -118,7 +134,7 @@ impl Editor {
                 self.goto(bounded);
             }
             (Command(Normal), Char('L')) => {
-                let ln_end = (self.buffers.current_buffer()[self.y()].len(), self.y());
+                let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
                 self.goto(ln_end);
                 mov = true;
             }
@@ -147,6 +163,16 @@ impl Editor {
                 let ins = self.get_inst();
                 if let Some(m) = self.to_motion_unbounded(ins) {
                     self.remove_rb(m);
+                }
+            }
+            (Command(Normal), Char('c')) => {
+                let ins = self.get_inst();
+                if let Some(m) = self.to_motion_unbounded(ins) {
+                    self.remove_rb(m);
+                    self.cursor_mut().mode =
+                        Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                                                                  mode: InsertMode::Insert,
+                                                           }));
                 }
             }
             (Command(Normal), Char('G')) => {
