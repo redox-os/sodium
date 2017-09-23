@@ -14,16 +14,29 @@ impl Editor {
     /// Redraw the window
     pub fn redraw(&mut self) {
         // TODO: Only draw when relevant for the window
+        let (pos_x, pos_y) = self.pos();
+
+        let w = self.window.width();
+        let h = self.window.height();
+
+        if  self.buffers.current_buffer_info().scroll_y > 0 && pos_y <= self.buffers.current_buffer_info().scroll_y {
+            self.buffers.current_buffer_info_mut().scroll_y = pos_y - 1;
+        }
+
+        let window_lines = (h as usize/16) - 2;
+
+        if pos_y > self.buffers.current_buffer_info().scroll_y + window_lines {
+            self.buffers.current_buffer_info_mut().scroll_y = pos_y - window_lines;
+        }
+
         let (scroll_x, scroll_y) = {
             let current_buffer = self.buffers.current_buffer_info();
 
             (current_buffer.scroll_x, current_buffer.scroll_y)
         };
-        let (pos_x, pos_y) = self.pos();
+        
         // Redraw window
         self.window.set(Color::rgb(25, 25, 25));
-
-        let w = self.window.width();
 
         if self.options.line_marker {
             self.window.rect(0,
@@ -65,17 +78,17 @@ impl Editor {
                 } else {
                     (255, 255, 255)
                 };
-
+ 
                 let c = if c == '\t' { ' ' } else { c };
 
                 if pos_x == x && pos_y == y {
-                    self.window.char(8 * (x - scroll_x) as i32,
-                                     16 * (y - scroll_y) as i32,
+                    self.window.char(8 * (x as isize - scroll_x as isize) as i32,
+                                     16 * (y as isize - scroll_y as isize) as i32,
                                      c,
                                      Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
                 } else {
-                    self.window.char(8 * (x - scroll_x) as i32,
-                                     16 * (y - scroll_y) as i32,
+                    self.window.char(8 * (x as isize - scroll_x as isize) as i32,
+                                     16 * (y as isize - scroll_y as isize) as i32,
                                      c,
                                      Color::rgb(color.0, color.1, color.2));
                 }

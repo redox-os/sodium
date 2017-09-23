@@ -10,6 +10,8 @@ use io::redraw::RedrawTask;
 
 #[cfg(feature = "orbital")]
 use orbclient::Window;
+#[cfg(feature = "orbital")]
+use orbclient::WindowFlag;
 
 use std::env::args;
 
@@ -182,7 +184,7 @@ impl Editor {
     pub fn init() {
 
         #[cfg(feature = "orbital")]
-        let window = Window::new(-1, -1, 700, 500, &"Sodium").unwrap();
+        let window = Window::new_flags(-1, -1, 700, 500, &"Sodium", &[WindowFlag::Resizable]).unwrap();
 
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
