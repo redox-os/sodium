@@ -26,7 +26,6 @@ impl Editor {
             Char('L') => Some((self.buffers.current_buffer()[y].len() - 1, y)),
             Char('H') => Some((0, y)),
             Char('t') => {
-
                 let ch = self.get_char();
 
                 if let Some(o) = self.next_ocur(ch, n.d()) {
@@ -36,7 +35,6 @@ impl Editor {
                 }
             }
             Char('f') => {
-
                 let ch = self.get_char();
 
                 if let Some(o) = self.previous_ocur(ch, n.d()) {
@@ -70,11 +68,13 @@ impl Editor {
             Char('j') => Some(self.down_unbounded(n.d())),
             Char('k') => Some(self.up_unbounded(n.d())),
             Char('g') => Some((0, n.or(1) as isize - 1)),
-            Char('G') => Some((self.buffers.current_buffer()[y].len() as isize, self.buffers.current_buffer().len() as isize - 1)),
+            Char('G') => Some((
+                self.buffers.current_buffer()[y].len() as isize,
+                self.buffers.current_buffer().len() as isize - 1,
+            )),
             Char('L') => Some(to_signed_pos((self.buffers.current_buffer()[y].len(), y))),
             Char('H') => Some((0, y as isize)),
             Char('t') => {
-
                 let ch = self.get_char();
 
                 if let Some(o) = self.next_ocur(ch, n.d()) {
@@ -84,7 +84,6 @@ impl Editor {
                 }
             }
             Char('f') => {
-
                 let ch = self.get_char();
 
                 if let Some(o) = self.previous_ocur(ch, n.d()) {

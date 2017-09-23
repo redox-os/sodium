@@ -14,38 +14,54 @@ impl Editor {
     /// Redraw the window
     pub fn redraw(&mut self) {
         // TODO: Only draw when relevant for the window
+        let (pos_x, pos_y) = self.pos();
+
+        let w = self.window.width();
+        let h = self.window.height();
+
+        if self.buffers.current_buffer_info().scroll_y > 0
+            && pos_y <= self.buffers.current_buffer_info().scroll_y
+        {
+            self.buffers.current_buffer_info_mut().scroll_y = pos_y - 1;
+        }
+
+        let window_lines = (h as usize / 16) - 2;
+
+        if pos_y > self.buffers.current_buffer_info().scroll_y + window_lines {
+            self.buffers.current_buffer_info_mut().scroll_y = pos_y - window_lines;
+        }
+
         let (scroll_x, scroll_y) = {
             let current_buffer = self.buffers.current_buffer_info();
 
             (current_buffer.scroll_x, current_buffer.scroll_y)
         };
-        let (pos_x, pos_y) = self.pos();
+
         // Redraw window
         self.window.set(Color::rgb(25, 25, 25));
 
-        let w = self.window.width();
-
         if self.options.line_marker {
-            self.window.rect(0,
-                             (pos_y - scroll_y) as i32 * 16,
-                             w,
-                             16,
-                             Color::rgb(45, 45, 45));
+            self.window.rect(
+                0,
+                (pos_y - scroll_y) as i32 * 16,
+                w,
+                16,
+                Color::rgb(45, 45, 45),
+            );
         }
 
-        self.window.rect(8 * (pos_x - scroll_x) as i32,
-                         16 * (pos_y - scroll_y) as i32,
-                         8,
-                         16,
-                         Color::rgb(255, 255, 255));
+        self.window.rect(
+            8 * (pos_x - scroll_x) as i32,
+            16 * (pos_y - scroll_y) as i32,
+            8,
+            16,
+            Color::rgb(255, 255, 255),
+        );
 
         let mut string = false;
 
 
-        for (y, row) in self.buffers
-                .current_buffer()
-                .lines()
-                .enumerate() {
+        for (y, row) in self.buffers.current_buffer().lines().enumerate() {
             for (x, c) in row.chars().enumerate() {
                 // TODO: Move outta here
                 let color = if self.options.highlight {
@@ -55,8 +71,22 @@ impl Editor {
                             (226, 225, 167) //(167, 222, 156)
                         }
                         _ if string => (226, 225, 167), //(167, 222, 156)
-                        '!' | '@' | '#' | '$' | '%' | '^' | '&' | '|' | '*' | '+' | '-' | '/' |
-                        ':' | '=' | '<' | '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
+                        '!' |
+                        '@' |
+                        '#' |
+                        '$' |
+                        '%' |
+                        '^' |
+                        '&' |
+                        '|' |
+                        '*' |
+                        '+' |
+                        '-' |
+                        '/' |
+                        ':' |
+                        '=' |
+                        '<' |
+                        '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
                         '.' | ',' => (241, 213, 226),
                         '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
                         '0'...'9' => (209, 209, 177),
@@ -69,15 +99,19 @@ impl Editor {
                 let c = if c == '\t' { ' ' } else { c };
 
                 if pos_x == x && pos_y == y {
-                    self.window.char(8 * (x - scroll_x) as i32,
-                                     16 * (y - scroll_y) as i32,
-                                     c,
-                                     Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3));
+                    self.window.char(
+                        8 * (x as isize - scroll_x as isize) as i32,
+                        16 * (y as isize - scroll_y as isize) as i32,
+                        c,
+                        Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3),
+                    );
                 } else {
-                    self.window.char(8 * (x - scroll_x) as i32,
-                                     16 * (y - scroll_y) as i32,
-                                     c,
-                                     Color::rgb(color.0, color.1, color.2));
+                    self.window.char(
+                        8 * (x as isize - scroll_x as isize) as i32,
+                        16 * (y as isize - scroll_y as isize) as i32,
+                        c,
+                        Color::rgb(color.0, color.1, color.2),
+                    );
                 }
             }
         }
@@ -94,26 +128,29 @@ impl Editor {
         let h = self.window.height();
         let w = self.window.width();
         let mode = self.cursor().mode;
-        self.window.rect(0,
-                         h as i32 - 18 -
-                         {
-                             if mode == Mode::Primitive(PrimitiveMode::Prompt) {
-                                 18
-                             } else {
-                                 0
-                             }
-                         },
-                         w,
-                         18,
-                         Color::rgba(74, 74, 74, 255));
+        self.window.rect(
+            0,
+            h as i32 - 18 - {
+                if mode == Mode::Primitive(PrimitiveMode::Prompt) {
+                    18
+                } else {
+                    0
+                }
+            },
+            w,
+            18,
+            Color::rgba(74, 74, 74, 255),
+        );
 
         self.draw_status_bar();
 
         for (n, c) in self.prompt.chars().enumerate() {
-            self.window.char(n as i32 * 8,
-                             h as i32 - 16 - 1,
-                             c,
-                             Color::rgb(255, 255, 255));
+            self.window.char(
+                n as i32 * 8,
+                h as i32 - 16 - 1,
+                c,
+                Color::rgb(255, 255, 255),
+            );
         }
 
         self.window.sync();
@@ -133,34 +170,36 @@ impl Editor {
             .map(|s| s.as_str())
             .unwrap_or("");
 
-        let items = [(self.status_bar.mode, 0, 4),
-                     (current_title, 1, 4),
-                     (&self.status_bar.cmd, 2, 4),
-                     (&self.status_bar.msg, 3, 4)];
+        let items = [
+            (self.status_bar.mode, 0, 4),
+            (current_title, 1, 4),
+            (&self.status_bar.cmd, 2, 4),
+            (&self.status_bar.msg, 3, 4),
+        ];
 
         for &(text, a, b) in items.iter() {
             for (n, c) in (if text.len() as u32 > w / (8 * b) {
-                         text.chars()
-                             .take((w / (8 * b) - 5) as usize)
-                             .chain(vec!['.'; 3])
-                             .collect::<Vec<_>>()
-                     } else {
-                         text.chars().collect()
-                     })
-                    .into_iter()
-                    .enumerate() {
-
-                self.window.char(((w * a) / b) as i32 + (n as i32 * 8),
-                                 h as i32 - 16 - 1 -
-                                 {
-                                     if mode == Mode::Primitive(PrimitiveMode::Prompt) {
-                                         16 + 1 + 1
-                                     } else {
-                                         0
-                                     }
-                                 },
-                                 c,
-                                 Color::rgb(255, 255, 255));
+                text.chars()
+                    .take((w / (8 * b) - 5) as usize)
+                    .chain(vec!['.'; 3])
+                    .collect::<Vec<_>>()
+            } else {
+                text.chars().collect()
+            }).into_iter()
+                .enumerate()
+            {
+                self.window.char(
+                    ((w * a) / b) as i32 + (n as i32 * 8),
+                    h as i32 - 16 - 1 - {
+                        if mode == Mode::Primitive(PrimitiveMode::Prompt) {
+                            16 + 1 + 1
+                        } else {
+                            0
+                        }
+                    },
+                    c,
+                    Color::rgb(255, 255, 255),
+                );
             }
         }
     }

@@ -26,7 +26,7 @@ impl Editor {
         let (mut x, mut y) = self.pos();
         match (mode, k) {
             (InsertMode::Insert, Key::Char('\n')) => {
-                let first_part  = self.buffers.current_buffer()[y][..x].to_owned();
+                let first_part = self.buffers.current_buffer()[y][..x].to_owned();
                 let second_part = self.buffers.current_buffer()[y][x..].to_owned();
 
                 self.buffers.current_buffer_mut()[y] = first_part;
@@ -38,11 +38,13 @@ impl Editor {
                 };
                 let begin = nl.len();
 
-                self.buffers.current_buffer_mut().insert_line(y + 1, nl + &second_part);
+                self.buffers
+                    .current_buffer_mut()
+                    .insert_line(y + 1, nl + &second_part);
 
                 self.redraw_task = RedrawTask::LinesAfter(y);
                 self.goto((begin, y + 1));
-            },
+            }
             (InsertMode::Insert, Key::Backspace) => self.backspace(),
             (InsertMode::Insert, Key::Char(c)) => {
                 self.buffers.current_buffer_mut()[y].insert(x, c);
@@ -50,7 +52,7 @@ impl Editor {
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
                 let right = self.right(1, false);
                 self.goto(right);
-            },
+            }
             (InsertMode::Replace, Key::Char(c)) => {
                 if x == self.buffers.current_buffer()[y].len() {
                     let next = self.next(1);
@@ -77,8 +79,8 @@ impl Editor {
                     self.goto(p);
                 }
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
-            },
-            _ => {},
+            }
+            _ => {}
         }
 
         self.hint();
@@ -90,5 +92,4 @@ impl Editor {
             self.insert(Key::Char(c), opt);
         }
     }
-
 }

@@ -75,17 +75,18 @@ pub trait TextBuffer<'a> {
 pub struct SplitBuffer {
     before: Vec<String>,
     after: Vec<String>,
-    #[cfg(debug)]
-    _hinted_since_edit: bool,
+    #[cfg(debug)] _hinted_since_edit: bool,
 }
 
 impl SplitBuffer {
     fn up(&mut self) {
-        self.after.push(self.before.pop().expect("Popped last element"));
+        self.after
+            .push(self.before.pop().expect("Popped last element"));
     }
 
     fn down(&mut self) {
-        self.before.push(self.after.pop().expect("Popped last element"));
+        self.before
+            .push(self.after.pop().expect("Popped last element"));
     }
 
     fn y(&self) -> usize {
@@ -207,7 +208,7 @@ impl<'a> TextBuffer<'a> for SplitBuffer {
             for c in ln.chars() {
                 match c {
                     '\t' | ' ' => len += 1,
-                    _          => break,
+                    _ => break,
                 }
             }
             &ln[..len]
@@ -226,7 +227,6 @@ impl Index<usize> for SplitBuffer {
     }
 }
 impl IndexMut<usize> for SplitBuffer {
-
     fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut String {
         #[cfg(debug)]
         fn debug_check(b: &mut SplitBuffer) {

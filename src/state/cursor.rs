@@ -1,5 +1,5 @@
 use state::editor::Editor;
-use state::mode::{Mode, CommandMode};
+use state::mode::{CommandMode, Mode};
 
 #[derive(Clone)]
 /// A cursor, i.e. a state defining a mode, and a position. The cursor does not define the content
@@ -46,15 +46,18 @@ impl Editor {
     #[inline]
     pub fn cursor_mut(&mut self) -> &mut Cursor {
         let buffer = self.buffers.current_buffer_info_mut();
-        buffer.cursors.get_mut(buffer.current_cursor as usize).unwrap()
+        buffer
+            .cursors
+            .get_mut(buffer.current_cursor as usize)
+            .unwrap()
     }
 
     /// Go to next cursor
     #[inline]
     pub fn next_cursor(&mut self) {
         let buffer = self.buffers.current_buffer_info_mut();
-        buffer.current_cursor = (buffer.current_cursor.wrapping_add(1)) %
-                                (buffer.cursors.len() as u8);
+        buffer.current_cursor =
+            (buffer.current_cursor.wrapping_add(1)) % (buffer.cursors.len() as u8);
     }
 
     /// Go to previous cursor

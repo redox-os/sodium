@@ -1,4 +1,4 @@
-use edit::buffer::{TextBuffer, SplitBuffer};
+use edit::buffer::{SplitBuffer, TextBuffer};
 use state::editor::{Buffer, Editor};
 use std::fs::File;
 use std::io::{Read, Write};
@@ -36,7 +36,9 @@ impl Editor {
     pub fn write(&mut self, path: &str) -> FileStatus {
         self.buffers.current_buffer_info_mut().title = Some(path.into());
         if let Some(mut file) = File::create(path).ok() {
-            if file.write(self.buffers.current_buffer().to_string().as_bytes()).is_ok() {
+            if file.write(self.buffers.current_buffer().to_string().as_bytes())
+                .is_ok()
+            {
                 FileStatus::Ok
             } else {
                 FileStatus::Other

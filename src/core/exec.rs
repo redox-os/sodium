@@ -1,7 +1,7 @@
 use state::editor::Editor;
 use io::parse::{Inst, Parameter};
-use state::mode::{Mode, CommandMode, PrimitiveMode};
-use edit::insert::{InsertOptions, InsertMode};
+use state::mode::{CommandMode, Mode, PrimitiveMode};
+use edit::insert::{InsertMode, InsertOptions};
 use io::redraw::RedrawTask;
 use edit::buffer::TextBuffer;
 use core::prompt::PromptCommand;
@@ -28,7 +28,7 @@ impl Editor {
                 let left = self.left(1);
                 self.goto(left);
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
-            },
+            }
             (Primitive(Insert(_)), Char(' ')) if self.key_state.shift => {
                 let left = self.left(1);
                 self.goto(left);
@@ -38,60 +38,50 @@ impl Editor {
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal)
             }
             (_, Char(' ')) if self.key_state.alt => self.next_cursor(),
-            _ if self.key_state.alt => {
-                if let Some(m) = self.to_motion(Inst(para, cmd)) {
-                    self.goto(m);
-                }
-            }
+            _ if self.key_state.alt => if let Some(m) = self.to_motion(Inst(para, cmd)) {
+                self.goto(m);
+            },
             (Command(Normal), Char('i')) => {
-                self.cursor_mut().mode =
-                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                              mode: InsertMode::Insert,
-                                                          }));
-
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                    mode: InsertMode::Insert,
+                }));
             }
             (Command(Normal), Char('I')) => {
                 self.cursor_mut().x = 0;
-                self.cursor_mut().mode =
-                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                              mode: InsertMode::Insert,
-                                                          }));
-
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                    mode: InsertMode::Insert,
+                }));
             }
             (Command(Normal), Char('a')) => {
                 let pos = self.right(1, false);
                 self.goto(pos);
-                self.cursor_mut().mode =
-                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                              mode: InsertMode::Insert,
-                                                          }));
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                    mode: InsertMode::Insert,
+                }));
             }
             (Command(Normal), Char('A')) => {
                 let pos = (self.buffers.current_buffer()[self.y()].len(), self.y());
                 //let pos = self.right(1, false);
                 self.goto(pos);
-                self.cursor_mut().mode =
-                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                              mode: InsertMode::Insert,
-                                                          }));
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                    mode: InsertMode::Insert,
+                }));
             }
             (Command(Normal), Char('o')) => {
                 let y = self.y();
                 let ind = if self.options.autoindent {
-                    self.buffers
-                        .current_buffer()
-                        .get_indent(y)
-                        .to_owned()
+                    self.buffers.current_buffer().get_indent(y).to_owned()
                 } else {
                     String::new()
                 };
                 let last = ind.len();
-                self.buffers.current_buffer_mut().insert_line(y + 1, ind.into());
+                self.buffers
+                    .current_buffer_mut()
+                    .insert_line(y + 1, ind.into());
                 self.goto((last, y + 1));
-                self.cursor_mut().mode =
-                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                              mode: InsertMode::Insert,
-                                                          }));
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                    mode: InsertMode::Insert,
+                }));
             }
             (Command(Normal), Char('h')) => {
                 let left = self.left(n);
@@ -154,10 +144,9 @@ impl Editor {
                 current_buffer.raw_buffer[y].insert(x, c);
             }
             (Command(Normal), Char('R')) => {
-                self.cursor_mut().mode =
-                    Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                              mode: InsertMode::Replace,
-                                                          }));
+                self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                    mode: InsertMode::Replace,
+                }));
             }
             (Command(Normal), Char('d')) => {
                 let ins = self.get_inst();
@@ -169,10 +158,9 @@ impl Editor {
                 let ins = self.get_inst();
                 if let Some(m) = self.to_motion_unbounded(ins) {
                     self.remove_rb(m);
-                    self.cursor_mut().mode =
-                        Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                                                                  mode: InsertMode::Insert,
-                                                           }));
+                    self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                        mode: InsertMode::Insert,
+                    }));
                 }
             }
             (Command(Normal), Char('G')) => {
@@ -191,17 +179,13 @@ impl Editor {
                         mov = true;
                     }
                 }
-
             }
             (Command(Normal), Char('b')) => {
                 // Branch cursor
-                if self.buffers
-                       .current_buffer_info()
-                       .cursors
-                       .len() < 255 {
+                if self.buffers.current_buffer_info().cursors.len() < 255 {
                     let cursor = self.cursor().clone();
-                    let current_cursor_index = self.buffers.current_buffer_info().current_cursor as
-                                               usize;
+                    let current_cursor_index =
+                        self.buffers.current_buffer_info().current_cursor as usize;
                     self.buffers
                         .current_buffer_info_mut()
                         .cursors
@@ -213,10 +197,7 @@ impl Editor {
             }
             (Command(Normal), Char('B')) => {
                 // Delete cursor
-                if self.buffers
-                       .current_buffer_info()
-                       .cursors
-                       .len() > 1 {
+                if self.buffers.current_buffer_info().cursors.len() > 1 {
                     let current_cursor_index = self.buffers.current_buffer_info().current_cursor;
                     self.buffers
                         .current_buffer_info_mut()
@@ -262,12 +243,10 @@ impl Editor {
             (Command(Normal), Char('z')) => {
                 let Inst(param, cmd) = self.get_inst();
                 match param {
-                    Parameter::Null => {
-                        if let Some(m) = self.to_motion(Inst(param, cmd)) {
-                            self.buffers.current_buffer_info_mut().scroll_y = m.1;
-                            self.goto(m);
-                        }
-                    }
+                    Parameter::Null => if let Some(m) = self.to_motion(Inst(param, cmd)) {
+                        self.buffers.current_buffer_info_mut().scroll_y = m.1;
+                        self.goto(m);
+                    },
                     Parameter::Int(n) => {
                         self.buffers.current_buffer_info_mut().scroll_y = n;
                     }
@@ -281,14 +260,12 @@ impl Editor {
             (Command(Normal), Char('~')) => {
                 self.invert_chars(n);
             }
-            (Command(Normal), Char('.')) => {
-                if let Some(inst) = self.previous_instruction {
-                    self.exec(inst);
-                } else {
-                    self.status_bar.msg = "No previous command".into();
-                    self.redraw_task = RedrawTask::StatusBar;
-                }
-            }
+            (Command(Normal), Char('.')) => if let Some(inst) = self.previous_instruction {
+                self.exec(inst);
+            } else {
+                self.status_bar.msg = "No previous command".into();
+                self.redraw_task = RedrawTask::StatusBar;
+            },
             (Command(Normal), Char(c)) => {
                 self.status_bar.msg = format!("Unknown command: {}", c);
                 self.redraw_task = RedrawTask::StatusBar;
@@ -296,7 +273,7 @@ impl Editor {
             (Primitive(Insert(opt)), k) => self.insert(k, opt),
             (Primitive(Prompt), Char('\n')) => {
                 self.cursor_mut().mode = Command(Normal);
-                if let Some(cmd) = PromptCommand::parse(&self.prompt.clone()) {;
+                if let Some(cmd) = PromptCommand::parse(&self.prompt.clone()) {
                     self.invoke(cmd);
                     self.prompt = String::new();
                     self.redraw_task = RedrawTask::StatusBar;

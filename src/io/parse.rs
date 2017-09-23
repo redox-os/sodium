@@ -46,13 +46,11 @@ impl Editor {
         loop {
             for event in self.window.events() {
                 match event.to_option() {
-                    EventOption::Key(k) => {
-                        if let Some(Key::Char(c)) = self.key_state.feed(k) {
-                            self.status_bar.cmd.push(c);
-                            self.redraw_task = RedrawTask::StatusBar;
-                            return c;
-                        }
-                    }
+                    EventOption::Key(k) => if let Some(Key::Char(c)) = self.key_state.feed(k) {
+                        self.status_bar.cmd.push(c);
+                        self.redraw_task = RedrawTask::StatusBar;
+                        return c;
+                    },
                     _ => {}
                 }
             }
@@ -93,24 +91,24 @@ impl Editor {
                                                 n * 10 + ((c as u8) - b'0') as usize
                                             }
                                             _ => {
-
                                                 key = k;
                                                 n
                                             }
                                         };
                                     }
-
                                 }
                             }
                             match key {
                                 Key::Null => {}
                                 _ => {
-                                    return Inst(if unset {
-                                                    Parameter::Null
-                                                } else {
-                                                    Parameter::Int(n)
-                                                },
-                                                Cmd { key: key });
+                                    return Inst(
+                                        if unset {
+                                            Parameter::Null
+                                        } else {
+                                            Parameter::Int(n)
+                                        },
+                                        Cmd { key: key },
+                                    );
                                 }
                             }
                         }
@@ -124,6 +122,5 @@ impl Editor {
         }
         #[cfg(not(feature = "orbital"))]
         Inst(Parameter::Null, Cmd { key: Key::Null })
-
     }
 }
