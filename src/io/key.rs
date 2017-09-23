@@ -1,14 +1,5 @@
 #[cfg(feature = "orbital")]
-use orbclient::{
-    KeyEvent,
-    K_BKSP,
-    K_LEFT,
-    K_RIGHT,
-    K_UP,
-    K_DOWN,
-    K_TAB,
-    K_ESC,
-};
+use orbclient::{KeyEvent, K_BKSP, K_DOWN, K_ESC, K_LEFT, K_RIGHT, K_TAB, K_UP};
 
 #[derive(Copy, Clone, PartialEq)]
 /// A key
@@ -54,7 +45,7 @@ impl Key {
                 s => match k.character {
                     '\0' => Key::Unknown(s),
                     c => Key::Char(c),
-                }
+                },
             }
         } else {
             Key::Null

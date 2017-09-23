@@ -24,10 +24,8 @@ impl Editor {
     /// Get position after a given position, i.e. a generalisation of .next()
     #[inline]
     pub fn after(&self, n: usize, (x, y): (usize, usize)) -> Option<(usize, usize)> {
-
         // TODO: Make this more idiomatic {
         if x + n < self.buffers.current_buffer()[y].len() {
-
             Some((x + n, y))
         } else {
             if y + 1 >= self.buffers.current_buffer().len() {
@@ -48,7 +46,6 @@ impl Editor {
                         }
                     }
                 }
-
             }
         }
         // }
@@ -76,7 +73,6 @@ impl Editor {
                             ry -= 1;
                         } else if ry == 0 {
                             return None;
-
                         }
                     }
                 }
@@ -134,15 +130,18 @@ impl Editor {
     #[inline]
     pub fn down_unbounded(&self, n: usize) -> (isize, isize) {
         (self.cursor().x as isize, self.y() as isize + n as isize)
-
     }
 
     /// Get n'th next ocurrence of a given charecter (relatively to the cursor)
     pub fn next_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let mut x  = self.x();
+        let mut x = self.x();
 
-        for (i, ch) in self.buffers.current_buffer()[self.y()].chars().skip(x).enumerate() {
+        for (i, ch) in self.buffers.current_buffer()[self.y()]
+            .chars()
+            .skip(x)
+            .enumerate()
+        {
             if ch == c {
                 if i > 0 {
                     dn += 1;
@@ -160,10 +159,15 @@ impl Editor {
     /// Get n'th previous ocurrence of a given charecter (relatively to the cursor)
     pub fn previous_ocur(&self, c: char, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let mut x  = self.x();
-        let y      = self.y();
+        let mut x = self.x();
+        let y = self.y();
 
-        for (i, ch) in self.buffers.current_buffer()[y].chars().rev().skip(self.buffers.current_buffer()[y].len() - x).enumerate() {
+        for (i, ch) in self.buffers.current_buffer()[y]
+            .chars()
+            .rev()
+            .skip(self.buffers.current_buffer()[y].len() - x)
+            .enumerate()
+        {
             if ch == c {
                 dn += 1;
                 if dn == n {
@@ -181,9 +185,13 @@ impl Editor {
     /// whitespace.  An empty line is also considered to be a WORD."
     pub fn _next_word_forward(&self, n: usize) -> Option<usize> {
         let mut dn = 0;
-        let mut x  = self.x();
+        let mut x = self.x();
 
-        for (i, ch) in self.buffers.current_buffer()[self.y()].chars().skip(x).enumerate() {
+        for (i, ch) in self.buffers.current_buffer()[self.y()]
+            .chars()
+            .skip(x)
+            .enumerate()
+        {
             if ch.is_whitespace() {
                 dn += 1;
                 if dn == n {

@@ -1,8 +1,8 @@
 use std::slice::Iter;
-use edit::buffer::{TextBuffer, SplitBuffer};
+use edit::buffer::{SplitBuffer, TextBuffer};
 use state::cursor::Cursor;
 use io::graphics::StatusBar;
-use io::key::{Key, Cmd};
+use io::key::{Cmd, Key};
 use io::key_state::KeyState;
 use state::options::Options;
 use io::parse::Inst;
@@ -148,7 +148,7 @@ impl BufferManager {
             self.buffers.push(Buffer::new());
             self.current_buffer_index = 0;
         } else if self.current_buffer_index <= n {
-            self.current_buffer_index  -= 1;
+            self.current_buffer_index -= 1;
         }
     }
 
@@ -182,9 +182,9 @@ pub struct Editor {
 impl Editor {
     /// Create new default state editor
     pub fn init() {
-
         #[cfg(feature = "orbital")]
-        let window = Window::new_flags(-1, -1, 700, 500, &"Sodium", &[WindowFlag::Resizable]).unwrap();
+        let window =
+            Window::new_flags(-1, -1, 700, 500, &"Sodium", &[WindowFlag::Resizable]).unwrap();
 
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
@@ -210,23 +210,26 @@ impl Editor {
         };
 
         let mut files: Vec<String> = Vec::new();
-        
+
         let mut args_iter = args().skip(1).peekable();
         loop {
             let arg = match args_iter.next() {
                 Some(x) => x,
-                None => break
+                None => break,
             };
 
             match arg.as_str() {
                 "--version" => {
-                    println!("Sodium {}", option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"));
+                    println!(
+                        "Sodium {}",
+                        option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")
+                    );
                     return;
-                },
+                }
                 "--help" => {
                     println!("{}", HELP);
                     return;
-                },
+                }
                 "-u" => {
                     unimplemented!();
                     /*
@@ -255,16 +258,14 @@ impl Editor {
                         if arg_chars.next() == Some('-') {
                             for ch in arg_chars {
                                 match ch {
-                                    'R' => {
-                                        match editor.options.set("readonly") {
-                                            Ok(_) => debugln!(editor, "Set readonly mode"),
-                                            Err(_) => println!("Could not set readonly mode") 
-                                        }
+                                    'R' => match editor.options.set("readonly") {
+                                        Ok(_) => debugln!(editor, "Set readonly mode"),
+                                        Err(_) => println!("Could not set readonly mode"),
                                     },
                                     'h' => {
                                         println!("{}", HELP);
                                         return;
-                                    },
+                                    }
                                     _ => {
                                         unimplemented!();
                                     }
@@ -283,7 +284,7 @@ impl Editor {
         if files.len() > 0 {
             // TODO: open multiple files into separate buffers
             editor.open(&files[0]);
-        } 
+        }
 
         debugln!(editor, "Starting Sodium");
 

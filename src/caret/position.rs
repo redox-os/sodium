@@ -29,15 +29,13 @@ impl Editor {
     /// Convert a position value to a bounded position value
     #[inline]
     pub fn bound(&self, (x, mut y): (usize, usize), tight: bool) -> (usize, usize) {
-
-
         y = if y >= self.buffers.current_buffer().len() {
             self.buffers.current_buffer().len() - 1
         } else {
             y
         };
 
-        let ln = self.buffers.current_buffer()[y].len() + if tight {0} else {1};
+        let ln = self.buffers.current_buffer()[y].len() + if tight { 0 } else { 1 };
         if x >= ln {
             if ln == 0 {
                 (0, y)
@@ -59,7 +57,6 @@ impl Editor {
     /// axis is bounded.
     #[inline]
     pub fn bound_ver(&self, (x, mut y): (usize, usize)) -> (usize, usize) {
-
         // Is this premature optimization? Yes, yes it is!
         y = if y > self.buffers.current_buffer().len() - 1 {
             self.buffers.current_buffer().len() - 1
