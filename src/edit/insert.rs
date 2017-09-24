@@ -46,6 +46,14 @@ impl Editor {
                 self.goto((begin, y + 1));
             }
             (InsertMode::Insert, Key::Backspace) => self.backspace(),
+            (InsertMode::Insert, Key::Tab) => {
+                for i in 0..4 {
+                    self.buffers.current_buffer_mut()[y].insert(x + i, ' ');
+                }
+                self.redraw_task = RedrawTask::Lines(y..y + 1);
+                let right = self.right(4, false);
+                self.goto(right);
+            }
             (InsertMode::Insert, Key::Char(c)) => {
                 self.buffers.current_buffer_mut()[y].insert(x, c);
 
