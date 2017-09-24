@@ -115,6 +115,10 @@ impl Editor {
                         EventOption::Quit(_) => {
                             return Inst(Parameter::Null, Cmd { key: Key::Quit });
                         }
+                        EventOption::Resize(_) => {
+                            self.redraw_task = RedrawTask::Full;
+                            self.redraw();
+                        }
                         _ => {}
                     }
                 }

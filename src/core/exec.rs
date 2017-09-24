@@ -124,9 +124,11 @@ impl Editor {
                 self.goto(bounded);
             }
             (Command(Normal), Char('L')) => {
-                let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
-                self.goto(ln_end);
-                mov = true;
+                if self.buffers.current_buffer()[self.y()].len() != 0 {
+                    let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
+                    self.goto(ln_end);
+                    mov = true;
+                }
             }
             (Command(Normal), Char('H')) => {
                 self.cursor_mut().x = 0;
