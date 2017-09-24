@@ -20,6 +20,10 @@ impl Editor {
             let mut con = String::new();
             let _ = file.read_to_string(&mut con);
 
+            if con.is_empty() {
+                con.push('\n');
+            }
+
             let mut new_buffer: Buffer = SplitBuffer::from_str(&con).into();
             new_buffer.title = Some(path.into());
 
