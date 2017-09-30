@@ -177,6 +177,10 @@ pub struct Editor {
     pub redraw_task: RedrawTask,
     /// The previous instruction
     pub previous_instruction: Option<Inst>,
+    /// The character width in pixels
+    pub char_width: usize,
+    /// The character height in pixels
+    pub char_height: usize,
 }
 
 impl Editor {
@@ -196,6 +200,8 @@ impl Editor {
             key_state: KeyState::new(),
             redraw_task: RedrawTask::None,
             previous_instruction: None,
+            char_width: 8,
+            char_height: 16,
         };
 
         #[cfg(not(feature = "orbital"))]
@@ -207,6 +213,8 @@ impl Editor {
             key_state: KeyState::new(),
             redraw_task: RedrawTask::None,
             previous_instruction: None,
+            char_width: 8,
+            char_height: 16,
         };
 
         let mut files: Vec<String> = Vec::new();

@@ -9,60 +9,106 @@ use state::mode::{Mode, PrimitiveMode};
 #[cfg(feature = "orbital")]
 use orbclient::{Color, Renderer};
 
+use std::iter;
+
 #[cfg(feature = "orbital")]
 impl Editor {
     /// Redraw the window
     pub fn redraw(&mut self) {
-        // TODO: Only draw when relevant for the window
-        let (pos_x, pos_y) = self.pos();
+        let w = self.window.width() as usize;
+        let h = self.window.height() as usize;
 
-        let w = self.window.width();
-        let h = self.window.height();
+        let vert_offset: usize = 0;
 
-        if self.buffers.current_buffer_info().scroll_y > 0
-            && pos_y <= self.buffers.current_buffer_info().scroll_y
-        {
-            self.buffers.current_buffer_info_mut().scroll_y = pos_y - 1;
-        }
+        let horz_offset: usize = if self.options.line_numbers {
+            let len = self.buffers.current_buffer_info().raw_buffer.len();
+            let mut ret: usize = 3;
+            while len >= 10usize.pow((ret - 1) as u32) {
+                ret += 1;
+            }
+            ret
+        } else {
+            0
+        };
 
-        let window_lines = (h as usize / 16) - 2;
+        let max_vert_chars = h/self.char_height - 2 - vert_offset;
+        let max_horz_chars = w/self.char_width - horz_offset;
 
-        if pos_y > self.buffers.current_buffer_info().scroll_y + window_lines {
-            self.buffers.current_buffer_info_mut().scroll_y = pos_y - window_lines;
-        }
+        // Redraw window
+        self.window.set(Color::rgb(25, 25, 25));
 
-        let (scroll_x, scroll_y) = {
+        let mut scr_lines: usize = 0;
+        let mut scr_chars: usize = 0;
+
+        self.cursor_in_window(max_horz_chars, max_vert_chars);
+
+        let (_scroll_x, scroll_y) = {
             let current_buffer = self.buffers.current_buffer_info();
 
             (current_buffer.scroll_x, current_buffer.scroll_y)
         };
 
-        // Redraw window
+        let (pos_x, pos_y) = self.pos();
+
+        let (window_pos_x, window_pos_y) = self.coords_to_window_coords((pos_x, pos_y), max_horz_chars);
+
         self.window.set(Color::rgb(25, 25, 25));
 
         if self.options.line_marker {
             self.window.rect(
                 0,
-                (pos_y - scroll_y) as i32 * 16,
-                w,
+                ((window_pos_y + vert_offset) * self.char_height) as i32,
+                w as u32,
                 16,
                 Color::rgb(45, 45, 45),
             );
         }
 
         self.window.rect(
-            8 * (pos_x - scroll_x) as i32,
-            16 * (pos_y - scroll_y) as i32,
-            8,
-            16,
+            ((window_pos_x + horz_offset) * self.char_width)  as i32,
+            ((window_pos_y + vert_offset) * self.char_height) as i32,
+            self.char_width as u32,
+            self.char_height as u32,
             Color::rgb(255, 255, 255),
         );
 
         let mut string = false;
 
+        'outer: for (y, row) in self.buffers.current_buffer().lines_from(scroll_y).enumerate() {
+            // Print line numbers
+            if self.options.line_numbers {
+                let mut line_number = scroll_y + y as usize + 1;
+                // The amount of digits for this line number
+                let mut digit_nr: usize = 0;
+                while line_number >= 10usize.pow(digit_nr as u32) {
+                   digit_nr += 1;
+                }
+                // Print the digits for this line number
+                for i in 1..digit_nr + 1 {
+                    let digit = ((line_number % 10) as u8 + ('0' as u32) as u8) as char;
+                    line_number = (line_number - line_number % 10)/10 as usize;
+                    self.window.char(
+                        (self.char_width * (horz_offset - 1 - i)) as i32,
+                        (self.char_height * (scr_lines + vert_offset)) as i32,
+                        digit,
+                        Color::rgb(255, 255, 0),
+                    );
+                }
+            }
+            for (x, c) in row.chars().flat_map(|c| if c == '\t' {
+                                                    iter::repeat(' ').take(4)
+                                                    } else {
+                                                        iter::repeat(c).take(1)
+                                                    }).enumerate() {
+                // New screen line
+                if scr_chars >= max_horz_chars {
+                    scr_chars = 0;
+                    scr_lines += 1;
+                    if scr_lines > max_vert_chars {
+                        break 'outer;
+                    }
+                }
 
-        for (y, row) in self.buffers.current_buffer().lines().enumerate() {
-            for (x, c) in row.chars().enumerate() {
                 // TODO: Move outta here
                 let color = if self.options.highlight {
                     match c {
@@ -96,31 +142,86 @@ impl Editor {
                     (255, 255, 255)
                 };
 
-                let c = if c == '\t' { ' ' } else { c };
-
-                if pos_x == x && pos_y == y {
+                if pos_x == x && (pos_y - scroll_y) == y {
                     self.window.char(
-                        8 * (x as isize - scroll_x as isize) as i32,
-                        16 * (y as isize - scroll_y as isize) as i32,
+                        (self.char_width * (scr_chars + horz_offset)) as i32,
+                        (self.char_height * (scr_lines + vert_offset)) as i32,
                         c,
                         Color::rgb(color.0 / 3, color.1 / 3, color.2 / 3),
                     );
                 } else {
                     self.window.char(
-                        8 * (x as isize - scroll_x as isize) as i32,
-                        16 * (y as isize - scroll_y as isize) as i32,
+                        (self.char_width * (scr_chars + horz_offset)) as i32,
+                        (self.char_height * (scr_lines + vert_offset)) as i32,
                         c,
                         Color::rgb(color.0, color.1, color.2),
                     );
                 }
+                scr_chars += 1;
+            }
+            scr_lines += 1;
+            scr_chars = 0;
+            if scr_lines > max_vert_chars {
+                break;
             }
         }
-
-        self.redraw_task = RedrawTask::None;
-
-
         self.redraw_status_bar();
+        self.redraw_task = RedrawTask::None;
         self.window.sync();
+    }
+
+    fn coords_to_window_coords(&mut self, point: (usize, usize), max_horz_chars: usize) -> (usize, usize) {
+        let (_, scroll_y) = {
+            let current_buffer = self.buffers.current_buffer_info();
+
+            (current_buffer.scroll_x, current_buffer.scroll_y)
+        };
+
+        let to_y = point.1 - scroll_y;
+
+        let mut ret_y = 0;
+
+        let ret_x = point.0 % max_horz_chars;
+        for (y, row) in self.buffers.current_buffer().lines_from(scroll_y).enumerate() {
+            if to_y > y {
+                ret_y += row.len() / max_horz_chars + 1;
+            } else {
+                ret_y += point.0 / max_horz_chars;
+                break;
+            }
+        }
+        (ret_x, ret_y)
+    }
+
+    // Ensure that the cursor is visible
+    fn cursor_in_window(&mut self, max_horz_chars: usize, max_vert_chars: usize) {
+        let (_pos_x, pos_y) = self.pos();
+        if self.buffers.current_buffer_info().scroll_y > 0
+            && pos_y <= self.buffers.current_buffer_info().scroll_y
+        {
+            self.buffers.current_buffer_info_mut().scroll_y = if pos_y == 0 {
+                pos_y
+            } else {
+                pos_y - 1
+            };
+            return;
+        }
+
+        let scroll_y = self.buffers.current_buffer_info().scroll_y;
+        let mut line_counter = 0;
+        let mut result_y = 0;
+
+        for (y, row) in self.buffers.current_buffer().lines_from(pos_y+1).rev().enumerate() {
+            if pos_y - y < scroll_y {
+                return;
+            }
+            line_counter += row.len() / max_horz_chars + 1;
+            if line_counter > max_vert_chars {
+                result_y = pos_y - y;
+                break;
+            }
+        }
+        self.buffers.current_buffer_info_mut().scroll_y = result_y;
     }
 
     /// Redraw the status bar

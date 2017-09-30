@@ -59,6 +59,9 @@ pub trait TextBuffer<'a> {
     /// Get an iterator over the lines in the buffer.
     fn lines(&'a self) -> Self::LineIter;
 
+    /// Get an iterator over the line starting from a certain line
+    fn lines_from(&'a self, from: usize) -> Self::LineIter;
+
     /// Get the leading whitespaces of the nth line. Used for autoindenting.
     fn get_indent(&self, n: usize) -> &str;
 }
@@ -199,6 +202,13 @@ impl<'a> TextBuffer<'a> for SplitBuffer {
         SplitBufIter {
             buffer: self,
             line: 0,
+        }
+    }
+
+    fn lines_from(&'a self, from: usize) -> SplitBufIter<'a> {
+        SplitBufIter {
+            buffer: self,
+            line: from,
         }
     }
 
