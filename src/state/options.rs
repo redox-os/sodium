@@ -10,6 +10,8 @@ pub struct Options {
     pub line_marker: bool,
     /// enables read-only mode
     pub readonly: bool,
+    /// Enable linenumbers
+    pub line_numbers: bool,
 }
 
 impl Options {
@@ -21,6 +23,7 @@ impl Options {
             highlight: true,
             line_marker: true,
             readonly: false,
+            line_numbers: false,
         }
     }
 
@@ -32,6 +35,7 @@ impl Options {
             "highlight" | "hl" => Some(&mut self.highlight),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(&mut self.line_marker),
             "readonly" | "ro" => Some(&mut self.readonly),
+            "line_numbers" | "ln" => Some(&mut self.line_numbers),
             _ => None,
         }
     }
@@ -44,6 +48,7 @@ impl Options {
             "highlight" | "hl" => Some(self.highlight),
             "line_marker" | "linemarker" | "linemark" | "lm" => Some(self.line_marker),
             "readonly" | "ro" => Some(self.readonly),
+            "line_numbers" | "ln" => Some(self.line_numbers),
             _ => None,
         }
     }
