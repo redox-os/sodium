@@ -245,7 +245,7 @@ impl Editor {
 
         self.draw_status_bar();
 
-        for (n, c) in self.prompt.chars().enumerate() {
+        for (n, c) in self.prompt[self.prompt_index].chars().enumerate() {
             self.window.char(
                 n as i32 * 8,
                 h as i32 - 16 - 1,
