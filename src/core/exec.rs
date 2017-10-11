@@ -277,11 +277,11 @@ impl Editor {
                 self.cursor_mut().mode = Command(Normal);
                 if let Some(cmd) = PromptCommand::parse(&self.prompt.clone()) {
                     self.invoke(cmd);
-                    self.prompt = String::new();
                     self.redraw_task = RedrawTask::StatusBar;
                 } else {
                     self.status_bar.msg = format!("Unknown command: {}", self.prompt);
                 }
+                self.prompt = String::new();
             }
             (Primitive(Prompt), Backspace) => {
                 self.prompt.pop();
