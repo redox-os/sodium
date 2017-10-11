@@ -21,7 +21,7 @@ impl Editor {
 
         match (self.cursor().mode, cmd.key) {
             (Primitive(Prompt), Char(' ')) if self.key_state.shift => {
-                self.prompt = String::new();
+                self.prompt.insert(0, String::new());
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal);
             }
             (Primitive(Insert(_)), Escape) => {
@@ -275,20 +275,42 @@ impl Editor {
             (Primitive(Insert(opt)), k) => self.insert(k, opt),
             (Primitive(Prompt), Char('\n')) => {
                 self.cursor_mut().mode = Command(Normal);
-                if let Some(cmd) = PromptCommand::parse(&self.prompt.clone()) {
+                if let Some(cmd) = PromptCommand::parse(&self.prompt[self.prompt_index].clone()) {
                     self.invoke(cmd);
-                    self.prompt = String::new();
                     self.redraw_task = RedrawTask::StatusBar;
                 } else {
-                    self.status_bar.msg = format!("Unknown command: {}", self.prompt);
+                    self.status_bar.msg = format!("Unknown command: {}", self.prompt[self.prompt_index]);
                 }
+
+                // If we use a command we used before, don't add a new line to the vec
+                let cmd = self.prompt[self.prompt_index].clone();
+                if self.prompt_index != 0 {
+                    self.prompt[0] = cmd;
+                }
+                // Don't insert anything if the user didn't write anything
+                if self.prompt[self.prompt_index] != "" {
+                    self.prompt.insert(0, String::new());
+                }
+                self.prompt_index = 0;
             }
             (Primitive(Prompt), Backspace) => {
-                self.prompt.pop();
+                self.prompt[self.prompt_index].pop();
+                self.redraw_task = RedrawTask::StatusBar;
+            }
+            (Primitive(Prompt), Up) => {
+                if self.prompt_index < self.prompt.len() - 1 {
+                    self.prompt_index += 1;
+                }
+                self.redraw_task = RedrawTask::StatusBar;
+            }
+            (Primitive(Prompt), Down) => {
+                if self.prompt_index > 0 {
+                    self.prompt_index -= 1;
+                }
                 self.redraw_task = RedrawTask::StatusBar;
             }
             (Primitive(Prompt), Char(c)) => {
-                self.prompt.push(c);
+                self.prompt[self.prompt_index].push(c);
                 self.redraw_task = RedrawTask::StatusBar;
             }
             _ => {

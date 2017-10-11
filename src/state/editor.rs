@@ -168,7 +168,9 @@ pub struct Editor {
     /// The status bar
     pub status_bar: StatusBar,
     /// The prompt
-    pub prompt: String,
+    pub prompt: Vec<String>,
+    /// The prompt index, usually 0
+    pub prompt_index: usize,
     /// The settings
     pub options: Options,
     /// The key state
@@ -195,7 +197,8 @@ impl Editor {
             buffers: BufferManager::new(),
             window: window,
             status_bar: StatusBar::new(),
-            prompt: String::new(),
+            prompt: vec![String::new()],
+            prompt_index: 0,
             options: Options::new(),
             key_state: KeyState::new(),
             redraw_task: RedrawTask::None,
@@ -208,7 +211,8 @@ impl Editor {
         let mut editor = Editor {
             buffers: BufferManager::new(),
             status_bar: StatusBar::new(),
-            prompt: String::new(),
+            prompt: vec![String::new()],
+            prompt_index: 0,
             options: Options::new(),
             key_state: KeyState::new(),
             redraw_task: RedrawTask::None,
