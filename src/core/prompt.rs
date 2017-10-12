@@ -39,6 +39,8 @@ pub enum PromptCommand<'a> {
     },
     /// List the available buffers.
     ListBuffers,
+    /// Create a new empty buffer.
+    CreateBuffer,
     /// Delete the current buffer.
     DeleteBuffer,
     /// Switch to the nth buffer.
@@ -70,6 +72,7 @@ impl<'a> PromptCommand<'a> {
             "o" | "open" => Open { path: sec_cmd },
             "w" | "write" => Write { path: sec_cmd },
             "ls" => ListBuffers,
+            "bn" => CreateBuffer,
             "bd" => DeleteBuffer,
             "h" | "help" => Help,
             "q" | "quit" => Quit,
@@ -121,10 +124,16 @@ impl Editor {
                 }
             }
             Open { path } => {
+                let line = self.buffers.current_buffer().get_line(0).unwrap().len();
+                let empty = self.buffers.current_buffer().len() == 1 && line == 0;
+                let ix = self.buffers.current_buffer_index();
                 self.status_bar.msg = match self.open(path) {
                     FileStatus::NotFound => format!("File {} could not be opened", path),
                     FileStatus::Ok => format!("File {} opened", path),
                     _ => unreachable!(),
+                };
+                if empty {
+                    self.buffers.delete_buffer(ix);
                 }
             }
             Write { path } => {
@@ -151,11 +160,19 @@ impl Editor {
             }
             SwitchToBuffer { buffer_index: ix } => if !self.buffers.is_buffer_index_valid(ix) {
                 self.status_bar.msg = format!("Invalid buffer #{}", ix);
+            } else if self.buffers.current_buffer_index() == ix{
+                self.status_bar.msg = format!("Already in buffer #{}", ix);
             } else {
                 self.buffers.switch_to(ix);
                 self.redraw_task = RedrawTask::Full;
                 self.status_bar.msg = format!("Switched to buffer #{}", ix);
             },
+            CreateBuffer => {
+                let new = self.buffers.new_buffer(Buffer::new());
+                self.buffers.switch_to(new);
+                self.redraw_task = RedrawTask::Full;
+                self.status_bar.msg = format!("Switched to buffer#{}", new);
+            }
             DeleteBuffer => {
                 let ix = self.buffers.current_buffer_index();
                 self.buffers.delete_buffer(ix);

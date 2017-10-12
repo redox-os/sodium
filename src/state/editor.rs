@@ -38,7 +38,7 @@ pub struct Buffer {
 
 impl Buffer {
     /// Create a new Buffer with default values.
-    fn new() -> Buffer {
+    pub fn new() -> Buffer {
         Buffer {
             raw_buffer: SplitBuffer::new(),
             current_cursor: 0,
@@ -147,7 +147,9 @@ impl BufferManager {
         if self.buffers.len() == 0 {
             self.buffers.push(Buffer::new());
             self.current_buffer_index = 0;
-        } else if self.current_buffer_index <= n {
+        } else if n == 0 {
+            self.current_buffer_index = 0;
+        } else if self.current_buffer_index >= n {
             self.current_buffer_index -= 1;
         }
     }
