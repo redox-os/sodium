@@ -185,6 +185,8 @@ pub struct Editor {
     pub char_width: usize,
     /// The character height in pixels
     pub char_height: usize,
+    /// The files currently open
+    pub files: Vec<String>,
 }
 
 impl Editor {
@@ -207,6 +209,7 @@ impl Editor {
             previous_instruction: None,
             char_width: 8,
             char_height: 16,
+            files: Vec::new(),
         };
 
         #[cfg(not(feature = "orbital"))]
@@ -221,6 +224,7 @@ impl Editor {
             previous_instruction: None,
             char_width: 8,
             char_height: 16,
+            files: Vec::new(),
         };
 
         let mut files: Vec<String> = Vec::new();
@@ -264,6 +268,7 @@ impl Editor {
                     for file in args_iter {
                         files.push(file);
                     }
+                    editor.files = files.clone();
                     break;
                 }
                 _ => {
@@ -291,6 +296,7 @@ impl Editor {
                     }
 
                     files.push(arg);
+                    editor.files = files.clone()
                 }
             }
         }
