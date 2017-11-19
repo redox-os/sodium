@@ -37,8 +37,11 @@ impl Editor {
     }
 
     /// Write the file.
-    pub fn write(&mut self, path: &str) -> FileStatus {
+    pub fn write<'a> (&'a mut self, mut path: &'a str) -> FileStatus {
         self.buffers.current_buffer_info_mut().title = Some(path.into());
+        if path == "" {
+            path = self.files[0].as_str();
+        }
         if let Some(mut file) = File::create(path).ok() {
             if file.write(self.buffers.current_buffer().to_string().as_bytes())
                 .is_ok()
