@@ -1,7 +1,7 @@
 use edit::buffer::{SplitBuffer, TextBuffer};
 use state::editor::{Buffer, Editor};
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{Read, Write, stdin};
 
 /// The status of a file IO operation.
 pub enum FileStatus {
@@ -16,7 +16,24 @@ pub enum FileStatus {
 impl Editor {
     /// Open a file.
     pub fn open(&mut self, path: &str) -> FileStatus {
-        if let Some(mut file) = File::open(path).ok() {
+		if path == "-" {
+			// reads from standard input
+			let mut con = String::new();
+			let stdin = stdin();
+			let _ = stdin.lock().read_to_string(&mut con);
+
+			if con.is_empty() {
+                con.push('\n');
+            }
+
+			let mut new_buffer: Buffer = SplitBuffer::from_str(&con).into();
+			new_buffer.title = Some("standard input".to_string());
+
+			let new_buffer_index = self.buffers.new_buffer(new_buffer);
+            self.buffers.switch_to(new_buffer_index);
+            self.hint();
+            FileStatus::Ok
+        } else if let Some(mut file) = File::open(path).ok() {
             let mut con = String::new();
             let _ = file.read_to_string(&mut con);
 
