@@ -78,7 +78,7 @@ impl Editor {
                 let ch = self.get_char();
 
                 if let Some(o) = self.next_ocur(ch, n.d()) {
-                    Some((to_signed_pos((o, y))))
+                    Some(to_signed_pos((o, y)))
                 } else {
                     None
                 }
@@ -87,7 +87,7 @@ impl Editor {
                 let ch = self.get_char();
 
                 if let Some(o) = self.previous_ocur(ch, n.d()) {
-                    Some((to_signed_pos((o, y))))
+                    Some(to_signed_pos((o, y)))
                 } else {
                     None
                 }
