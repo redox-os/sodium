@@ -83,22 +83,22 @@ impl Editor {
                     mode: InsertMode::Insert,
                 }));
             }
-            (Command(Normal), Char('h')) => {
+            (Command(Normal), Left) | (Command(Normal), Char('h')) => {
                 let left = self.left(n);
                 self.goto(left);
                 mov = true;
             }
-            (Command(Normal), Char('j')) => {
+            (Command(Normal), Down) | (Command(Normal), Char('j')) => {
                 let down = self.down(n);
                 self.goto(down);
                 mov = true;
             }
-            (Command(Normal), Char('k')) => {
+            (Command(Normal), Up) | (Command(Normal), Char('k')) => {
                 let up = self.up(n);
                 self.goto(up);
                 mov = true;
             }
-            (Command(Normal), Char('l')) => {
+            (Command(Normal), Right) | (Command(Normal), Char('l')) => {
                 let right = self.right(n, true);
                 self.goto(right);
                 mov = true;
