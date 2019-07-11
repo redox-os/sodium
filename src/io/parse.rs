@@ -86,7 +86,7 @@ impl Editor {
                                     }
                                     Mode::Command(_) => {
                                         n = match c {
-                                            '0'...'9' => {
+                                            '0'..='9' => {
                                                 unset = false;
                                                 n * 10 + ((c as u8) - b'0') as usize
                                             }
