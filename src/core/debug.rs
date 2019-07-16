@@ -2,7 +2,7 @@
 #[macro_export]
 macro_rules! debugln {
     ($e:expr, $($arg:tt)*) => ({
-        if $e.options.debug {
+        if $e.debug {
             println!($($arg)*);
         }
     });
@@ -12,7 +12,7 @@ macro_rules! debugln {
 #[macro_export]
 macro_rules! debug {
     ($e:expr, $($arg:tt)*) => ({
-        if $e.options.debug {
+        if $e.debug {
             print!($($arg)*);
         }
     });

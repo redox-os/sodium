@@ -192,42 +192,8 @@ pub struct Editor {
 impl Editor {
     /// Create new default state editor
     pub fn init() {
-        #[cfg(feature = "orbital")]
-        let window =
-            Window::new_flags(-1, -1, 700, 500, &"Sodium", &[WindowFlag::Resizable]).unwrap();
-
-        #[cfg(feature = "orbital")]
-        let mut editor = Editor {
-            buffers: BufferManager::new(),
-            window: window,
-            status_bar: StatusBar::new(),
-            prompt: vec![String::new()],
-            prompt_index: 0,
-            options: Options::new(),
-            key_state: KeyState::new(),
-            redraw_task: RedrawTask::None,
-            previous_instruction: None,
-            char_width: 8,
-            char_height: 16,
-            files: Vec::new(),
-        };
-
-        #[cfg(not(feature = "orbital"))]
-        let mut editor = Editor {
-            buffers: BufferManager::new(),
-            status_bar: StatusBar::new(),
-            prompt: vec![String::new()],
-            prompt_index: 0,
-            options: Options::new(),
-            key_state: KeyState::new(),
-            redraw_task: RedrawTask::None,
-            previous_instruction: None,
-            char_width: 8,
-            char_height: 16,
-            files: Vec::new(),
-        };
-
         let mut files: Vec<String> = Vec::new();
+        let mut options = Options::new();
 
         let mut args_iter = args().skip(1).peekable();
         loop {
@@ -268,17 +234,16 @@ impl Editor {
                     for file in args_iter {
                         files.push(file);
                     }
-                    editor.files = files.clone();
                     break;
                 }
                 _ => {
-                    {
+                    if arg.len() > 1 {
                         let mut arg_chars = arg.chars();
                         if arg_chars.next() == Some('-') {
                             for ch in arg_chars {
                                 match ch {
-                                    'R' => match editor.options.set("readonly") {
-                                        Ok(_) => debugln!(editor, "Set readonly mode"),
+                                    'R' => match options.set("readonly") {
+                                        Ok(_) => debugln!(options, "Set readonly mode"),
                                         Err(_) => println!("Could not set readonly mode"),
                                     },
                                     'h' => {
@@ -295,27 +260,61 @@ impl Editor {
                         }
                     }
 
-                    files.push(arg);
-                    editor.files = files.clone()
+                    files.push(arg)
                 }
             }
         }
+
+        #[cfg(feature = "orbital")]
+        let window =
+            Window::new_flags(-1, -1, 700, 500, &"Sodium", &[WindowFlag::Resizable]).unwrap();
+
+        #[cfg(feature = "orbital")]
+        let mut editor = Editor {
+            buffers: BufferManager::new(),
+            window: window,
+            status_bar: StatusBar::new(),
+            prompt: vec![String::new()],
+            prompt_index: 0,
+            options: options,
+            key_state: KeyState::new(),
+            redraw_task: RedrawTask::None,
+            previous_instruction: None,
+            char_width: 8,
+            char_height: 16,
+            files: files.clone(),
+        };
+
+        #[cfg(not(feature = "orbital"))]
+        let mut editor = Editor {
+            buffers: BufferManager::new(),
+            status_bar: StatusBar::new(),
+            prompt: vec![String::new()],
+            prompt_index: 0,
+            options: options,
+            key_state: KeyState::new(),
+            redraw_task: RedrawTask::None,
+            previous_instruction: None,
+            char_width: 8,
+            char_height: 16,
+            files: files.clone(),
+        };
 
         if files.len() > 0 {
             // TODO: open multiple files into separate buffers
             editor.open(&files[0]);
         }
 
-        debugln!(editor, "Starting Sodium");
+        debugln!(editor.options, "Starting Sodium");
 
         editor.redraw();
 
-        debugln!(editor, "First redraw of the screen");
+        debugln!(editor.options, "First redraw of the screen");
 
         loop {
             let inp = editor.get_inst();
             if let Inst(_, Cmd { key: Key::Quit }) = inp {
-                debugln!(editor, "C'ya");
+                debugln!(editor.options, "C'ya");
                 break;
             }
             editor.exec(inp);
