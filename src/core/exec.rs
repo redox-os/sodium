@@ -14,6 +14,7 @@ impl Editor {
         use state::mode::Mode::*;
         use state::mode::PrimitiveMode::*;
         use state::mode::CommandMode::*;
+        use std::cmp::min;
 
         let n = para.d();
         let bef = self.pos();
@@ -256,7 +257,7 @@ impl Editor {
                 self.redraw_task = RedrawTask::Full;
             }
             (Command(Normal), Char('Z')) => {
-                self.buffers.current_buffer_info_mut().scroll_y = self.y() - 3;
+                self.buffers.current_buffer_info_mut().scroll_y = self.y() - min(3, self.y());
                 self.redraw_task = RedrawTask::Full;
             }
             (Command(Normal), Char('~')) => {
