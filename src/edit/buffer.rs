@@ -93,7 +93,7 @@ impl SplitBuffer {
     }
 
     fn y(&self) -> usize {
-        self.before.len()
+        self.before.len() - 1
     }
 }
 
@@ -289,5 +289,18 @@ impl<'a> DoubleEndedIterator for SplitBufIter<'a> {
             self.line -= 1;
             self.buffer.get_line(self.line)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SplitBuffer, TextBuffer};
+
+    #[test]
+    fn focus_hint_y_right_away() {
+        let mut buf = SplitBuffer::from_str("1\n2\n3\n4\n5");
+        assert_eq!(buf.len(), 5);
+        assert_eq!(buf.y(), 4);
+        buf.focus_hint_y(5);
     }
 }
