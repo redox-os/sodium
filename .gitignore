@@ -20,3 +20,8 @@ build
 target
 *.swp
 doc
+
+# Editor configuration files
+.vs/
+.vscode/
+.idea/
