@@ -46,11 +46,13 @@ impl Editor {
         loop {
             for event in self.window.events() {
                 match event.to_option() {
-                    EventOption::Key(k) => if let Some(Key::Char(c)) = self.key_state.feed(k) {
-                        self.status_bar.cmd.push(c);
-                        self.redraw_task = RedrawTask::StatusBar;
-                        return c;
-                    },
+                    EventOption::Key(k) => {
+                        if let Some(Key::Char(c)) = self.key_state.feed(k) {
+                            self.status_bar.cmd.push(c);
+                            self.redraw_task = RedrawTask::StatusBar;
+                            return c;
+                        }
+                    }
                     _ => {}
                 }
             }

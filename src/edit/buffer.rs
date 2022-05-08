@@ -66,7 +66,6 @@ pub trait TextBuffer<'a> {
     fn get_indent(&self, n: usize) -> &str;
 }
 
-
 /// The buffer data structure, that Sodium is using.
 ///
 /// This structure consists of two "subbuffers", which are just vectors over lines (defined by
@@ -78,7 +77,8 @@ pub trait TextBuffer<'a> {
 pub struct SplitBuffer {
     before: Vec<String>,
     after: Vec<String>,
-    #[cfg(debug)] _hinted_since_edit: bool,
+    #[cfg(debug)]
+    _hinted_since_edit: bool,
 }
 
 impl SplitBuffer {
@@ -227,7 +227,6 @@ impl<'a> TextBuffer<'a> for SplitBuffer {
         }
     }
 }
-
 
 impl Index<usize> for SplitBuffer {
     type Output = String;

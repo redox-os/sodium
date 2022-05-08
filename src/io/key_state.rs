@@ -4,9 +4,9 @@ use io::key::Key;
 use orbclient::KeyEvent;
 
 #[cfg(feature = "ansi")]
-use std::io::Stdin;
-#[cfg(feature = "ansi")]
 use std::io::prelude::*;
+#[cfg(feature = "ansi")]
+use std::io::Stdin;
 
 /// Key state
 pub struct KeyState {

@@ -1,7 +1,7 @@
+use edit::buffer::{SplitBuffer, TextBuffer};
 use io::file::FileStatus;
 use io::redraw::RedrawTask;
 use state::editor::{Buffer, BufferManager, Editor};
-use edit::buffer::{SplitBuffer, TextBuffer};
 
 use std::process::exit;
 
@@ -158,15 +158,17 @@ impl Editor {
                 self.buffers.switch_to(new_buffer_index);
                 self.redraw_task = RedrawTask::Full;
             }
-            SwitchToBuffer { buffer_index: ix } => if !self.buffers.is_buffer_index_valid(ix) {
-                self.status_bar.msg = format!("Invalid buffer #{}", ix);
-            } else if self.buffers.current_buffer_index() == ix{
-                self.status_bar.msg = format!("Already in buffer #{}", ix);
-            } else {
-                self.buffers.switch_to(ix);
-                self.redraw_task = RedrawTask::Full;
-                self.status_bar.msg = format!("Switched to buffer #{}", ix);
-            },
+            SwitchToBuffer { buffer_index: ix } => {
+                if !self.buffers.is_buffer_index_valid(ix) {
+                    self.status_bar.msg = format!("Invalid buffer #{}", ix);
+                } else if self.buffers.current_buffer_index() == ix {
+                    self.status_bar.msg = format!("Already in buffer #{}", ix);
+                } else {
+                    self.buffers.switch_to(ix);
+                    self.redraw_task = RedrawTask::Full;
+                    self.status_bar.msg = format!("Switched to buffer #{}", ix);
+                }
+            }
             CreateBuffer => {
                 let new = self.buffers.new_buffer(Buffer::new());
                 self.buffers.switch_to(new);
@@ -198,14 +200,14 @@ fn get_buffers_description(buffers: &BufferManager) -> String {
     }
 
     let descriptions = buffers
-            .iter()
-            // don't include transient buffers like the one
-            // this is going to be shown in
-            .filter(|b| !b.is_transient)
-            .enumerate()
-            .map(|(i, b)| print_buffer(i, b))
-            .collect::<Vec<_>>()
-            .join("\n");
+        .iter()
+        // don't include transient buffers like the one
+        // this is going to be shown in
+        .filter(|b| !b.is_transient)
+        .enumerate()
+        .map(|(i, b)| print_buffer(i, b))
+        .collect::<Vec<_>>()
+        .join("\n");
 
     format!(
         "Buffers\n=====================================\n\n{}",
