@@ -103,6 +103,16 @@ impl Editor {
                 self.goto(right);
                 mov = true;
             }
+            (Command(Normal), Char('w')) => {
+                let next_word = self.next_word(n, true);
+                self.goto(next_word);
+                mov = true;
+            }
+            (Command(Normal), Char('e')) => {
+                let next_word = self.next_word_end(n, true);
+                self.goto(next_word);
+                mov = true;
+            }
             (Command(Normal), Char('J')) => {
                 let down = self.down(15 * n);
                 self.goto(down);
@@ -130,7 +140,20 @@ impl Editor {
                     mov = true;
                 }
             }
+            (Command(Normal), Char('$')) => {
+                if self.buffers.current_buffer()[self.y()].len() != 0 {
+                    let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
+                    self.goto(ln_end);
+                    mov = true;
+                }
+            }
             (Command(Normal), Char('H')) => {
+                println!("H pressed");
+                self.cursor_mut().x = 0;
+                mov = true;
+            }
+            (Command(Normal), Char('0')) => {
+                println!("0 pressed");
                 self.cursor_mut().x = 0;
                 mov = true;
             }
@@ -230,14 +253,14 @@ impl Editor {
                     mov = true;
                 }
             }
-            (Command(Normal), Char('W')) => {
-                let pos = self._next_word_forward(n);
-                if let Some(p) = pos {
-                    let y = self.y();
-                    self.goto((p, y));
-                    mov = true;
-                }
-            }
+            // (Command(Normal), Char('W')) => {
+            //     let pos = self.next_word_forward(n);
+            //     if let Some(p) = pos {
+            //         let y = self.y();
+            //         self.goto((p, y));
+            //         mov = true;
+            //     }
+            // }
             (Command(Normal), Char(';')) => {
                 self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt)
             }
