@@ -31,8 +31,8 @@ impl Editor {
             0
         };
 
-        let max_vert_chars = h/self.char_height - 2 - vert_offset;
-        let max_horz_chars = w/self.char_width - horz_offset;
+        let max_vert_chars = h / self.char_height - 2 - vert_offset;
+        let max_horz_chars = w / self.char_width - horz_offset;
 
         // Redraw window
         self.window.set(Color::rgb(25, 25, 25));
@@ -50,7 +50,8 @@ impl Editor {
 
         let (pos_x, pos_y) = self.pos();
 
-        let (window_pos_x, window_pos_y) = self.coords_to_window_coords((pos_x, pos_y), max_horz_chars);
+        let (window_pos_x, window_pos_y) =
+            self.coords_to_window_coords((pos_x, pos_y), max_horz_chars);
 
         self.window.set(Color::rgb(25, 25, 25));
 
@@ -65,7 +66,7 @@ impl Editor {
         }
 
         self.window.rect(
-            ((window_pos_x + horz_offset) * self.char_width)  as i32,
+            ((window_pos_x + horz_offset) * self.char_width) as i32,
             ((window_pos_y + vert_offset) * self.char_height) as i32,
             self.char_width as u32,
             self.char_height as u32,
@@ -74,19 +75,24 @@ impl Editor {
 
         let mut string = false;
 
-        'outer: for (y, row) in self.buffers.current_buffer().lines_from(scroll_y).enumerate() {
+        'outer: for (y, row) in self
+            .buffers
+            .current_buffer()
+            .lines_from(scroll_y)
+            .enumerate()
+        {
             // Print line numbers
             if self.options.line_numbers {
                 let mut line_number = scroll_y + y as usize + 1;
                 // The amount of digits for this line number
                 let mut digit_nr: usize = 0;
                 while line_number >= 10usize.pow(digit_nr as u32) {
-                   digit_nr += 1;
+                    digit_nr += 1;
                 }
                 // Print the digits for this line number
                 for i in 1..digit_nr + 1 {
                     let digit = ((line_number % 10) as u8 + ('0' as u32) as u8) as char;
-                    line_number = (line_number - line_number % 10)/10 as usize;
+                    line_number = (line_number - line_number % 10) / 10 as usize;
                     self.window.char(
                         (self.char_width * (horz_offset - 1 - i)) as i32,
                         (self.char_height * (scr_lines + vert_offset)) as i32,
@@ -95,11 +101,17 @@ impl Editor {
                     );
                 }
             }
-            for (x, c) in row.chars().flat_map(|c| if c == '\t' {
-                                                    iter::repeat(' ').take(4)
-                                                    } else {
-                                                        iter::repeat(c).take(1)
-                                                    }).enumerate() {
+            for (x, c) in row
+                .chars()
+                .flat_map(|c| {
+                    if c == '\t' {
+                        iter::repeat(' ').take(4)
+                    } else {
+                        iter::repeat(c).take(1)
+                    }
+                })
+                .enumerate()
+            {
                 // New screen line
                 if scr_chars >= max_horz_chars {
                     scr_chars = 0;
@@ -117,22 +129,8 @@ impl Editor {
                             (226, 225, 167) //(167, 222, 156)
                         }
                         _ if string => (226, 225, 167), //(167, 222, 156)
-                        '!' |
-                        '@' |
-                        '#' |
-                        '$' |
-                        '%' |
-                        '^' |
-                        '&' |
-                        '|' |
-                        '*' |
-                        '+' |
-                        '-' |
-                        '/' |
-                        ':' |
-                        '=' |
-                        '<' |
-                        '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
+                        '!' | '@' | '#' | '$' | '%' | '^' | '&' | '|' | '*' | '+' | '-' | '/'
+                        | ':' | '=' | '<' | '>' => (198, 83, 83), //(228, 190, 175), //(194, 106, 71),
                         '.' | ',' => (241, 213, 226),
                         '(' | ')' | '[' | ']' | '{' | '}' => (164, 212, 125), //(195, 139, 75),
                         '0'..='9' => (209, 209, 177),
@@ -170,7 +168,11 @@ impl Editor {
         self.window.sync();
     }
 
-    fn coords_to_window_coords(&mut self, point: (usize, usize), max_horz_chars: usize) -> (usize, usize) {
+    fn coords_to_window_coords(
+        &mut self,
+        point: (usize, usize),
+        max_horz_chars: usize,
+    ) -> (usize, usize) {
         let (_, scroll_y) = {
             let current_buffer = self.buffers.current_buffer_info();
 
@@ -182,7 +184,12 @@ impl Editor {
         let mut ret_y = 0;
 
         let ret_x = point.0 % max_horz_chars;
-        for (y, row) in self.buffers.current_buffer().lines_from(scroll_y).enumerate() {
+        for (y, row) in self
+            .buffers
+            .current_buffer()
+            .lines_from(scroll_y)
+            .enumerate()
+        {
             if to_y > y {
                 ret_y += row.len() / max_horz_chars + 1;
             } else {
@@ -199,11 +206,8 @@ impl Editor {
         if self.buffers.current_buffer_info().scroll_y > 0
             && pos_y <= self.buffers.current_buffer_info().scroll_y
         {
-            self.buffers.current_buffer_info_mut().scroll_y = if pos_y == 0 {
-                pos_y
-            } else {
-                pos_y - 1
-            };
+            self.buffers.current_buffer_info_mut().scroll_y =
+                if pos_y == 0 { pos_y } else { pos_y - 1 };
             return;
         }
 
@@ -211,7 +215,13 @@ impl Editor {
         let mut line_counter = 0;
         let mut result_y = 0;
 
-        for (y, row) in self.buffers.current_buffer().lines_from(pos_y+1).rev().enumerate() {
+        for (y, row) in self
+            .buffers
+            .current_buffer()
+            .lines_from(pos_y + 1)
+            .rev()
+            .enumerate()
+        {
             if pos_y - y < scroll_y {
                 return;
             }
@@ -264,7 +274,8 @@ impl Editor {
 
         let mode = self.cursor().mode;
 
-        let current_title = self.buffers
+        let current_title = self
+            .buffers
             .current_buffer_info()
             .title
             .as_ref()
@@ -286,8 +297,9 @@ impl Editor {
                     .collect::<Vec<_>>()
             } else {
                 text.chars().collect()
-            }).into_iter()
-                .enumerate()
+            })
+            .into_iter()
+            .enumerate()
             {
                 self.window.char(
                     ((w * a) / b) as i32 + (n as i32 * 8),

@@ -19,7 +19,6 @@ pub mod io;
 /// State of the editor.
 pub mod state;
 
-
 fn main() {
     self::state::editor::Editor::init();
 }

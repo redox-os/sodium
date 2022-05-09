@@ -1,12 +1,12 @@
-use std::slice::Iter;
 use edit::buffer::{SplitBuffer, TextBuffer};
-use state::cursor::Cursor;
 use io::graphics::StatusBar;
 use io::key::{Cmd, Key};
 use io::key_state::KeyState;
-use state::options::Options;
 use io::parse::Inst;
 use io::redraw::RedrawTask;
+use state::cursor::Cursor;
+use state::options::Options;
+use std::slice::Iter;
 
 #[cfg(feature = "orbital")]
 use orbclient::Window;

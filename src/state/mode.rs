@@ -17,9 +17,9 @@ pub enum Mode {
 impl Mode {
     /// Convert the mode to string
     pub fn to_string(self) -> &'static str {
+        use self::CommandMode::*;
         use self::Mode::*;
         use self::PrimitiveMode::*;
-        use self::CommandMode::*;
         match self {
             Command(Normal) => "Normal",
             Primitive(Insert(_)) => "Insert",

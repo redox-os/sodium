@@ -1,19 +1,19 @@
-use state::editor::Editor;
-use io::parse::{Inst, Parameter};
-use state::mode::{CommandMode, Mode, PrimitiveMode};
-use edit::insert::{InsertMode, InsertOptions};
-use io::redraw::RedrawTask;
-use edit::buffer::TextBuffer;
 use core::prompt::PromptCommand;
+use edit::buffer::TextBuffer;
+use edit::insert::{InsertMode, InsertOptions};
+use io::parse::{Inst, Parameter};
+use io::redraw::RedrawTask;
+use state::editor::Editor;
+use state::mode::{CommandMode, Mode, PrimitiveMode};
 
 // TODO: Move the command definitions outta here
 impl Editor {
     /// Execute an instruction
     pub fn exec(&mut self, Inst(para, cmd): Inst) {
         use io::key::Key::*;
+        use state::mode::CommandMode::*;
         use state::mode::Mode::*;
         use state::mode::PrimitiveMode::*;
-        use state::mode::CommandMode::*;
 
         let n = para.d();
         let bef = self.pos();
@@ -38,9 +38,11 @@ impl Editor {
                 self.cursor_mut().mode = Mode::Command(CommandMode::Normal)
             }
             (_, Char(' ')) if self.key_state.alt => self.next_cursor(),
-            _ if self.key_state.alt => if let Some(m) = self.to_motion(Inst(para, cmd)) {
-                self.goto(m);
-            },
+            _ if self.key_state.alt => {
+                if let Some(m) = self.to_motion(Inst(para, cmd)) {
+                    self.goto(m);
+                }
+            }
             (Command(Normal), Char('i')) => {
                 self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                     mode: InsertMode::Insert,
@@ -103,6 +105,16 @@ impl Editor {
                 self.goto(right);
                 mov = true;
             }
+            (Command(Normal), Char('w')) => {
+                let next_word = self.next_word(n, true);
+                self.goto(next_word);
+                mov = true;
+            }
+            (Command(Normal), Char('e')) => {
+                let next_word = self.next_word_end(n, true);
+                self.goto(next_word);
+                mov = true;
+            }
             (Command(Normal), Char('J')) => {
                 let down = self.down(15 * n);
                 self.goto(down);
@@ -130,7 +142,20 @@ impl Editor {
                     mov = true;
                 }
             }
+            (Command(Normal), Char('$')) => {
+                if self.buffers.current_buffer()[self.y()].len() != 0 {
+                    let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
+                    self.goto(ln_end);
+                    mov = true;
+                }
+            }
             (Command(Normal), Char('H')) => {
+                println!("H pressed");
+                self.cursor_mut().x = 0;
+                mov = true;
+            }
+            (Command(Normal), Char('0')) => {
+                println!("0 pressed");
                 self.cursor_mut().x = 0;
                 mov = true;
             }
@@ -160,9 +185,10 @@ impl Editor {
                 let ins = self.get_inst();
                 if let Some(m) = self.to_motion_unbounded(ins) {
                     self.remove_rb(m);
-                    self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
-                        mode: InsertMode::Insert,
-                    }));
+                    self.cursor_mut().mode =
+                        Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
+                            mode: InsertMode::Insert,
+                        }));
                 }
             }
             (Command(Normal), Char('G')) => {
@@ -230,14 +256,14 @@ impl Editor {
                     mov = true;
                 }
             }
-            (Command(Normal), Char('W')) => {
-                let pos = self._next_word_forward(n);
-                if let Some(p) = pos {
-                    let y = self.y();
-                    self.goto((p, y));
-                    mov = true;
-                }
-            }
+            // (Command(Normal), Char('W')) => {
+            //     let pos = self.next_word_forward(n);
+            //     if let Some(p) = pos {
+            //         let y = self.y();
+            //         self.goto((p, y));
+            //         mov = true;
+            //     }
+            // }
             (Command(Normal), Char(';')) => {
                 self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Prompt)
             }
@@ -245,10 +271,12 @@ impl Editor {
             (Command(Normal), Char('z')) => {
                 let Inst(param, cmd) = self.get_inst();
                 match param {
-                    Parameter::Null => if let Some(m) = self.to_motion(Inst(param, cmd)) {
-                        self.buffers.current_buffer_info_mut().scroll_y = m.1;
-                        self.goto(m);
-                    },
+                    Parameter::Null => {
+                        if let Some(m) = self.to_motion(Inst(param, cmd)) {
+                            self.buffers.current_buffer_info_mut().scroll_y = m.1;
+                            self.goto(m);
+                        }
+                    }
                     Parameter::Int(n) => {
                         self.buffers.current_buffer_info_mut().scroll_y = n;
                     }
@@ -262,12 +290,14 @@ impl Editor {
             (Command(Normal), Char('~')) => {
                 self.invert_chars(n);
             }
-            (Command(Normal), Char('.')) => if let Some(inst) = self.previous_instruction {
-                self.exec(inst);
-            } else {
-                self.status_bar.msg = "No previous command".into();
-                self.redraw_task = RedrawTask::StatusBar;
-            },
+            (Command(Normal), Char('.')) => {
+                if let Some(inst) = self.previous_instruction {
+                    self.exec(inst);
+                } else {
+                    self.status_bar.msg = "No previous command".into();
+                    self.redraw_task = RedrawTask::StatusBar;
+                }
+            }
             (Command(Normal), Char(c)) => {
                 self.status_bar.msg = format!("Unknown command: {}", c);
                 self.redraw_task = RedrawTask::StatusBar;
@@ -279,7 +309,8 @@ impl Editor {
                     self.invoke(cmd);
                     self.redraw_task = RedrawTask::StatusBar;
                 } else {
-                    self.status_bar.msg = format!("Unknown command: {}", self.prompt[self.prompt_index]);
+                    self.status_bar.msg =
+                        format!("Unknown command: {}", self.prompt[self.prompt_index]);
                 }
 
                 // If we use a command we used before, don't add a new line to the vec

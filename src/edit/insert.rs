@@ -12,7 +12,6 @@ pub enum InsertMode {
     Replace,
 }
 
-
 #[derive(Clone, PartialEq, Copy)]
 /// The insert options
 pub struct InsertOptions {

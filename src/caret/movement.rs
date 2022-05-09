@@ -48,7 +48,6 @@ impl Editor {
                 }
             }
         }
-        // }
     }
 
     /// Get the position before a given position, i.e. a generalisation .before(). Includes
@@ -90,7 +89,18 @@ impl Editor {
     pub fn right_unbounded(&self, n: usize) -> (isize, isize) {
         ((self.x() + n) as isize, self.y() as isize)
     }
-
+    /// Get the position of the first word right of the cursor (horizontally bounded)
+    #[inline]
+    pub fn next_word(&self, n: usize, tight: bool) -> (usize, usize) {
+        let next_n = self.next_word_forward(n);
+        self.bound_hor((self.x() + (next_n), self.y()), tight)
+    }
+    /// Get the position of the first word end right of the cursor (horizontally bounded)
+    #[inline]
+    pub fn next_word_end(&self, n: usize, tight: bool) -> (usize, usize) {
+        let next_n = self.next_word_end_forward(n);
+        self.bound_hor((self.x() + (next_n), self.y()), tight)
+    }
     /// Get the position of the character left to the cursor (horizontally bounded)
     #[inline]
     pub fn left(&self, n: usize) -> (usize, usize) {
@@ -180,27 +190,59 @@ impl Editor {
         None
     }
 
-    /// Get next WORD forward
+    /// Get end of next WORD forward
     /// "A WORD consists of a sequence of non-blank characters, separated with
     /// whitespace.  An empty line is also considered to be a WORD."
-    pub fn _next_word_forward(&self, n: usize) -> Option<usize> {
-        let mut dn = 0;
-        let mut x = self.x();
+    pub fn next_word_forward(&self, n_opt: usize) -> usize {
+        let mut word_count: usize = 0;
+        let x: usize = self.x();
+        let mut has_ws = false;
 
-        for (i, ch) in self.buffers.current_buffer()[self.y()]
+        for (i, current_char) in self.buffers.current_buffer()[self.y()]
             .chars()
             .skip(x)
             .enumerate()
         {
-            if ch.is_whitespace() {
-                dn += 1;
-                if dn == n {
-                    x += i + 1;
-                    return Some(x);
+            if current_char.is_whitespace() {
+                has_ws = true;
+            } else if has_ws && !current_char.is_whitespace() {
+                word_count += 1;
+                if word_count < n_opt - 1 {
+                    has_ws = false;
+                } else {
+                    return i;
                 }
             }
         }
+        0
+    }
 
-        None
+    /// Get beginning of next WORD forward
+    /// "A WORD consists of a sequence of non-blank characters, separated with
+    /// whitespace.  An empty line is also considered to be a WORD."
+    pub fn next_word_end_forward(&self, n_opt: usize) -> usize {
+        let mut word_count: usize = 0;
+        let x: usize = self.x();
+        let mut word_char: bool = true;
+        let mut last: usize = 0;
+
+        for (i, current_char) in self.buffers.current_buffer()[self.y()]
+            .chars()
+            .skip(x)
+            .enumerate()
+        {
+            // if a word_char
+            if !current_char.is_whitespace() {
+                word_char = true;
+                last = i;
+                word_count += 1;
+            } else if current_char.is_whitespace() {
+                if word_char && word_count > n_opt {
+                    return i - 1;
+                }
+                word_char = false;
+            }
+        }
+        last
     }
 }
