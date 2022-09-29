@@ -56,6 +56,9 @@ pub trait TextBuffer<'a> {
     /// Get the number of lines in the buffer.
     fn len(&self) -> usize;
 
+    /// Get if there are no lines
+    fn is_empty(&self) -> bool;
+
     /// Get an iterator over the lines in the buffer.
     fn lines(&'a self) -> Self::LineIter;
 
@@ -100,6 +103,7 @@ impl SplitBuffer {
 // TODO remove
 impl SplitBuffer {
     /// Convert the buffer to a string.
+    #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         self.lines().map(|x| x.to_owned() + "\n").collect()
     }
@@ -226,16 +230,22 @@ impl<'a> TextBuffer<'a> for SplitBuffer {
             ""
         }
     }
+
+    fn is_empty(&self) -> bool {
+        self.len() > 0
+    }
 }
 
 impl Index<usize> for SplitBuffer {
     type Output = String;
 
+    #[allow(clippy::needless_lifetimes)]
     fn index<'a>(&'a self, index: usize) -> &'a String {
         self.get_line(index).expect("Out of bound")
     }
 }
 impl IndexMut<usize> for SplitBuffer {
+    #[allow(clippy::needless_lifetimes)]
     fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut String {
         #[cfg(debug)]
         fn debug_check(b: &mut SplitBuffer) {

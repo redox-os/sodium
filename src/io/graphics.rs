@@ -92,7 +92,7 @@ impl Editor {
                 // Print the digits for this line number
                 for i in 1..digit_nr + 1 {
                     let digit = ((line_number % 10) as u8 + ('0' as u32) as u8) as char;
-                    line_number = (line_number - line_number % 10) / 10 as usize;
+                    line_number = (line_number - line_number % 10) / 10_usize;
                     self.window.char(
                         (self.char_width * (horz_offset - 1 - i)) as i32,
                         (self.char_height * (scr_lines + vert_offset)) as i32,
@@ -277,9 +277,7 @@ impl Editor {
         let current_title = self
             .buffers
             .current_buffer_info()
-            .title
-            .as_ref()
-            .map(|s| s.as_str())
+            .title.as_deref()
             .unwrap_or("");
 
         let items = [
@@ -335,6 +333,12 @@ pub struct StatusBar {
     /// A message (such as an error or other info to the user)
     pub msg: String,
 }
+
+impl Default for StatusBar {
+    fn default() -> Self {
+    Self::new()
+    }
+    }
 
 impl StatusBar {
     /// Create new status bar

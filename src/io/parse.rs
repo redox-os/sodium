@@ -45,15 +45,12 @@ impl Editor {
         #[cfg(feature = "orbital")]
         loop {
             for event in self.window.events() {
-                match event.to_option() {
-                    EventOption::Key(k) => {
-                        if let Some(Key::Char(c)) = self.key_state.feed(k) {
-                            self.status_bar.cmd.push(c);
-                            self.redraw_task = RedrawTask::StatusBar;
-                            return c;
-                        }
+                if let EventOption::Key(k) = event.to_option() {
+                    if let Some(Key::Char(c)) = self.key_state.feed(k) {
+                    self.status_bar.cmd.push(c);
+                    self.redraw_task = RedrawTask::StatusBar;
+                    return c;
                     }
-                    _ => {}
                 }
             }
         }
@@ -109,7 +106,7 @@ impl Editor {
                                         } else {
                                             Parameter::Int(n)
                                         },
-                                        Cmd { key: key },
+                                        Cmd { key },
                                     );
                                 }
                             }

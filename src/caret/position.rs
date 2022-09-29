@@ -35,7 +35,7 @@ impl Editor {
             y
         };
 
-        let ln = self.buffers.current_buffer()[y].len() + if tight { 0 } else { 1 };
+        let ln = self.buffers.current_buffer()[y].len() + usize::from(!tight);
         if x >= ln {
             if ln == 0 {
                 (0, y)

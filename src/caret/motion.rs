@@ -28,20 +28,12 @@ impl Editor {
             Char('t') => {
                 let ch = self.get_char();
 
-                if let Some(o) = self.next_ocur(ch, n.d()) {
-                    Some((o, y))
-                } else {
-                    None
-                }
+                self.next_ocur(ch, n.d()).map(|o| (o, y))
             }
             Char('f') => {
                 let ch = self.get_char();
 
-                if let Some(o) = self.previous_ocur(ch, n.d()) {
-                    Some((o, y))
-                } else {
-                    None
-                }
+                self.previous_ocur(ch, n.d()).map(|o| (o, y))
             }
             Char(c) => {
                 self.status_bar.msg = format!("Motion not defined: '{}'", c);
@@ -49,7 +41,7 @@ impl Editor {
                 None
             }
             _ => {
-                self.status_bar.msg = format!("Motion not defined");
+                self.status_bar.msg = "Motion not defined".to_string();
                 None
             }
         }
@@ -77,20 +69,12 @@ impl Editor {
             Char('t') => {
                 let ch = self.get_char();
 
-                if let Some(o) = self.next_ocur(ch, n.d()) {
-                    Some(to_signed_pos((o, y)))
-                } else {
-                    None
-                }
+                self.next_ocur(ch, n.d()).map(|o| to_signed_pos((o, y)))
             }
             Char('f') => {
                 let ch = self.get_char();
 
-                if let Some(o) = self.previous_ocur(ch, n.d()) {
-                    Some(to_signed_pos((o, y)))
-                } else {
-                    None
-                }
+                self.previous_ocur(ch, n.d()).map(|o| to_signed_pos((o, y)))
             }
             _ => None,
         }

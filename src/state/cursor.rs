@@ -13,6 +13,12 @@ pub struct Cursor {
     pub mode: Mode,
 }
 
+impl Default for Cursor {
+    fn default() -> Self {
+    Self::new()
+    }
+    }
+
 impl Cursor {
     /// Create a new default cursor
     pub fn new() -> Cursor {
@@ -29,10 +35,7 @@ impl Editor {
     #[inline]
     pub fn current(&self) -> Option<char> {
         let (x, y) = self.pos();
-        match self.buffers.current_buffer()[y].chars().nth(x) {
-            Some(c) => Some(c),
-            None => None,
-        }
+        self.buffers.current_buffer()[y].chars().nth(x)
     }
 
     /// Get the current cursor

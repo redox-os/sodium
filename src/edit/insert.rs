@@ -3,7 +3,7 @@ use io::key::Key;
 use io::redraw::RedrawTask;
 use state::editor::Editor;
 
-#[derive(Clone, PartialEq, Copy)]
+#[derive(Clone, PartialEq, Eq, Copy)]
 /// The type of the insert mode
 pub enum InsertMode {
     /// Insert text (before the cursor)
@@ -12,7 +12,7 @@ pub enum InsertMode {
     Replace,
 }
 
-#[derive(Clone, PartialEq, Copy)]
+#[derive(Clone, PartialEq, Eq, Copy)]
 /// The insert options
 pub struct InsertOptions {
     /// The mode type

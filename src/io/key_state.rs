@@ -18,6 +18,12 @@ pub struct KeyState {
     pub shift: bool,
 }
 
+impl Default for KeyState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl KeyState {
     /// Create a new default key state.
     pub fn new() -> KeyState {

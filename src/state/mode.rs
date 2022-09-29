@@ -1,6 +1,6 @@
 use edit::insert::InsertOptions;
 
-#[derive(Clone, PartialEq, Copy)]
+#[derive(Clone, PartialEq, Eq, Copy)]
 /// A mode. Modes determine which set of commands that will be used. Modes comes in two flavors:
 pub enum Mode {
     /// A primitive mode. In this mode type, absolutely none preprocessing of the commands are
@@ -28,7 +28,7 @@ impl Mode {
     }
 }
 
-#[derive(Clone, PartialEq, Copy)]
+#[derive(Clone, PartialEq, Eq, Copy)]
 /// A command mode
 pub enum CommandMode {
     // Visual(VisualOptions),
@@ -37,7 +37,7 @@ pub enum CommandMode {
     Normal,
 }
 
-#[derive(Clone, PartialEq, Copy)]
+#[derive(Clone, PartialEq, Eq, Copy)]
 /// A primitive mode
 pub enum PrimitiveMode {
     /// Insert mode. In this text is inserted

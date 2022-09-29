@@ -1,7 +1,7 @@
 #[cfg(feature = "orbital")]
 use orbclient::{KeyEvent, K_BKSP, K_DOWN, K_ESC, K_LEFT, K_RIGHT, K_TAB, K_UP};
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 /// A key
 pub enum Key {
     /// Printable character.
@@ -62,7 +62,7 @@ impl Key {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 /// A command, i.e. a key together with information on the modifiers.
 pub struct Cmd {
     /// The key associated with the command.

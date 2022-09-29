@@ -15,7 +15,7 @@ use orbclient::WindowFlag;
 
 use std::env::args;
 
-const HELP: &'static str = include_str!("../../help.txt");
+const HELP: &str = include_str!("../../help.txt");
 
 /// A SplitBuffer and related state
 pub struct Buffer {
@@ -35,6 +35,12 @@ pub struct Buffer {
     /// it is no longer the current buffer.
     pub is_transient: bool,
 }
+
+impl Default for Buffer {
+    fn default() -> Self {
+    Self::new()
+    }
+    }
 
 impl Buffer {
     /// Create a new Buffer with default values.
@@ -66,6 +72,12 @@ pub struct BufferManager {
     current_buffer_index: usize,
 }
 
+impl Default for BufferManager {
+    fn default() -> Self {
+    Self::new()
+    }
+    }
+
 impl BufferManager {
     /// Create a new BufferManager with default values.
     pub fn new() -> BufferManager {
@@ -91,6 +103,11 @@ impl BufferManager {
     /// Gets the number of buffers.
     pub fn len(&self) -> usize {
         self.buffers.len()
+    }
+
+    /// checks if there are no buffers
+    pub fn is_empty(&self) -> bool {
+        self.len() < 1
     }
 
     /// Gets the index of the current buffer.
@@ -144,7 +161,7 @@ impl BufferManager {
 
         self.buffers.remove(n);
 
-        if self.buffers.len() == 0 {
+        if self.buffers.is_empty() {
             self.buffers.push(Buffer::new());
             self.current_buffer_index = 0;
         } else if n == 0 {
@@ -194,12 +211,12 @@ impl Editor {
     pub fn init() {
         #[cfg(feature = "orbital")]
         let window =
-            Window::new_flags(-1, -1, 700, 500, &"Sodium", &[WindowFlag::Resizable]).unwrap();
+            Window::new_flags(-1, -1, 700, 500, "Sodium", &[WindowFlag::Resizable]).unwrap();
 
         #[cfg(feature = "orbital")]
         let mut editor = Editor {
             buffers: BufferManager::new(),
-            window: window,
+            window,
             status_bar: StatusBar::new(),
             prompt: vec![String::new()],
             prompt_index: 0,
@@ -230,11 +247,8 @@ impl Editor {
         let mut files: Vec<String> = Vec::new();
 
         let mut args_iter = args().skip(1).peekable();
-        loop {
-            let arg = match args_iter.next() {
-                Some(x) => x,
-                None => break,
-            };
+        while let Some(arg) = args_iter.next() {
+                
 
             match arg.as_str() {
                 "--version" => {
@@ -301,7 +315,7 @@ impl Editor {
             }
         }
 
-        if files.len() > 0 {
+        if !files.is_empty() {
             // TODO: open multiple files into separate buffers
             editor.open(&files[0]);
         }

@@ -14,6 +14,12 @@ pub struct Options {
     pub line_numbers: bool,
 }
 
+impl Default for Options {
+    fn default() -> Self {
+    Self::new()
+    }
+    }
+
 impl Options {
     /// Create new default options
     pub fn new() -> Self {
@@ -54,6 +60,7 @@ impl Options {
     }
 
     /// Set a given option (mark it as active)
+    #[allow(clippy::result_unit_err)]
     pub fn set(&mut self, name: &str) -> Result<(), ()> {
         match self.get_mut(name) {
             Some(x) => {
@@ -64,6 +71,7 @@ impl Options {
         }
     }
     /// Unset a given option (mark it as inactive)
+    #[allow(clippy::result_unit_err)]
     pub fn unset(&mut self, name: &str) -> Result<(), ()> {
         match self.get_mut(name) {
             Some(x) => {
@@ -74,6 +82,7 @@ impl Options {
         }
     }
     /// Toggle a given option
+    #[allow(clippy::result_unit_err)]
     pub fn toggle(&mut self, name: &str) -> Result<(), ()> {
         match self.get_mut(name) {
             Some(x) => {

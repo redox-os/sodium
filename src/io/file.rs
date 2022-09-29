@@ -16,7 +16,7 @@ pub enum FileStatus {
 impl Editor {
     /// Open a file.
     pub fn open(&mut self, path: &str) -> FileStatus {
-        if let Some(mut file) = File::open(path).ok() {
+        if let Ok(mut file) = File::open(path) {
             let mut con = String::new();
             let _ = file.read_to_string(&mut con);
 
@@ -39,10 +39,10 @@ impl Editor {
     /// Write the file.
     pub fn write<'a>(&'a mut self, path: &'a str) -> FileStatus {
         self.buffers.current_buffer_info_mut().title = Some(path.into());
-        if path == "" {
+        if path.is_empty() {
             return FileStatus::Other;
         }
-        if let Some(mut file) = File::create(path).ok() {
+        if let Ok(mut file) = File::create(path) {
             if file
                 .write(self.buffers.current_buffer().to_string().as_bytes())
                 .is_ok()

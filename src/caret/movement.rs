@@ -27,24 +27,20 @@ impl Editor {
         // TODO: Make this more idiomatic {
         if x + n < self.buffers.current_buffer()[y].len() {
             Some((x + n, y))
+        } else if y + 1 >= self.buffers.current_buffer().len() {
+            None
         } else {
-            if y + 1 >= self.buffers.current_buffer().len() {
-                None
-            } else {
-                let mut mv = n + x - self.buffers.current_buffer()[y].len();
-                let mut ry = y + 1;
+            let mut mv = n + x - self.buffers.current_buffer()[y].len();
+            let mut ry = y + 1;
 
-                loop {
-                    if mv < self.buffers.current_buffer()[ry].len() {
-                        return Some((mv, ry));
-                    } else {
-                        if ry + 1 < self.buffers.current_buffer().len() {
-                            mv -= self.buffers.current_buffer()[ry].len();
-                            ry += 1;
-                        } else {
-                            return None;
-                        }
-                    }
+            loop {
+                if mv < self.buffers.current_buffer()[ry].len() {
+                    return Some((mv, ry));
+                } else if ry + 1 < self.buffers.current_buffer().len() {
+                    mv -= self.buffers.current_buffer()[ry].len();
+                    ry += 1;
+                } else {
+                    return None;
                 }
             }
         }
@@ -56,24 +52,20 @@ impl Editor {
     pub fn before(&self, n: usize, (x, y): (usize, usize)) -> Option<(usize, usize)> {
         if x >= n {
             Some((x - n, y))
+        } else if y == 0 {
+            None
         } else {
-            if y == 0 {
-                None
-            } else {
-                let mut mv = n - x - 1;
-                let mut ry = y - 1;
+            let mut mv = n - x - 1;
+            let mut ry = y - 1;
 
-                loop {
-                    if mv <= self.buffers.current_buffer()[ry].len() {
-                        return Some((self.buffers.current_buffer()[ry].len() - mv, ry));
-                    } else {
-                        if ry > 0 && mv >= self.buffers.current_buffer()[ry].len() {
-                            mv -= self.buffers.current_buffer()[ry].len();
-                            ry -= 1;
-                        } else if ry == 0 {
-                            return None;
-                        }
-                    }
+            loop {
+                if mv <= self.buffers.current_buffer()[ry].len() {
+                    return Some((self.buffers.current_buffer()[ry].len() - mv, ry));
+                } else if ry > 0 && mv >= self.buffers.current_buffer()[ry].len() {
+                    mv -= self.buffers.current_buffer()[ry].len();
+                    ry -= 1;
+                } else if ry == 0 {
+                    return None;
                 }
             }
         }
@@ -152,13 +144,11 @@ impl Editor {
             .skip(x)
             .enumerate()
         {
-            if ch == c {
-                if i > 0 {
-                    dn += 1;
-                    if dn == n {
-                        x += i;
-                        return Some(x);
-                    }
+            if ch == c && i > 0 {
+                dn += 1;
+                if dn == n {
+                    x += i;
+                    return Some(x);
                 }
             }
         }

@@ -61,8 +61,8 @@ impl<'a> PromptCommand<'a> {
         use self::PromptCommand::*;
 
         let mut split = s.split(' ');
-        let base_cmd = split.nth(0).unwrap_or("");
-        let sec_cmd = split.nth(0).unwrap_or("");
+        let base_cmd = split.next().unwrap_or("");
+        let sec_cmd = split.next().unwrap_or("");
 
         Some(match base_cmd {
             "set" => Set { option: sec_cmd },
@@ -76,7 +76,7 @@ impl<'a> PromptCommand<'a> {
             "bd" => DeleteBuffer,
             "h" | "help" => Help,
             "q" | "quit" => Quit,
-            bn if bn.starts_with("b") => {
+            bn if bn.starts_with('b') => {
                 let rest: String = bn.chars().skip(1).collect();
 
                 if let Ok(number) = rest.parse::<usize>() {
@@ -94,6 +94,7 @@ impl<'a> PromptCommand<'a> {
 
 impl Editor {
     /// Invoke a command in the prompt
+    #[allow(clippy::needless_lifetimes)]
     pub fn invoke<'a>(&mut self, cmd: PromptCommand<'a>) {
         use self::PromptCommand::*;
 
@@ -194,7 +195,7 @@ impl Editor {
 
 fn get_buffers_description(buffers: &BufferManager) -> String {
     fn print_buffer(i: usize, b: &Buffer) -> String {
-        let title = b.title.as_ref().map(|s| s.as_str()).unwrap_or("<No Title>");
+        let title = b.title.as_deref().unwrap_or("<No Title>");
 
         format!("b{}\t\t\t{}", i, title)
     }

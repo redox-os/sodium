@@ -79,7 +79,7 @@ impl Editor {
                 let last = ind.len();
                 self.buffers
                     .current_buffer_mut()
-                    .insert_line(y + 1, ind.into());
+                    .insert_line(y + 1, ind);
                 self.goto((last, y + 1));
                 self.cursor_mut().mode = Mode::Primitive(PrimitiveMode::Insert(InsertOptions {
                     mode: InsertMode::Insert,
@@ -136,14 +136,14 @@ impl Editor {
                 self.goto(bounded);
             }
             (Command(Normal), Char('L')) => {
-                if self.buffers.current_buffer()[self.y()].len() != 0 {
+                if !self.buffers.current_buffer()[self.y()].is_empty() {
                     let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
                     self.goto(ln_end);
                     mov = true;
                 }
             }
             (Command(Normal), Char('$')) => {
-                if self.buffers.current_buffer()[self.y()].len() != 0 {
+                if !self.buffers.current_buffer()[self.y()].is_empty() {
                     let ln_end = (self.buffers.current_buffer()[self.y()].len() - 1, self.y());
                     self.goto(ln_end);
                     mov = true;
@@ -165,7 +165,7 @@ impl Editor {
                 let current_buffer = self.buffers.current_buffer_info_mut();
                 // If there is nothing in the current buffer
                 // ignore the command
-                if current_buffer.raw_buffer[y].len() > 0 {
+                if !current_buffer.raw_buffer[y].is_empty() {
                     current_buffer.raw_buffer[y].remove(x);
                 }
                 current_buffer.raw_buffer[y].insert(x, c);
@@ -220,7 +220,7 @@ impl Editor {
                         .insert(current_cursor_index, cursor);
                     self.next_cursor();
                 } else {
-                    self.status_bar.msg = format!("At max 255 cursors");
+                    self.status_bar.msg = "At max 255 cursors".to_string();
                 }
             }
             (Command(Normal), Char('B')) => {
@@ -233,7 +233,7 @@ impl Editor {
                         .remove(current_cursor_index as usize);
                     self.prev_cursor();
                 } else {
-                    self.status_bar.msg = format!("No other cursors!");
+                    self.status_bar.msg = "No other cursors!".to_string();
                 }
             }
             (Command(Normal), Char('t')) => {
@@ -319,7 +319,7 @@ impl Editor {
                     self.prompt[0] = cmd;
                 }
                 // Don't insert anything if the user didn't write anything
-                if self.prompt[self.prompt_index] != "" {
+                if !self.prompt[self.prompt_index].is_empty() {
                     self.prompt.insert(0, String::new());
                 }
                 self.prompt_index = 0;
@@ -345,7 +345,7 @@ impl Editor {
                 self.redraw_task = RedrawTask::StatusBar;
             }
             _ => {
-                self.status_bar.msg = format!("Unknown command");
+                self.status_bar.msg = "Unknown command".to_string();
                 self.redraw_task = RedrawTask::StatusBar;
             }
         }
