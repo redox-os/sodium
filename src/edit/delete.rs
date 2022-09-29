@@ -12,13 +12,13 @@ impl Editor {
             std::cmp::Ordering::Less => {
                 self.buffers.current_buffer_mut()[y].remove(x);
                 self.redraw_task = RedrawTask::LinesAfter(y);
-            },
+            }
             std::cmp::Ordering::Equal => {
                 let s = self.buffers.current_buffer_mut().remove_line(y + 1);
                 self.buffers.current_buffer_mut()[y].push_str(&s);
                 self.redraw_task = RedrawTask::Lines(y..y + 1);
-            },
-            _ => {},
+            }
+            _ => {}
         }
         self.hint();
     }

@@ -15,9 +15,9 @@ pub struct Cursor {
 
 impl Default for Cursor {
     fn default() -> Self {
-    Self::new()
+        Self::new()
     }
-    }
+}
 
 impl Cursor {
     /// Create a new default cursor

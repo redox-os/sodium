@@ -16,9 +16,9 @@ pub struct Options {
 
 impl Default for Options {
     fn default() -> Self {
-    Self::new()
+        Self::new()
     }
-    }
+}
 
 impl Options {
     /// Create new default options

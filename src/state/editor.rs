@@ -38,9 +38,9 @@ pub struct Buffer {
 
 impl Default for Buffer {
     fn default() -> Self {
-    Self::new()
+        Self::new()
     }
-    }
+}
 
 impl Buffer {
     /// Create a new Buffer with default values.
@@ -74,9 +74,9 @@ pub struct BufferManager {
 
 impl Default for BufferManager {
     fn default() -> Self {
-    Self::new()
+        Self::new()
     }
-    }
+}
 
 impl BufferManager {
     /// Create a new BufferManager with default values.
@@ -248,8 +248,6 @@ impl Editor {
 
         let mut args_iter = args().skip(1).peekable();
         while let Some(arg) = args_iter.next() {
-                
-
             match arg.as_str() {
                 "--version" => {
                     println!(

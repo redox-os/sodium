@@ -277,7 +277,8 @@ impl Editor {
         let current_title = self
             .buffers
             .current_buffer_info()
-            .title.as_deref()
+            .title
+            .as_deref()
             .unwrap_or("");
 
         let items = [
@@ -336,9 +337,9 @@ pub struct StatusBar {
 
 impl Default for StatusBar {
     fn default() -> Self {
-    Self::new()
+        Self::new()
     }
-    }
+}
 
 impl StatusBar {
     /// Create new status bar
