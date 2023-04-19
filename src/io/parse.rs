@@ -88,10 +88,14 @@ impl Editor {
                                     }
                                     Mode::Command(_) => {
                                         n = match c {
-                                            '0'..='9' => {
+                                            '0'..='9' => if unset && c == '0' {
+                                                key = k;
+                                                n
+                                            } else {
                                                 unset = false;
                                                 n * 10 + ((c as u8) - b'0') as usize
                                             }
+                                            
                                             _ => {
                                                 key = k;
                                                 n
