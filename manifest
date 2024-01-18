@@ -1,5 +1,5 @@
 name=Sodium
-binary=/ui/bin/sodium
+binary=/usr/bin/sodium
 icon=/ui/icons/sodium.png
 accept=*_REDOX
 accept=*.md
