@@ -1,7 +1,6 @@
 //! Sodium is a next generation Vi-like editor.
 
 #![feature(stmt_expr_attributes)]
-#![deny(warnings)]
 #![deny(missing_docs)]
 
 #[cfg(feature = "orbital")]
