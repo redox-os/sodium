@@ -14,4 +14,4 @@ To install on Ubuntu, use the following command: `sudo apt-get install libsdl2-d
 
 ### Build
 
-Use `cargo run --features orbital` in order to build the program.
+Use `cargo +nightly run --features orbital` in order to build the program.
