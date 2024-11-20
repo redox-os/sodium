@@ -137,14 +137,21 @@ impl Editor {
                 }
             }
             Write { path } => {
+                // TODO: if open multiple files written write the current file
+                let mut write_path: String = if path.is_empty() {
+                    self.files[0].clone()
+                } else {
+                    path.to_string()
+                };
+
                 if self.options.get("readonly") == Some(true) {
                     // TODO: add override (w!)
-                    self.status_bar.msg = format!("File {} is opened in readonly mode", path)
+                    self.status_bar.msg = format!("File {} is opened in readonly mode", write_path)
                 } else {
-                    self.status_bar.msg = match self.write(path) {
-                        FileStatus::NotFound => format!("File {} could not be opened", path),
-                        FileStatus::Ok => format!("File {} written", path),
-                        FileStatus::Other => format!("Couldn't write {}", path),
+                    self.status_bar.msg = match self.write(&mut write_path) {
+                        FileStatus::NotFound => format!("File {} could not be opened", write_path),
+                        FileStatus::Ok => format!("File {} written", write_path),
+                        FileStatus::Other => format!("Couldn't write {}", write_path),
                     }
                 }
             }
