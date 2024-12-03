@@ -34,6 +34,8 @@ pub struct Buffer {
     /// True if the buffer is transient and should be deleted when
     /// it is no longer the current buffer.
     pub is_transient: bool,
+    /// True if the buffer has unsaved changes
+    pub dirty: bool,
 }
 
 impl Buffer {
@@ -47,6 +49,7 @@ impl Buffer {
             scroll_y: 0,
             title: None,
             is_transient: false,
+            dirty: false,
         }
     }
 }

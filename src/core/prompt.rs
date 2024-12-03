@@ -52,6 +52,8 @@ pub enum PromptCommand<'a> {
     Help,
     /// Exit Sodium.
     Quit,
+    /// Quit without saving
+    ForceQuit
 }
 
 impl<'a> PromptCommand<'a> {
@@ -76,6 +78,7 @@ impl<'a> PromptCommand<'a> {
             "bd" => DeleteBuffer,
             "h" | "help" => Help,
             "q" | "quit" => Quit,
+            "q!" => ForceQuit,
             bn if bn.starts_with("b") => {
                 let rest: String = bn.chars().skip(1).collect();
 
@@ -191,6 +194,14 @@ impl Editor {
                 self.open("/apps/sodium/help.txt");
             }
             Quit => {
+                let is_buffer_dirty = self.buffers.current_buffer_info().dirty;
+                if is_buffer_dirty {
+                    self.status_bar.msg = format!("can not quit this file, there are some changes in the file");
+                } else {
+                    exit(0);
+                }
+            }
+            ForceQuit => {
                 exit(0);
             }
         }
