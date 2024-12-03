@@ -23,6 +23,7 @@ impl Editor {
     /// Insert text under the current cursor.
     pub fn insert(&mut self, k: Key, InsertOptions { mode }: InsertOptions) {
         let (mut x, mut y) = self.pos();
+        self.buffers.current_buffer_info_mut().dirty = true;
         match (mode, k) {
             (InsertMode::Insert, Key::Char('\n')) => {
                 let first_part = self.buffers.current_buffer()[y][..x].to_owned();
