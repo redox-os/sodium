@@ -69,9 +69,9 @@ Navigation:
 - <numeral>g : Go to <numeral> line
 - g<motion> : Do <motion>
 - G : Go to the end of the document
-- <numeral>t<char> : Go to the next occurence
+- <numeral>t<char> : Go to the next occurrence
                      of <char>
-- <numeral>f<char> : Go to the previous occurence
+- <numeral>f<char> : Go to the previous occurrence
                      of <char>
 
 Scrolling:
@@ -173,9 +173,9 @@ stated.
                line
 - <numeral>g : Go to <numeral> line
 - G : Go to the end of the document
-- <numeral>t<char> : Go to the next occurence
+- <numeral>t<char> : Go to the next occurrence
                      of <char>
-- <numeral>f<char> : Go to the previous occurence
+- <numeral>f<char> : Go to the previous occurrence
                      of <char>
 
 Tips'n'tricks
